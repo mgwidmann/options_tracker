@@ -1,0 +1,74 @@
+<h2><%= @title %></h2>
+
+<%= f = form_for @changeset, "#",
+  id: "transaction-form",
+  phx_target: @myself,
+  phx_change: "validate",
+  phx_submit: "save" %>
+
+  <%= label f, :stock %>
+  <%= text_input f, :stock %>
+  <%= error_tag f, :stock %>
+
+  <%= label f, :strike %>
+  <%= number_input f, :strike, step: "any" %>
+  <%= error_tag f, :strike %>
+
+  <%= radio_button f, :short, true %>
+  <%= label f, :short, "Short" %>
+  <%= radio_button f, :short, false %>
+  <%= label f, :short, "Long" %>
+  <%= error_tag f, :short %>
+
+  <%= label f, :type, "Transaction Type" %>
+  <%= select f, :type, transaction_type_map(), prompt: "Stock / Call / Put" %>
+  <%= error_tag f, :type %>
+
+  <%= label f, :opened_at %>
+  <%= datetime_select f, :opened_at %>
+  <%= error_tag f, :opened_at %>
+
+  <%= label f, :expires_at %>
+  <%= datetime_select f, :expires_at %>
+  <%= error_tag f, :expires_at %>
+
+  <%= label f, :premium %>
+  <%= number_input f, :premium, step: "any" %>
+  <%= error_tag f, :premium %>
+
+  <%= label f, :fees %>
+  <%= number_input f, :fees, step: "any" %>
+  <%= error_tag f, :fees %>
+
+  <%= label f, :notes %>
+  <%= textarea f, :notes %>
+  <%= error_tag f, :notes %>
+
+  <%= label f, :exit_strategy %>
+  <%= textarea f, :exit_strategy %>
+  <%= error_tag f, :exit_strategy %>
+
+  <!--
+  <%= label f, :basis %>
+  <%= number_input f, :basis, step: "any" %>
+  <%= error_tag f, :basis %>
+
+  <%= label f, :exit_price %>
+  <%= number_input f, :exit_price, step: "any" %>
+  <%= error_tag f, :exit_price %>
+
+  <%= label f, :closed_at %>
+  <%= datetime_select f, :closed_at %>
+  <%= error_tag f, :closed_at %>
+
+  <%= label f, :profit_loss %>
+  <%= number_input f, :profit_loss, step: "any" %>
+  <%= error_tag f, :profit_loss %>
+
+  <%= label f, :status %>
+  <%= number_input f, :status %>
+  <%= error_tag f, :status %>
+  -->
+
+  <%= submit "Save", phx_disable_with: "Saving..." %>
+</form>

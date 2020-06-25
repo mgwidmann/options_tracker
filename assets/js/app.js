@@ -31,3 +31,7 @@ liveSocket.connect()
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})

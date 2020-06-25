@@ -1,0 +1,49 @@
+<div class="d-flex">
+  <h1>Positions</h1>
+  <span class="ml-auto">
+    <%= live_patch to: Routes.transaction_index_path(@socket, :new) do %>
+      <span class="oi oi-plus"></span>
+    <% end %>
+  </span>
+</div>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.TransactionLive.FormComponent,
+    id: @transaction.id || :new,
+    title: @page_title,
+    action: @live_action,
+    transaction: @transaction,
+    return_to: Routes.transaction_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stock</th>
+      <th>Long / Short</th>
+      <th>Strike / Type</th>
+      <th>Expires at</th>
+      <th>Premium</th>
+      <th>Status</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="transactions">
+    <%= for transaction <- @transactions do %>
+      <tr id="transaction-<%= transaction.id %>">
+        <td><%= transaction.stock %></td>
+        <td><%= if(transaction.short, do: "Short", else: "Long") %></td>
+        <td><%= transaction.strike %><%= type_display(transaction.type) %></td>
+        <td><%= transaction.expires_at %></td>
+        <td><%= transaction.premium %></td>
+        <td><%= transaction.status %></td>
+        <td>
+          <span><%= live_redirect "Show", to: Routes.transaction_show_path(@socket, :show, transaction) %></span>
+          <span><%= live_patch "Edit", to: Routes.transaction_index_path(@socket, :edit, transaction) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: transaction.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

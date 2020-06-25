@@ -1,6 +1,7 @@
 /* This file is for your main application css. */
-@import "./phoenix.css";
 @import "../node_modules/nprogress/nprogress.css";
+$icon-font-path: "../node_modules/open-iconic/font/fonts/";
+@import "../node_modules/open-iconic/font/css/open-iconic-bootstrap";
 
 /* LiveView specific classes for your customizations */
 .invalid-feedback {
@@ -88,4 +89,8 @@
 }
 .alert:empty {
   display: none;
+}
+
+.main {
+  min-height: 90vh;
 }
