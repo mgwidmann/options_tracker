@@ -1,0 +1,49 @@
+<h1>Listing Accounts</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.AccountLive.FormComponent,
+    id: @account.id || :new,
+    title: @page_title,
+    action: @live_action,
+    account: @account,
+    return_to: Routes.account_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Opt open fee</th>
+      <th>Opt close fee</th>
+      <th>Stock open fee</th>
+      <th>Stock close fee</th>
+      <th>Exercise fee</th>
+      <th>Cash</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="accounts">
+    <%= for account <- @accounts do %>
+      <tr id="account-<%= account.id %>">
+        <td><%= account.name %></td>
+        <td><%= account.type %></td>
+        <td><%= account.opt_open_fee %></td>
+        <td><%= account.opt_close_fee %></td>
+        <td><%= account.stock_open_fee %></td>
+        <td><%= account.stock_close_fee %></td>
+        <td><%= account.exercise_fee %></td>
+        <td><%= account.cash %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.account_show_path(@socket, :show, account) %></span>
+          <span><%= live_patch "Edit", to: Routes.account_index_path(@socket, :edit, account) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: account.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Account", to: Routes.account_index_path(@socket, :new) %></span>

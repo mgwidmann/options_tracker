@@ -6,6 +6,8 @@ defmodule OptionsTracker.Users.User do
     field :email, :string
     field :username, :string
 
+    has_many :accounts, OptionsTracker.Accounts.Account
+
     timestamps()
   end
 

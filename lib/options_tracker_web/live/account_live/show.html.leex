@@ -1,0 +1,57 @@
+<h1>Show Account</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.AccountLive.FormComponent,
+    id: @account.id,
+    title: @page_title,
+    action: @live_action,
+    account: @account,
+    return_to: Routes.account_show_path(@socket, :show, @account) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @account.name %>
+  </li>
+
+  <li>
+    <strong>Type:</strong>
+    <%= @account.type %>
+  </li>
+
+  <li>
+    <strong>Opt open fee:</strong>
+    <%= @account.opt_open_fee %>
+  </li>
+
+  <li>
+    <strong>Opt close fee:</strong>
+    <%= @account.opt_close_fee %>
+  </li>
+
+  <li>
+    <strong>Stock open fee:</strong>
+    <%= @account.stock_open_fee %>
+  </li>
+
+  <li>
+    <strong>Stock close fee:</strong>
+    <%= @account.stock_close_fee %>
+  </li>
+
+  <li>
+    <strong>Exercise fee:</strong>
+    <%= @account.exercise_fee %>
+  </li>
+
+  <li>
+    <strong>Cash:</strong>
+    <%= @account.cash %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.account_show_path(@socket, :edit, @account), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.account_index_path(@socket, :index) %></span>
