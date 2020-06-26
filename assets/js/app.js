@@ -16,6 +16,7 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import NProgress from "nprogress"
 import {LiveSocket} from "phoenix_live_view"
+import datepicker from "js-datepicker";
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
@@ -33,6 +34,16 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-    $('#modal').modal('show');
+    $('.datepicker').each((input) => {
+        datepicker($(input), {
+            onSelect: (instance, date) => {
+                
+            },
+            formatter: (input, date, instance) => {
+                const value = date.toLocaleDateString()
+                console.log("value is", value);
+                input.value = '1/1/2099' // => '1/1/2099'
+            }
+        }).show();
+    });
 });

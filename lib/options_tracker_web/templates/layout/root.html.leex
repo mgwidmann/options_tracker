@@ -27,54 +27,41 @@
 
       <div id="navbarBasicExample" class="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item">
-            Home
+          <a class="navbar-item" href="/positions">
+            Positions
           </a>
 
-          <a class="navbar-item">
-            Documentation
+          <a class="navbar-item" href="/dashboard">
+            Dashboard
           </a>
-
-          <div class="navbar-end">
-
-          </div>
         </div>
-
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               Settings
             </a>
-
             <div class="navbar-dropdown is-right">
-              <a class="navbar-item">
-                About
-              </a>
-              <a class="navbar-item">
-                Jobs
-              </a>
-              <a class="navbar-item">
-                Contact
+              <a class="navbar-item" href="/accounts">
+                Accounts
               </a>
               <hr class="navbar-divider">
-              <a class="navbar-item">
-                Report an issue
+              <a class="navbar-item" href="/preferences">
+                Preferences
               </a>
             </div>
           </div>
           <div class="navbar-item">
             <div class="buttons">
-              <a class="button is-primary">
-                <strong>Sign up</strong>
-              </a>
-              <a class="button is-light">
-                Log in
+              <a class="button" href="/">
+                Sign out
               </a>
             </div>
           </div>
         </div>
       </div>
     </nav>
-    <%= @inner_content %>
+    <section class="section">
+      <%= @inner_content %>
+    </section>
   </body>
 </html>

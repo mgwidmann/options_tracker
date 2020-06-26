@@ -1,14 +1,29 @@
 /* This file is for your main application css. */
 @import "../node_modules/nprogress/nprogress.css";
-$icon-font-path: "../node_modules/open-iconic/font/fonts/";
-@import "../node_modules/open-iconic/font/css/open-iconic-bootstrap";
+$fa-font-path: "~font-awesome/fonts/";
+@import "~font-awesome/scss/font-awesome";
+@import "../node_modules/js-datepicker/dist/datepicker.min.css";
 @import "bulma";
+
+
+@import "./position.scss";
+
+.modal-card.wide {
+  width: 60vw;
+}
+
+.ml-auto {
+  margin-left: auto !important;
+}
+.mr-auto {
+  margin-right: auto !important;
+}
+
 
 /* LiveView specific classes for your customizations */
 .invalid-feedback {
   color: #a94442;
   display: block;
-  margin: -1rem 0 2rem;
 }
 
 .phx-no-feedback.invalid-feedback, .phx-no-feedback .invalid-feedback {

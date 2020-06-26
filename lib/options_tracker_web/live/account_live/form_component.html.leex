@@ -1,50 +1,106 @@
-<h2><%= @title %></h2>
-
-<%= inspect @changeset %>
-
 <%= f = form_for @changeset, "#",
   id: "account-form",
   phx_target: @myself,
   phx_change: "validate",
   phx_submit: "save" %>
 
-  <%= label f, :type %>
-  <%= select f, :type, account_type_map(), prompt: "Select a broker" %>
-  <%= error_tag f, :type %>
-
-  <%= if @changeset.changes[:type] == :other || @changeset.data.type == :other do %>
-    <%= label f, :broker_name %>
-    <%= text_input f, :broker_name %>
-    <%= error_tag f, :broker_name %>
-  <% end %>
-  
-  <%= label f, :name %>
-  <%= text_input f, :name %>
-  <%= error_tag f, :name %>
-
-  <%= label f, :opt_open_fee %>
-  <%= number_input f, :opt_open_fee, step: "any" %>
-  <%= error_tag f, :opt_open_fee %>
-
-  <%= label f, :opt_close_fee %>
-  <%= number_input f, :opt_close_fee, step: "any" %>
-  <%= error_tag f, :opt_close_fee %>
-
-  <%= label f, :stock_open_fee %>
-  <%= number_input f, :stock_open_fee, step: "any" %>
-  <%= error_tag f, :stock_open_fee %>
-
-  <%= label f, :stock_close_fee %>
-  <%= number_input f, :stock_close_fee, step: "any" %>
-  <%= error_tag f, :stock_close_fee %>
-
-  <%= label f, :exercise_fee %>
-  <%= number_input f, :exercise_fee, step: "any" %>
-  <%= error_tag f, :exercise_fee %>
-
-  <%= label f, :cash %>
-  <%= number_input f, :cash, step: "any" %>
-  <%= error_tag f, :cash %>
-
-  <%= submit "Save", phx_disable_with: "Saving..." %>
+  <section class="modal-card-body">
+    <div class="columns">
+      <div class="column control">
+        <%= label f, :type %>
+        <%= select f, :type, account_type_map(), prompt: "Select a broker", class: "input" %>
+        <%= error_tag f, :type %>
+      </div>
+      <div class="column control">
+        <%= label f, :broker_name %>
+        <% disabled = @changeset.changes[:type] != :other && @changeset.data.type != :other %>
+        <%= text_input f, :broker_name, class: "input #{if(disabled, do: "disabled")}", disabled: disabled %>
+        <%= error_tag f, :broker_name %>
+      </div>
+      <div class="column control">
+        <%= label f, :name %>
+        <%= text_input f, :name, class: "input" %>
+        <%= error_tag f, :name %>
+      </div>
+      <div class="column control">
+        <%= label f, :cash %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :cash, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :cash %>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column control">
+        <%= label f, :opt_open_fee %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :opt_open_fee, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :opt_open_fee %>
+      </div>
+      <div class="column control">
+        <%= label f, :opt_close_fee %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :opt_close_fee, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :opt_close_fee %>
+      </div>
+      <div class="column control">
+        <%= label f, :stock_open_fee %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :stock_open_fee, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :stock_open_fee %>
+      </div>
+      <div class="column control">
+        <%= label f, :stock_close_fee %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :stock_close_fee, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :stock_close_fee %>
+      </div>
+      <div class="column control">
+        <%= label f, :exercise_fee %>
+        <div class="field">
+          <p class="control has-icons-left">
+            <%= number_input f, :exercise_fee, step: "any", class: "input" %>
+            <span class="icon is-small is-left">
+              <i class="fa fa-usd"></i>
+            </span>
+          </p>
+        </div>
+        <%= error_tag f, :exercise_fee %>
+      </div>
+    </div>
+  </section>
+  <footer class="modal-card-foot">
+    <div class="control is-grouped is-pulled-right ml-auto">
+      <%= submit "Save", phx_disable_with: "Saving...", class: "button is-success" %>
+    </div>
+  </footer>
 </form>

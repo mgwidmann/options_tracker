@@ -21,10 +21,16 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:position, Accounts.get_position!(id))
   end
 
+  @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Position")
-    |> assign(:position, %Position{account_id: 2})
+    |> assign(:position, %Position{
+      account_id: 2,
+      opened_at: DateTime.utc_now,
+      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second),
+      short: true
+    })
   end
 
   defp apply_action(socket, :index, _params) do

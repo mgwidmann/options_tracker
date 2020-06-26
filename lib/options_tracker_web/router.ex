@@ -10,6 +10,10 @@ defmodule OptionsTrackerWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :full_width do
+    plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root_full}
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -17,7 +21,10 @@ defmodule OptionsTrackerWeb.Router do
   scope "/", OptionsTrackerWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    scope "/" do
+      pipe_through :full_width
+      live "/", PageLive, :index
+    end
 
     live "/users", UserLive.Index, :index
     live "/users/new", UserLive.Index, :new
