@@ -1,13 +1,13 @@
-defmodule OptionsTrackerWeb.TransactionLive.Index do
+defmodule OptionsTrackerWeb.PositionLive.Index do
   use OptionsTrackerWeb, :live_view
-  import OptionsTrackerWeb.TransactionLive.Helpers
+  import OptionsTrackerWeb.PositionLive.Helpers
 
   alias OptionsTracker.Accounts
-  alias OptionsTracker.Accounts.Transaction
+  alias OptionsTracker.Accounts.Position
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :transactions, list_transactions())}
+    {:ok, assign(socket, :positions, list_positions())}
   end
 
   @impl true
@@ -18,30 +18,30 @@ defmodule OptionsTrackerWeb.TransactionLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Position")
-    |> assign(:transaction, Accounts.get_transaction!(id))
+    |> assign(:position, Accounts.get_position!(id))
   end
 
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Position")
-    |> assign(:transaction, %Transaction{account_id: 2})
+    |> assign(:position, %Position{account_id: 2})
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Positions")
-    |> assign(:transaction, nil)
+    |> assign(:position, nil)
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    transaction = Accounts.get_transaction!(id)
-    {:ok, _} = Accounts.delete_transaction(transaction)
+    position = Accounts.get_position!(id)
+    {:ok, _} = Accounts.delete_position(position)
 
-    {:noreply, assign(socket, :transactions, list_transactions())}
+    {:noreply, assign(socket, :positions, list_positions())}
   end
 
-  defp list_transactions do
-    Accounts.list_transactions()
+  defp list_positions do
+    Accounts.list_positions()
   end
 end

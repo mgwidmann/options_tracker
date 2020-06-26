@@ -112,107 +112,107 @@ defmodule OptionsTracker.Accounts do
     Account.TypeEnum.name_for(type)
   end
 
-  alias OptionsTracker.Accounts.Transaction
+  alias OptionsTracker.Accounts.Position
 
   @doc """
-  Returns the list of transactions.
+  Returns the list of positions.
 
   ## Examples
 
-      iex> list_transactions()
-      [%Transaction{}, ...]
+      iex> list_positions()
+      [%Position{}, ...]
 
   """
-  def list_transactions do
-    Repo.all(Transaction)
+  def list_positions do
+    Repo.all(Position)
   end
 
   @doc """
-  Gets a single transaction.
+  Gets a single position.
 
-  Raises `Ecto.NoResultsError` if the Transaction does not exist.
+  Raises `Ecto.NoResultsError` if the Position does not exist.
 
   ## Examples
 
-      iex> get_transaction!(123)
-      %Transaction{}
+      iex> get_position!(123)
+      %Position{}
 
-      iex> get_transaction!(456)
+      iex> get_position!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_transaction!(id), do: Repo.get!(Transaction, id)
+  def get_position!(id), do: Repo.get!(Position, id)
 
   @doc """
-  Creates a transaction.
+  Creates a position.
 
   ## Examples
 
-      iex> create_transaction(%{field: value})
-      {:ok, %Transaction{}}
+      iex> create_position(%{field: value})
+      {:ok, %Position{}}
 
-      iex> create_transaction(%{field: bad_value})
+      iex> create_position(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_transaction(attrs \\ %{}) do
-    %Transaction{}
-    |> Transaction.open_changeset(attrs)
+  def create_position(attrs \\ %{}) do
+    %Position{}
+    |> Position.open_changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Updates a transaction.
+  Updates a position.
 
   ## Examples
 
-      iex> update_transaction(transaction, %{field: new_value})
-      {:ok, %Transaction{}}
+      iex> update_position(position, %{field: new_value})
+      {:ok, %Position{}}
 
-      iex> update_transaction(transaction, %{field: bad_value})
+      iex> update_position(position, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_transaction(%Transaction{} = transaction, attrs) do
-    transaction
-    |> Transaction.changeset(attrs)
+  def update_position(%Position{} = position, attrs) do
+    position
+    |> Position.changeset(attrs)
     |> Repo.update()
   end
 
   @doc """
-  Deletes a transaction.
+  Deletes a position.
 
   ## Examples
 
-      iex> delete_transaction(transaction)
-      {:ok, %Transaction{}}
+      iex> delete_position(position)
+      {:ok, %Position{}}
 
-      iex> delete_transaction(transaction)
+      iex> delete_position(position)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_transaction(%Transaction{} = transaction) do
-    Repo.delete(transaction)
+  def delete_position(%Position{} = position) do
+    Repo.delete(position)
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking transaction changes.
+  Returns an `%Ecto.Changeset{}` for tracking position changes.
 
   ## Examples
 
-      iex> change_transaction(transaction)
-      %Ecto.Changeset{data: %Transaction{}}
+      iex> change_position(position)
+      %Ecto.Changeset{data: %Position{}}
 
   """
-  def change_transaction(%Transaction{} = transaction, attrs \\ %{}) do
-    Transaction.changeset(transaction, attrs)
+  def change_position(%Position{} = position, attrs \\ %{}) do
+    Position.changeset(position, attrs)
   end
 
-  def list_transaction_types() do
-    Transaction.TransType.__enum_map__()
+  def list_position_types() do
+    Position.TransType.__enum_map__()
   end
 
-  def name_for_transaction_type(type) do
-    Transaction.TransType.name_for(type)
+  def name_for_position_type(type) do
+    Position.TransType.name_for(type)
   end
 end

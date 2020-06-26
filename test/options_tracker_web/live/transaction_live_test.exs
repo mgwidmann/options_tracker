@@ -1,4 +1,4 @@
-defmodule OptionsTrackerWeb.TransactionLiveTest do
+defmodule OptionsTrackerWeb.PositionLiveTest do
   use OptionsTrackerWeb.ConnCase
 
   import Phoenix.LiveViewTest
@@ -9,107 +9,107 @@ defmodule OptionsTrackerWeb.TransactionLiveTest do
   @update_attrs %{basis: 456.7, closed_at: ~N[2011-05-18 15:01:01], direction: 43, exit_price: 456.7, exit_strategy: "some updated exit_strategy", expires_at: ~N[2011-05-18 15:01:01], fees: 456.7, notes: "some updated notes", opened_at: ~N[2011-05-18 15:01:01], premium: 456.7, profit_loss: 456.7, status: 43, stock: "some updated stock", strike: 456.7, type: 43}
   @invalid_attrs %{basis: nil, closed_at: nil, direction: nil, exit_price: nil, exit_strategy: nil, expires_at: nil, fees: nil, notes: nil, opened_at: nil, premium: nil, profit_loss: nil, status: nil, stock: nil, strike: nil, type: nil}
 
-  defp fixture(:transaction) do
-    {:ok, transaction} = Accounts.create_transaction(@create_attrs)
-    transaction
+  defp fixture(:position) do
+    {:ok, position} = Accounts.create_position(@create_attrs)
+    position
   end
 
-  defp create_transaction(_) do
-    transaction = fixture(:transaction)
-    %{transaction: transaction}
+  defp create_position(_) do
+    position = fixture(:position)
+    %{position: position}
   end
 
   describe "Index" do
-    setup [:create_transaction]
+    setup [:create_position]
 
-    test "lists all transactions", %{conn: conn, transaction: transaction} do
-      {:ok, _index_live, html} = live(conn, Routes.transaction_index_path(conn, :index))
+    test "lists all positions", %{conn: conn, position: position} do
+      {:ok, _index_live, html} = live(conn, Routes.position_index_path(conn, :index))
 
-      assert html =~ "Listing Transactions"
-      assert html =~ transaction.exit_strategy
+      assert html =~ "Listing Positions"
+      assert html =~ position.exit_strategy
     end
 
-    test "saves new transaction", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, Routes.transaction_index_path(conn, :index))
+    test "saves new position", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, Routes.position_index_path(conn, :index))
 
-      assert index_live |> element("a", "New Transaction") |> render_click() =~
-               "New Transaction"
+      assert index_live |> element("a", "New Position") |> render_click() =~
+               "New Position"
 
-      assert_patch(index_live, Routes.transaction_index_path(conn, :new))
+      assert_patch(index_live, Routes.position_index_path(conn, :new))
 
       assert index_live
-             |> form("#transaction-form", transaction: @invalid_attrs)
+             |> form("#position-form", position: @invalid_attrs)
              |> render_change() =~ "can&apos;t be blank"
 
       {:ok, _, html} =
         index_live
-        |> form("#transaction-form", transaction: @create_attrs)
+        |> form("#position-form", position: @create_attrs)
         |> render_submit()
-        |> follow_redirect(conn, Routes.transaction_index_path(conn, :index))
+        |> follow_redirect(conn, Routes.position_index_path(conn, :index))
 
-      assert html =~ "Transaction created successfully"
+      assert html =~ "Position created successfully"
       assert html =~ "some exit_strategy"
     end
 
-    test "updates transaction in listing", %{conn: conn, transaction: transaction} do
-      {:ok, index_live, _html} = live(conn, Routes.transaction_index_path(conn, :index))
+    test "updates position in listing", %{conn: conn, position: position} do
+      {:ok, index_live, _html} = live(conn, Routes.position_index_path(conn, :index))
 
-      assert index_live |> element("#transaction-#{transaction.id} a", "Edit") |> render_click() =~
-               "Edit Transaction"
+      assert index_live |> element("#position-#{position.id} a", "Edit") |> render_click() =~
+               "Edit Position"
 
-      assert_patch(index_live, Routes.transaction_index_path(conn, :edit, transaction))
+      assert_patch(index_live, Routes.position_index_path(conn, :edit, position))
 
       assert index_live
-             |> form("#transaction-form", transaction: @invalid_attrs)
+             |> form("#position-form", position: @invalid_attrs)
              |> render_change() =~ "can&apos;t be blank"
 
       {:ok, _, html} =
         index_live
-        |> form("#transaction-form", transaction: @update_attrs)
+        |> form("#position-form", position: @update_attrs)
         |> render_submit()
-        |> follow_redirect(conn, Routes.transaction_index_path(conn, :index))
+        |> follow_redirect(conn, Routes.position_index_path(conn, :index))
 
-      assert html =~ "Transaction updated successfully"
+      assert html =~ "Position updated successfully"
       assert html =~ "some updated exit_strategy"
     end
 
-    test "deletes transaction in listing", %{conn: conn, transaction: transaction} do
-      {:ok, index_live, _html} = live(conn, Routes.transaction_index_path(conn, :index))
+    test "deletes position in listing", %{conn: conn, position: position} do
+      {:ok, index_live, _html} = live(conn, Routes.position_index_path(conn, :index))
 
-      assert index_live |> element("#transaction-#{transaction.id} a", "Delete") |> render_click()
-      refute has_element?(index_live, "#transaction-#{transaction.id}")
+      assert index_live |> element("#position-#{position.id} a", "Delete") |> render_click()
+      refute has_element?(index_live, "#position-#{position.id}")
     end
   end
 
   describe "Show" do
-    setup [:create_transaction]
+    setup [:create_position]
 
-    test "displays transaction", %{conn: conn, transaction: transaction} do
-      {:ok, _show_live, html} = live(conn, Routes.transaction_show_path(conn, :show, transaction))
+    test "displays position", %{conn: conn, position: position} do
+      {:ok, _show_live, html} = live(conn, Routes.position_show_path(conn, :show, position))
 
-      assert html =~ "Show Transaction"
-      assert html =~ transaction.exit_strategy
+      assert html =~ "Show Position"
+      assert html =~ position.exit_strategy
     end
 
-    test "updates transaction within modal", %{conn: conn, transaction: transaction} do
-      {:ok, show_live, _html} = live(conn, Routes.transaction_show_path(conn, :show, transaction))
+    test "updates position within modal", %{conn: conn, position: position} do
+      {:ok, show_live, _html} = live(conn, Routes.position_show_path(conn, :show, position))
 
       assert show_live |> element("a", "Edit") |> render_click() =~
-               "Edit Transaction"
+               "Edit Position"
 
-      assert_patch(show_live, Routes.transaction_show_path(conn, :edit, transaction))
+      assert_patch(show_live, Routes.position_show_path(conn, :edit, position))
 
       assert show_live
-             |> form("#transaction-form", transaction: @invalid_attrs)
+             |> form("#position-form", position: @invalid_attrs)
              |> render_change() =~ "can&apos;t be blank"
 
       {:ok, _, html} =
         show_live
-        |> form("#transaction-form", transaction: @update_attrs)
+        |> form("#position-form", position: @update_attrs)
         |> render_submit()
-        |> follow_redirect(conn, Routes.transaction_show_path(conn, :show, transaction))
+        |> follow_redirect(conn, Routes.position_show_path(conn, :show, position))
 
-      assert html =~ "Transaction updated successfully"
+      assert html =~ "Position updated successfully"
       assert html =~ "some updated exit_strategy"
     end
   end

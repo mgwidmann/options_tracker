@@ -1,0 +1,67 @@
+<header class="header">
+  <section class="section">
+    <h1 class="title">
+      Positions
+      <div class="mx-auto is-pulled-right">
+        <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary" do %>
+          <span class="oi oi-plus"></span>
+        <% end %>
+      </div>
+    </h1>
+  </section>
+</header>
+
+<nav class="panel">
+  <p class="panel-heading">
+    Position Summary
+  </p>
+  <div class="panel-block">
+    <p class="control has-icons-left">
+      <input class="input" type="text" placeholder="Search">
+      <span class="icon is-left">
+        <i class="fas fa-search" aria-hidden="true"></i>
+      </span>
+    </p>
+  </div>
+</nav>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.FormComponent,
+    id: @position.id || :new,
+    title: @page_title,
+    action: @live_action,
+    position: @position,
+    modal_title: if(@live_action == :new, do: "New Position", else: "Edit Position"),
+    return_to: Routes.position_index_path(@socket, :index) %>
+<% end %>
+
+<table class="table is-striped is-narrow is-hoverable is-fullwidth">
+  <thead>
+    <tr>
+      <th>Stock</th>
+      <th>Long / Short</th>
+      <th>Strike / Type</th>
+      <th>Expires at</th>
+      <th>Premium</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="positions">
+    <%= for position <- @positions do %>
+      <tr id="position-<%= position.id %>">
+        <td><%= position.stock %></td>
+        <td><%= if(position.short, do: "Short", else: "Long") %></td>
+        <td><%= position.strike %><%= type_display(position.type) %></td>
+        <td><%= position.expires_at %></td>
+        <td><%= position.premium %></td>
+        <td><%= position.status %></td>
+        <td>
+          <span><%= live_redirect "Show", to: Routes.position_show_path(@socket, :show, position) %></span>
+          <span><%= live_patch "Edit", to: Routes.position_index_path(@socket, :edit, position) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: position.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

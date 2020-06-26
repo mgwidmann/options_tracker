@@ -1,8 +1,8 @@
-defmodule OptionsTracker.Repo.Migrations.CreateTransactions do
+defmodule OptionsTracker.Repo.Migrations.CreatePositions do
   use Ecto.Migration
 
   def change do
-    create table(:transactions) do
+    create table(:positions) do
       add :stock, :string
       add :strike, :float
       add :short, :boolean
@@ -28,6 +28,6 @@ defmodule OptionsTracker.Repo.Migrations.CreateTransactions do
       timestamps()
     end
 
-    create index(:transactions, [:account_id])
+    create index(:positions, [:account_id])
   end
 end

@@ -1,4 +1,4 @@
-defmodule OptionsTrackerWeb.TransactionLive.Show do
+defmodule OptionsTrackerWeb.PositionLive.Show do
   use OptionsTrackerWeb, :live_view
 
   alias OptionsTracker.Accounts
@@ -13,9 +13,9 @@ defmodule OptionsTrackerWeb.TransactionLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:transaction, Accounts.get_transaction!(id))}
+     |> assign(:position, Accounts.get_position!(id))}
   end
 
-  defp page_title(:show), do: "Show Transaction"
-  defp page_title(:edit), do: "Edit Transaction"
+  defp page_title(:show), do: "Show Position"
+  defp page_title(:edit), do: "Edit Position"
 end

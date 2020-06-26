@@ -4,7 +4,7 @@ defmodule OptionsTrackerWeb.ModalComponent do
   @impl true
   def render(assigns) do
     ~L"""
-    <div class="modal is-active is-clipped" id="<%= @id %>" phx-window-keyup="close" phx-target="#<%= @id %>">
+    <div class="modal is-active is-clipped" id="<%= @id %>" phx-keyup="close" phx-target="#<%= @id %>">
       <div class="modal-background" phx-capture-click="close" phx-target="#<%= @id %>" phx-page-loading></div>
       <div class="modal-card">
         <header class="modal-card-head">

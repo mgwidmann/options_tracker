@@ -1,7 +1,7 @@
 <h2><%= @title %></h2>
 
 <%= f = form_for @changeset, "#",
-  id: "transaction-form",
+  id: "position-form",
   phx_target: @myself,
   phx_change: "validate",
   phx_submit: "save" %>
@@ -24,8 +24,8 @@
   <%= number_input f, :strike, step: "any" %>
   <%= error_tag f, :strike %>
 
-  <%= label f, :type, "Transaction Type" %>
-  <%= select f, :type, transaction_type_map(), prompt: "Stock / Call / Put" %>
+  <%= label f, :type, "Position Type" %>
+  <%= select f, :type, position_type_map(), prompt: "Stock / Call / Put" %>
   <%= error_tag f, :type %>
 
   <%= label f, :opened_at %>

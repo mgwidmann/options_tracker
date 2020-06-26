@@ -1,0 +1,93 @@
+<h1>Show Position</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.FormComponent,
+    id: @position.id,
+    title: @page_title,
+    action: @live_action,
+    position: @position,
+    modal_title: "Edit Position",
+    return_to: Routes.position_show_path(@socket, :show, @position) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Stock:</strong>
+    <%= @position.stock %>
+  </li>
+
+  <li>
+    <strong>Direction:</strong>
+    <%= @position.direction %>
+  </li>
+
+  <li>
+    <strong>Type:</strong>
+    <%= @position.type %>
+  </li>
+
+  <li>
+    <strong>Strike:</strong>
+    <%= @position.strike %>
+  </li>
+
+  <li>
+    <strong>Opened at:</strong>
+    <%= @position.opened_at %>
+  </li>
+
+  <li>
+    <strong>Expires at:</strong>
+    <%= @position.expires_at %>
+  </li>
+
+  <li>
+    <strong>Premium:</strong>
+    <%= @position.premium %>
+  </li>
+
+  <li>
+    <strong>Basis:</strong>
+    <%= @position.basis %>
+  </li>
+
+  <li>
+    <strong>Fees:</strong>
+    <%= @position.fees %>
+  </li>
+
+  <li>
+    <strong>Exit price:</strong>
+    <%= @position.exit_price %>
+  </li>
+
+  <li>
+    <strong>Closed at:</strong>
+    <%= @position.closed_at %>
+  </li>
+
+  <li>
+    <strong>Profit loss:</strong>
+    <%= @position.profit_loss %>
+  </li>
+
+  <li>
+    <strong>Status:</strong>
+    <%= @position.status %>
+  </li>
+
+  <li>
+    <strong>Notes:</strong>
+    <%= @position.notes %>
+  </li>
+
+  <li>
+    <strong>Exit strategy:</strong>
+    <%= @position.exit_strategy %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.position_show_path(@socket, :edit, @position), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.position_index_path(@socket, :index) %></span>

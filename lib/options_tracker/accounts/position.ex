@@ -1,4 +1,4 @@
-defmodule OptionsTracker.Accounts.Transaction do
+defmodule OptionsTracker.Accounts.Position do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -13,7 +13,7 @@ defmodule OptionsTracker.Accounts.Transaction do
     use EctoEnum, open: 0, closed: 1, rolled: 2, exercised: 3
   end
 
-  schema "transactions" do
+  schema "positions" do
     # Require info on open
     field :stock, :string
     field :strike, :float
@@ -49,20 +49,20 @@ defmodule OptionsTracker.Accounts.Transaction do
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
         ) :: Ecto.Changeset.t()
   @doc false
-  def open_changeset(transaction, attrs) do
+  def open_changeset(position, attrs) do
     attrs = Map.put(attrs, "status", :open)
 
-    transaction
+    position
     |> cast(prepare_attrs(attrs), @open_fields)
     |> validate_required(@required_open_fields)
-    |> validate_transaction_open()
+    |> validate_position_open()
     |> standard_validations()
   end
 
-  defp validate_transaction_open(%{data: %{id: nil}} = changeset), do: changeset
-  defp validate_transaction_open(changeset) do
+  defp validate_position_open(%{data: %{id: nil}} = changeset), do: changeset
+  defp validate_position_open(changeset) do
     changeset
-    |> add_error(:id, "Cannot perform operation to open on an existing transaction. This is a bug.")
+    |> add_error(:id, "Cannot perform operation to open on an existing position. This is a bug.")
   end
 
   defp prepare_attrs(%{"type" => "" <> _ = type} = attrs) do
@@ -80,8 +80,8 @@ defmodule OptionsTracker.Accounts.Transaction do
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
         ) :: Ecto.Changeset.t()
-  def changeset(transaction, attrs) do
-    transaction
+  def changeset(position, attrs) do
+    position
     |> cast(prepare_attrs(attrs), @fields)
     |> standard_validations()
     |> validate_number(:basis, greater_than: 0.0)

@@ -33,12 +33,12 @@ defmodule OptionsTrackerWeb.Router do
     live "/accounts/:id", AccountLive.Show, :show
     live "/accounts/:id/show/edit", AccountLive.Show, :edit
 
-    live "/transactions", TransactionLive.Index, :index
-    live "/transactions/new", TransactionLive.Index, :new
-    live "/transactions/:id/edit", TransactionLive.Index, :edit
+    live "/positions", PositionLive.Index, :index
+    live "/positions/new", PositionLive.Index, :new
+    live "/positions/:id/edit", PositionLive.Index, :edit
 
-    live "/transactions/:id", TransactionLive.Show, :show
-    live "/transactions/:id/show/edit", TransactionLive.Show, :edit
+    live "/positions/:id", PositionLive.Show, :show
+    live "/positions/:id/show/edit", PositionLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
