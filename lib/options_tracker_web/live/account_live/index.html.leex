@@ -6,10 +6,11 @@
     title: @page_title,
     action: @live_action,
     account: @account,
+    modal_title: if(@live_action == :new, do: "New Account", else: "Edit Account"),
     return_to: Routes.account_index_path(@socket, :index) %>
 <% end %>
 
-<table>
+<table class="table is-striped is-narrow is-hoverable is-fullwidth">
   <thead>
     <tr>
       <th>Name</th>

@@ -6,19 +6,23 @@
   phx_change: "validate",
   phx_submit: "save" %>
 
-  <%= label f, :stock %>
-  <%= text_input f, :stock %>
-  <%= error_tag f, :stock %>
+  <div class="row">
+    <div class="col">
+      <%= text_input f, :stock, class: "form-control", placeholder: "Ticker" %>
+      <%= error_tag f, :stock %>
+    </div>
+    <div class="col form-check">
+      <%= radio_button f, :short, true, class: "form-check-input mx-auto" %>
+      <%= label f, :short_true, "Short", class: "form-check-label" %>
+      <%= radio_button f, :short, false, class: "form-check-input mx-auto" %>
+      <%= label f, :short_false, "Long", class: "form-check-label" %>
+      <%= error_tag f, :short %>
+    </div>
+  </div>
 
   <%= label f, :strike %>
   <%= number_input f, :strike, step: "any" %>
   <%= error_tag f, :strike %>
-
-  <%= radio_button f, :short, true %>
-  <%= label f, :short, "Short" %>
-  <%= radio_button f, :short, false %>
-  <%= label f, :short, "Long" %>
-  <%= error_tag f, :short %>
 
   <%= label f, :type, "Transaction Type" %>
   <%= select f, :type, transaction_type_map(), prompt: "Stock / Call / Put" %>

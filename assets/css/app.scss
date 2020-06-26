@@ -2,6 +2,7 @@
 @import "../node_modules/nprogress/nprogress.css";
 $icon-font-path: "../node_modules/open-iconic/font/fonts/";
 @import "../node_modules/open-iconic/font/css/open-iconic-bootstrap";
+@import "bulma";
 
 /* LiveView specific classes for your customizations */
 .invalid-feedback {

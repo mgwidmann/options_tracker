@@ -1,11 +1,29 @@
-<div class="d-flex">
-  <h1>Positions</h1>
-  <span class="ml-auto">
-    <%= live_patch to: Routes.transaction_index_path(@socket, :new) do %>
-      <span class="oi oi-plus"></span>
-    <% end %>
-  </span>
-</div>
+<header class="header">
+  <section class="section">
+    <h1 class="title">
+      Positions
+      <div class="mx-auto is-pulled-right">
+        <%= live_patch to: Routes.transaction_index_path(@socket, :new), class: "button is-primary" do %>
+          <span class="oi oi-plus"></span>
+        <% end %>
+      </div>
+    </h1>
+  </section>
+</header>
+
+<nav class="panel">
+  <p class="panel-heading">
+    Position Summary
+  </p>
+  <div class="panel-block">
+    <p class="control has-icons-left">
+      <input class="input" type="text" placeholder="Search">
+      <span class="icon is-left">
+        <i class="fas fa-search" aria-hidden="true"></i>
+      </span>
+    </p>
+  </div>
+</nav>
 
 <%= if @live_action in [:new, :edit] do %>
   <%= live_modal @socket, OptionsTrackerWeb.TransactionLive.FormComponent,
@@ -13,10 +31,11 @@
     title: @page_title,
     action: @live_action,
     transaction: @transaction,
+    modal_title: if(@live_action == :new, do: "New Position", else: "Edit Position"),
     return_to: Routes.transaction_index_path(@socket, :index) %>
 <% end %>
 
-<table>
+<table class="table is-striped is-narrow is-hoverable is-fullwidth">
   <thead>
     <tr>
       <th>Stock</th>

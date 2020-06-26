@@ -34,4 +34,5 @@ window.liveSocket = liveSocket
 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()
-})
+    $('#modal').modal('show');
+});

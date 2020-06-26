@@ -4,16 +4,18 @@ defmodule OptionsTrackerWeb.ModalComponent do
   @impl true
   def render(assigns) do
     ~L"""
-    <div id="<%= @id %>" class="phx-modal"
-      phx-capture-click="close"
-      phx-window-keydown="close"
-      phx-key="escape"
-      phx-target="#<%= @id %>"
-      phx-page-loading>
-
-      <div class="phx-modal-content">
-        <%= live_patch raw("&times;"), to: @return_to, class: "phx-modal-close" %>
-        <%= live_component @socket, @component, @opts %>
+    <div class="modal is-active is-clipped" id="<%= @id %>">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-header">
+          <p class="modal-card-title"><%= @modal_title %></p>
+          <button type="button" class="delete" aria-label="close">
+            <%= live_patch raw("&times;"), to: @return_to, "aria-hidden": true %>
+          </button>
+        </header>
+        <section class="modal-card-body">
+          <%= live_component @socket, @component, @opts %>
+        </section>
       </div>
     </div>
     """
