@@ -1,6 +1,7 @@
 defmodule OptionsTracker.Accounts.Position do
   use Ecto.Schema
   import Ecto.Changeset
+  import OptionsTracker.Utilities.Maps
 
   defmodule TransType do
     use EctoEnum, stock: 0, call: 1, put: 2
@@ -23,7 +24,7 @@ defmodule OptionsTracker.Accounts.Position do
     field :opened_at, :utc_datetime
     field :premium, :float
     field :expires_at, :utc_datetime
-    field :fees, :float
+    field :fees, :float, default: 0.00
     field :spread_width, :float
 
     # Updated later
@@ -42,7 +43,9 @@ defmodule OptionsTracker.Accounts.Position do
   end
 
   @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status]a
-  @optional_open_fields ~w[spread spread_width notes exit_strategy]a
+  @not_allowed_stock_fields ~w[expires_at premium spread spread_width]a
+  @not_allowed_option_fields ~w[basis]a
+  @optional_open_fields ~w[spread spread_width basis notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
   @spec open_changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
@@ -50,13 +53,28 @@ defmodule OptionsTracker.Accounts.Position do
         ) :: Ecto.Changeset.t()
   @doc false
   def open_changeset(position, attrs) do
-    attrs = Map.put(attrs, "status", :open)
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> Map.put("status", :open)
+      |> prepare_attrs()
 
-    position
-    |> cast(prepare_attrs(attrs), @open_fields)
-    |> validate_required(@required_open_fields)
-    |> validate_position_open()
-    |> standard_validations()
+    if attrs["type"] in [:stock, "stock", 0] do
+      # Set the basis to the stock price if its not filled in
+      attrs = Map.put(attrs, "basis", Map.get(attrs, "basis", attrs["strike"]))
+
+      position
+      |> cast(attrs, @open_fields -- @not_allowed_stock_fields)
+      |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
+      |> validate_position_open()
+      |> standard_validations()
+    else
+      position
+      |> cast(prepare_attrs(attrs), @open_fields -- @not_allowed_option_fields)
+      |> validate_required(@required_open_fields -- @not_allowed_option_fields)
+      |> validate_position_open()
+      |> standard_validations()
+    end
   end
 
   defp validate_position_open(%{data: %{id: nil}} = changeset), do: changeset
@@ -75,16 +93,30 @@ defmodule OptionsTracker.Accounts.Position do
   end
   defp prepare_attrs(attrs), do: attrs
 
-  @fields @open_fields ++ ~w[basis fees exit_price closed_at profit_loss]a
+  @immutable_fields ~w[stock short type strike opened_at expires_at premium]a
+  @fields @open_fields ++ ~w[basis fees exit_price closed_at profit_loss]a -- @immutable_fields
   @spec changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
         ) :: Ecto.Changeset.t()
   def changeset(position, attrs) do
-    position
-    |> cast(prepare_attrs(attrs), @fields)
-    |> standard_validations()
-    |> validate_number(:basis, greater_than: 0.0)
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> prepare_attrs()
+
+    if position.type in [:stock, "stock", 0] do
+      position
+      |> cast(prepare_attrs(attrs), @fields -- @not_allowed_stock_fields)
+      |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
+      |> standard_validations()
+      |> validate_number(:basis, greater_than: 0.0)
+    else
+      position
+      |> cast(prepare_attrs(attrs), @fields -- @not_allowed_option_fields)
+      |> validate_required(@required_open_fields -- @not_allowed_option_fields)
+      |> standard_validations()
+    end
   end
 
   defp standard_validations(changeset) do

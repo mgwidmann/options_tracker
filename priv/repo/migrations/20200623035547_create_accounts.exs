@@ -3,9 +3,9 @@ defmodule OptionsTracker.Repo.Migrations.CreateAccounts do
 
   def change do
     create table(:accounts) do
-      add :name, :string
+      add :name, :string, null: false
       add :broker_name, :string
-      add :type, :integer
+      add :type, :integer, null: false
       add :opt_open_fee, :float
       add :opt_close_fee, :float
       add :stock_open_fee, :float

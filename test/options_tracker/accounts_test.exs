@@ -79,9 +79,9 @@ defmodule OptionsTracker.AccountsTest do
   describe "positions" do
     alias OptionsTracker.Accounts.Position
 
-    @valid_attrs %{basis: 120.5, closed_at: ~N[2010-04-17 14:00:00], direction: 42, exit_price: 120.5, exit_strategy: "some exit_strategy", expires_at: ~N[2010-04-17 14:00:00], fees: 120.5, notes: "some notes", opened_at: ~N[2010-04-17 14:00:00], premium: 120.5, profit_loss: 120.5, status: 42, stock: "some stock", strike: 120.5, type: 42}
-    @update_attrs %{basis: 456.7, closed_at: ~N[2011-05-18 15:01:01], direction: 43, exit_price: 456.7, exit_strategy: "some updated exit_strategy", expires_at: ~N[2011-05-18 15:01:01], fees: 456.7, notes: "some updated notes", opened_at: ~N[2011-05-18 15:01:01], premium: 456.7, profit_loss: 456.7, status: 43, stock: "some updated stock", strike: 456.7, type: 43}
-    @invalid_attrs %{basis: nil, closed_at: nil, direction: nil, exit_price: nil, exit_strategy: nil, expires_at: nil, fees: nil, notes: nil, opened_at: nil, premium: nil, profit_loss: nil, status: nil, stock: nil, strike: nil, type: nil}
+    @valid_attrs %{short: true, exit_strategy: "some exit_strategy", expires_at: ~N[2010-04-17 14:00:00], fees: 1.5, notes: "some notes", opened_at: ~N[2010-04-17 14:00:00], premium: 1.50, status: :open, stock: "XYZ", strike: 120.5, type: :call}
+    @update_attrs %{closed_at: ~N[2011-05-18 15:01:01], short: true, exit_price: 456.7, exit_strategy: "some updated exit_strategy", expires_at: ~N[2011-05-18 15:01:01], fees: 2.50, notes: "some updated notes", opened_at: ~N[2011-05-18 15:01:01], premium: 456.7, profit_loss: 456.7, status: :closed, stock: "XYZ", strike: 456.7, type: :call}
+    @invalid_attrs %{closed_at: nil, fees: nil, notes: nil, opened_at: nil, premium: nil, status: nil}
 
     def position_fixture(attrs \\ %{}) do
       {:ok, position} =
@@ -104,21 +104,41 @@ defmodule OptionsTracker.AccountsTest do
 
     test "create_position/1 with valid data creates a position" do
       assert {:ok, %Position{} = position} = Accounts.create_position(@valid_attrs)
-      assert position.basis == 120.5
-      assert position.closed_at == ~N[2010-04-17 14:00:00]
-      assert position.direction == 42
-      assert position.exit_price == 120.5
+      assert position.basis == nil # Not valid on non-stocks
+      assert position.closed_at == nil
+      assert position.short == true
+      assert position.exit_price == nil
       assert position.exit_strategy == "some exit_strategy"
-      assert position.expires_at == ~N[2010-04-17 14:00:00]
-      assert position.fees == 120.5
+      assert position.expires_at == ~U[2010-04-17 14:00:00Z]
+      assert position.fees == 1.5
       assert position.notes == "some notes"
-      assert position.opened_at == ~N[2010-04-17 14:00:00]
-      assert position.premium == 120.5
-      assert position.profit_loss == 120.5
-      assert position.status == 42
-      assert position.stock == "some stock"
+      assert position.opened_at == ~U[2010-04-17 14:00:00Z]
+      assert position.premium == 1.5
+      assert position.profit_loss == nil
+      assert position.status == :open
+      assert position.stock == "XYZ"
       assert position.strike == 120.5
-      assert position.type == 42
+      assert position.type == :call
+    end
+
+    test "create_position/1 with valid data creates a stock position" do
+      attrs = %{type: :stock, stock: "XYZ", premium: nil, strike: 100.00, expires_at: nil, basis: 100.00, closed_at: nil, fees: 0}
+      assert {:ok, %Position{} = position} = Accounts.create_position(attrs |> Enum.into(@valid_attrs))
+      assert position.basis == 100.00
+      assert position.closed_at == nil
+      assert position.short == true
+      assert position.exit_price == nil
+      assert position.exit_strategy == "some exit_strategy"
+      assert position.expires_at == nil
+      assert position.fees == 0
+      assert position.notes == "some notes"
+      assert position.opened_at == ~U[2010-04-17 14:00:00Z]
+      assert position.premium == nil
+      assert position.profit_loss == nil
+      assert position.status == :open
+      assert position.stock == "XYZ"
+      assert position.strike == 100.00
+      assert position.type == :stock
     end
 
     test "create_position/1 with invalid data returns error changeset" do
@@ -128,21 +148,21 @@ defmodule OptionsTracker.AccountsTest do
     test "update_position/2 with valid data updates the position" do
       position = position_fixture()
       assert {:ok, %Position{} = position} = Accounts.update_position(position, @update_attrs)
-      assert position.basis == 456.7
-      assert position.closed_at == ~N[2011-05-18 15:01:01]
-      assert position.direction == 43
+      assert position.basis == nil # Basis are always nil on options and cannot be updated
+      assert position.closed_at == ~U[2011-05-18 15:01:01Z]
+      assert position.short == true
       assert position.exit_price == 456.7
       assert position.exit_strategy == "some updated exit_strategy"
-      assert position.expires_at == ~N[2011-05-18 15:01:01]
-      assert position.fees == 456.7
+      assert position.expires_at == ~U[2011-05-18 15:01:01Z]
+      assert position.fees == 2.5
       assert position.notes == "some updated notes"
-      assert position.opened_at == ~N[2011-05-18 15:01:01]
+      assert position.opened_at == ~U[2011-05-18 15:01:01Z]
       assert position.premium == 456.7
       assert position.profit_loss == 456.7
-      assert position.status == 43
-      assert position.stock == "some updated stock"
+      assert position.status == :closed
+      assert position.stock == "XYZ"
       assert position.strike == 456.7
-      assert position.type == 43
+      assert position.type == :call
     end
 
     test "update_position/2 with invalid data returns error changeset" do
