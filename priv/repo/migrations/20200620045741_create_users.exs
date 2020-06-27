@@ -8,6 +8,5 @@ defmodule OptionsTracker.Repo.Migrations.CreateUsers do
 
       timestamps()
     end
-
   end
 end

@@ -5,9 +5,57 @@ defmodule OptionsTrackerWeb.PositionLiveTest do
 
   alias OptionsTracker.Accounts
 
-  @create_attrs %{basis: 120.5, closed_at: ~N[2010-04-17 14:00:00], direction: 42, exit_price: 120.5, exit_strategy: "some exit_strategy", expires_at: ~N[2010-04-17 14:00:00], fees: 120.5, notes: "some notes", opened_at: ~N[2010-04-17 14:00:00], premium: 120.5, profit_loss: 120.5, status: 42, stock: "some stock", strike: 120.5, type: 42}
-  @update_attrs %{basis: 456.7, closed_at: ~N[2011-05-18 15:01:01], direction: 43, exit_price: 456.7, exit_strategy: "some updated exit_strategy", expires_at: ~N[2011-05-18 15:01:01], fees: 456.7, notes: "some updated notes", opened_at: ~N[2011-05-18 15:01:01], premium: 456.7, profit_loss: 456.7, status: 43, stock: "some updated stock", strike: 456.7, type: 43}
-  @invalid_attrs %{basis: nil, closed_at: nil, direction: nil, exit_price: nil, exit_strategy: nil, expires_at: nil, fees: nil, notes: nil, opened_at: nil, premium: nil, profit_loss: nil, status: nil, stock: nil, strike: nil, type: nil}
+  @create_attrs %{
+    basis: 120.5,
+    closed_at: ~N[2010-04-17 14:00:00],
+    direction: 42,
+    exit_price: 120.5,
+    exit_strategy: "some exit_strategy",
+    expires_at: ~N[2010-04-17 14:00:00],
+    fees: 120.5,
+    notes: "some notes",
+    opened_at: ~N[2010-04-17 14:00:00],
+    premium: 120.5,
+    profit_loss: 120.5,
+    status: 42,
+    stock: "some stock",
+    strike: 120.5,
+    type: 42
+  }
+  @update_attrs %{
+    basis: 456.7,
+    closed_at: ~N[2011-05-18 15:01:01],
+    direction: 43,
+    exit_price: 456.7,
+    exit_strategy: "some updated exit_strategy",
+    expires_at: ~N[2011-05-18 15:01:01],
+    fees: 456.7,
+    notes: "some updated notes",
+    opened_at: ~N[2011-05-18 15:01:01],
+    premium: 456.7,
+    profit_loss: 456.7,
+    status: 43,
+    stock: "some updated stock",
+    strike: 456.7,
+    type: 43
+  }
+  @invalid_attrs %{
+    basis: nil,
+    closed_at: nil,
+    direction: nil,
+    exit_price: nil,
+    exit_strategy: nil,
+    expires_at: nil,
+    fees: nil,
+    notes: nil,
+    opened_at: nil,
+    premium: nil,
+    profit_loss: nil,
+    status: nil,
+    stock: nil,
+    strike: nil,
+    type: nil
+  }
 
   defp fixture(:position) do
     {:ok, position} = Accounts.create_position(@create_attrs)

@@ -102,7 +102,10 @@ defmodule OptionsTracker.Accounts do
     Account.changeset(account, attrs)
   end
 
-  @spec list_account_types :: [{:other, 1000} | {:robinhood, 1} | {:tasty_works, 0} | {:td_ameritrade, 2}, ...]
+  @spec list_account_types :: [
+          {:other, 1000} | {:robinhood, 1} | {:tasty_works, 0} | {:td_ameritrade, 2},
+          ...
+        ]
   def list_account_types() do
     Account.TypeEnum.__enum_map__()
   end
@@ -174,9 +177,85 @@ defmodule OptionsTracker.Accounts do
 
   """
   def update_position(%Position{} = position, attrs) do
-    position
-    |> Position.changeset(attrs)
-    |> Repo.update()
+    changeset = position |> Position.changeset(attrs)
+
+    if changeset.valid? do
+      Repo.transaction(fn ->
+        case Repo.update(changeset) do
+          {:ok, position} ->
+            update_basis!(position)
+            position
+
+          {:error, changeset} ->
+            {:error, changeset}
+        end
+      end)
+    else
+      {:error, changeset}
+    end
+  end
+
+  @doc """
+  Updates any long or short stock positions' basis field which were used as collateral for this position.
+  """
+  @spec update_basis!(OptionsTracker.Accounts.Position.t()) :: [
+          OptionsTracker.Accounts.Position.t()
+        ]
+  def update_basis!(
+        %Position{status: :closed, count: count, type: call_or_put, profit_loss: profit_loss} =
+          position
+      )
+      when call_or_put in ~w[call put]a do
+    open_enum = Position.StatusType.__enum_map__()[:open]
+    stock_enum = Position.TransType.__enum_map__()[:stock]
+    # Long stock for call, short stock for put
+    short_long = if(call_or_put == :call, do: false, else: true)
+
+    from(p in Position,
+      where:
+        p.account_id == ^position.account_id and
+          p.status == ^open_enum and
+          p.stock == ^position.stock and
+          p.type == ^stock_enum
+    )
+    |> Repo.all()
+    # Do after retrieval to be able to use index
+    |> Enum.reject(fn s ->
+      # Can't be used for this option to lower basis
+      s.short != short_long || s.count < 100
+    end)
+    |> Enum.reduce({count, []}, fn stock, {count, stocks} ->
+      contracts_can_reduce = div(stock.count, 100)
+      count_delta = if(contracts_can_reduce > count, do: count, else: contracts_can_reduce)
+
+      stock =
+        if count_delta > 0 do
+          basis_delta = profit_loss / stock.count
+          # short stock positions add to basis instead of lowering basis
+          basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
+          change_position(stock, %{basis: stock.basis - basis_delta})
+        else
+          # unchanged
+          stock
+        end
+
+      {count - count_delta, [stock | stocks]}
+    end)
+    |> elem(1)
+    |> Enum.map(fn
+      %Ecto.Changeset{} = changeset ->
+        {:ok, position} = Repo.update(changeset)
+        position
+
+      %Position{} = position ->
+        # Do nothing as this stock was unchanged
+        position
+    end)
+  end
+
+  # When not closing a call/put, just return empty since nothing was done
+  def update_basis!(_position) do
+    []
   end
 
   @doc """

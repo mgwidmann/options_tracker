@@ -26,6 +26,7 @@ defmodule OptionsTracker.Accounts.Position do
     field :expires_at, :utc_datetime
     field :fees, :float, default: 0.00
     field :spread_width, :float
+    field :count, :integer, default: 1
 
     # Updated later
     field :basis, :float
@@ -42,7 +43,7 @@ defmodule OptionsTracker.Accounts.Position do
     timestamps()
   end
 
-  @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status]a
+  @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status count account_id]a
   @not_allowed_stock_fields ~w[expires_at premium spread spread_width]a
   @not_allowed_option_fields ~w[basis]a
   @optional_open_fields ~w[spread spread_width basis notes exit_strategy]a
@@ -78,6 +79,7 @@ defmodule OptionsTracker.Accounts.Position do
   end
 
   defp validate_position_open(%{data: %{id: nil}} = changeset), do: changeset
+
   defp validate_position_open(changeset) do
     changeset
     |> add_error(:id, "Cannot perform operation to open on an existing position. This is a bug.")
@@ -87,14 +89,16 @@ defmodule OptionsTracker.Accounts.Position do
     case Integer.parse(type) do
       {type_int, ""} ->
         Map.put(attrs, "type", type_int)
+
       :error ->
         attrs
     end
   end
+
   defp prepare_attrs(attrs), do: attrs
 
   @immutable_fields ~w[stock short type strike opened_at expires_at premium]a
-  @fields @open_fields ++ ~w[basis fees exit_price closed_at profit_loss]a -- @immutable_fields
+  @fields (@open_fields ++ ~w[basis fees exit_price closed_at]a) -- @immutable_fields
   @spec changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
@@ -111,16 +115,19 @@ defmodule OptionsTracker.Accounts.Position do
       |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
       |> standard_validations()
       |> validate_number(:basis, greater_than: 0.0)
+      |> calculate_profit_loss()
     else
       position
       |> cast(prepare_attrs(attrs), @fields -- @not_allowed_option_fields)
       |> validate_required(@required_open_fields -- @not_allowed_option_fields)
       |> standard_validations()
+      |> calculate_profit_loss()
     end
   end
 
   defp standard_validations(changeset) do
     changeset
+    |> foreign_key_constraint(:account_id)
     |> validate_length(:stock, min: 1)
     |> validate_number(:premium, greater_than: 0.0)
     |> validate_number(:strike, greater_than: 0.0)
@@ -128,5 +135,38 @@ defmodule OptionsTracker.Accounts.Position do
     |> validate_number(:exit_price, greater_than: 0.0)
     |> validate_length(:notes, max: 10_000)
     |> validate_length(:exit_strategy, max: 10_000)
+  end
+
+  defp calculate_profit_loss(changeset) do
+    premium = get_field(changeset, :premium)
+    status = get_change(changeset, :status)
+    prior_status = changeset.data.status
+    exit_price = get_field(changeset, :exit_price)
+    count = get_field(changeset, :count)
+    type = get_field(changeset, :type)
+    strike = get_field(changeset, :strike)
+    short = get_field(changeset, :short)
+
+    if prior_status == :open && status == :closed && exit_price && count do
+      profit_loss =
+        if type == :stock do
+          IO.puts(
+            "exit: #{inspect(exit_price)} strike #{inspect(strike)} short #{inspect(short)} count #{
+              inspect(count)
+            }"
+          )
+
+          (exit_price - strike) * if(short, do: -1, else: 1) * count
+        else
+          (premium - exit_price) * 100 * count
+        end
+        |> Decimal.from_float()
+        |> Decimal.round(2, :half_up)
+        |> Decimal.to_float()
+
+      put_change(changeset, :profit_loss, profit_loss)
+    else
+      changeset
+    end
   end
 end

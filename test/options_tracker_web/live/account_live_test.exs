@@ -5,9 +5,36 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
 
   alias OptionsTracker.Accounts
 
-  @create_attrs %{cash: "120.5", exercise_fee: 120.5, name: "some name", opt_close_fee: 120.5, opt_open_fee: 120.5, stock_close_fee: 120.5, stock_open_fee: 120.5, type: 0}
-  @update_attrs %{cash: "456.7", exercise_fee: 456.7, name: "some updated name", opt_close_fee: 456.7, opt_open_fee: 456.7, stock_close_fee: 456.7, stock_open_fee: 456.7, type: 1000}
-  @invalid_attrs %{cash: nil, exercise_fee: nil, name: nil, opt_close_fee: nil, opt_open_fee: nil, stock_close_fee: nil, stock_open_fee: nil, type: nil}
+  @create_attrs %{
+    cash: "120.5",
+    exercise_fee: 120.5,
+    name: "some name",
+    opt_close_fee: 120.5,
+    opt_open_fee: 120.5,
+    stock_close_fee: 120.5,
+    stock_open_fee: 120.5,
+    type: 0
+  }
+  @update_attrs %{
+    cash: "456.7",
+    exercise_fee: 456.7,
+    name: "some updated name",
+    opt_close_fee: 456.7,
+    opt_open_fee: 456.7,
+    stock_close_fee: 456.7,
+    stock_open_fee: 456.7,
+    type: 1000
+  }
+  @invalid_attrs %{
+    cash: nil,
+    exercise_fee: nil,
+    name: nil,
+    opt_close_fee: nil,
+    opt_open_fee: nil,
+    stock_close_fee: nil,
+    stock_open_fee: nil,
+    type: nil
+  }
 
   defp fixture(:account) do
     {:ok, account} = Accounts.create_account(@create_attrs)

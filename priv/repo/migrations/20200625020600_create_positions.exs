@@ -13,6 +13,7 @@ defmodule OptionsTracker.Repo.Migrations.CreatePositions do
       add :expires_at, :utc_datetime
       add :fees, :float
       add :spread_width, :float
+      add :count, :integer, null: false
 
       add :basis, :float
       add :closed_at, :utc_datetime

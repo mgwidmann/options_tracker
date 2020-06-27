@@ -31,26 +31,50 @@ defmodule OptionsTracker.Accounts.Account do
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(prepare_attrs(attrs), [:name, :broker_name, :type, :opt_open_fee, :opt_close_fee, :stock_open_fee, :stock_close_fee, :exercise_fee, :cash])
+    |> cast(prepare_attrs(attrs), [
+      :name,
+      :broker_name,
+      :type,
+      :opt_open_fee,
+      :opt_close_fee,
+      :stock_open_fee,
+      :stock_close_fee,
+      :exercise_fee,
+      :cash
+    ])
     |> cast_broker_name(attrs)
-    |> validate_required([:name, :type, :opt_open_fee, :opt_close_fee, :stock_open_fee, :stock_close_fee, :exercise_fee, :cash])
+    |> validate_required([
+      :name,
+      :type,
+      :opt_open_fee,
+      :opt_close_fee,
+      :stock_open_fee,
+      :stock_close_fee,
+      :exercise_fee,
+      :cash
+    ])
   end
 
   defp prepare_attrs(%{"type" => "" <> _ = type} = attrs) do
     case Integer.parse(type) do
       {type_int, ""} ->
         Map.put(attrs, "type", type_int)
+
       :error ->
         attrs
     end
   end
+
   defp prepare_attrs(attrs), do: attrs
 
   defp cast_broker_name(changeset, params) do
     case get_field(changeset, :type) do
-      :other -> cast(changeset, params, [:broker_name], [])
-                |> validate_required([:broker_name])
-      _      -> changeset
+      :other ->
+        cast(changeset, params, [:broker_name], [])
+        |> validate_required([:broker_name])
+
+      _ ->
+        changeset
     end
   end
 end

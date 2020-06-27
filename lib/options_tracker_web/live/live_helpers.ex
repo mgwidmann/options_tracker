@@ -17,7 +17,15 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   """
   def live_modal(socket, component, opts) do
     path = Keyword.fetch!(opts, :return_to)
-    modal_opts = [id: :modal, return_to: path, component: component, modal_title: opts[:modal_title] || "Modal Title", opts: opts]
+
+    modal_opts = [
+      id: :modal,
+      return_to: path,
+      component: component,
+      modal_title: opts[:modal_title] || "Modal Title",
+      opts: opts
+    ]
+
     live_component(socket, OptionsTrackerWeb.ModalComponent, modal_opts)
   end
 end

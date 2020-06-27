@@ -49,7 +49,8 @@ defmodule OptionsTracker.MixProject do
       {:plug_cowboy, "~> 2.0"},
 
       # Additional Dependencies
-      {:ecto_enum, "~> 1.4"}
+      {:ecto_enum, "~> 1.4"},
+      {:decimal, "~> 1.8"}
     ]
   end
 

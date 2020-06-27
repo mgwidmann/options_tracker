@@ -4,7 +4,8 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   alias OptionsTracker.Accounts
 
   @impl true
-  @spec update(%{account: Account.t()}, Phoenix.LiveView.Socket.t()) :: {:ok, Phoenix.LiveView.Socket.t()}
+  @spec update(%{account: Account.t()}, Phoenix.LiveView.Socket.t()) ::
+          {:ok, Phoenix.LiveView.Socket.t()}
   def update(%{account: account} = assigns, socket) do
     changeset = Accounts.change_account(account)
 
@@ -15,9 +16,9 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   end
 
   @impl true
-  @spec handle_event(String.t(), %{required(String.t()) => map}, Phoenix.LiveView.Socket.t()) :: {:noreply, Phoenix.LiveView.Socket.t()}
+  @spec handle_event(String.t(), %{required(String.t()) => map}, Phoenix.LiveView.Socket.t()) ::
+          {:noreply, Phoenix.LiveView.Socket.t()}
   def handle_event("validate", %{"account" => account_params}, socket) do
-    IO.inspect(account_params)
     changeset =
       socket.assigns.account
       |> Accounts.change_account(account_params)

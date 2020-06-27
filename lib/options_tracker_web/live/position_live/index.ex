@@ -27,7 +27,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:page_title, "New Position")
     |> assign(:position, %Position{
       account_id: 2,
-      opened_at: DateTime.utc_now,
+      opened_at: DateTime.utc_now(),
       expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second),
       short: true
     })
