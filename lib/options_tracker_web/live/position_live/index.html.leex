@@ -13,7 +13,7 @@
 
 <nav class="panel">
   <p class="panel-heading">
-    Position Summary
+    Search for a position
   </p>
   <div class="panel-block">
     <p class="control has-icons-left">
@@ -25,43 +25,87 @@
   </div>
 </nav>
 
-<%= if @live_action in [:new, :edit] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.FormComponent,
+<%#= if @live_action in [:new, :edit] do %>
+  <%#= live_modal @socket, OptionsTrackerWeb.PositionLive.FormComponent,
     id: @position.id || :new,
     title: @page_title,
     action: @live_action,
     position: @position,
     modal_title: if(@live_action == :new, do: "New Position", else: "Edit Position"),
     return_to: Routes.position_index_path(@socket, :index) %>
+<%# end %>
+<%= if @live_action in [:close] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.CloseComponent,
+    id: @position.id,
+    title: @page_title,
+    action: @live_action,
+    position: @position,
+    modal_title: "Close Position",
+    return_to: Routes.position_index_path(@socket, :index) %>
 <% end %>
+
+
+<%= f = form_for @changeset, "#",
+  id: "position-form",
+  phx_change: "validate",
+  phx_submit: "save" %>
 
 <table class="table is-striped is-narrow is-hoverable is-fullwidth">
   <thead>
     <tr>
+      <th>Opened</th>
+      <th>Count</th>
       <th>Stock</th>
       <th>Long / Short</th>
       <th>Strike / Type</th>
       <th>Expires at</th>
       <th>Premium</th>
       <th>Status</th>
+      <th>Profit / Loss</th>
+      <th>Fees</th>
       <th></th>
     </tr>
   </thead>
   <tbody id="positions">
+    <%= if @live_action in [:new] do %>
+      <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+        id: :new,
+        f: f,
+        title: @page_title,
+        action: @live_action,
+        position: @position,
+        return_to: Routes.position_index_path(@socket, :index)) %>
+    <% end %>
     <%= for position <- @positions do %>
-      <tr id="position-<%= position.id %>">
-        <td><%= position.stock %></td>
-        <td><%= if(position.short, do: "Short", else: "Long") %></td>
-        <td><%= position.strike %><%= type_display(position.type) %></td>
+      <tr id="position-<%= position.id %>" class="<%= row_class_for_status(position.status) %>">
+        <td></td>
+        <td><%= position.count %>&nbsp;<%= count_type(position) %></td>
+        <td><span class="tag is-rounded"><%= position.stock %></span></td>
+        <td><span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span></td>
+        <td><%= currency_string(position.strike) %><%= type_display(position) %></td>
         <td><%= position.expires_at %></td>
-        <td><%= position.premium %></td>
-        <td><%= position.status %></td>
+        <td>
+          <span class="<%= if(position.premium >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
+          </span>
+        </td>
+        <td><%= position_status_display(position.status, true) %></td>
+        <td>
+          <span class="<%= if(position.profit_loss >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
+          </span>
+        </td>
+        <td>
+          <%= currency_string(position.fees) %>
+        </td>
         <td>
           <span><%= live_redirect "Show", to: Routes.position_show_path(@socket, :show, position) %></span>
           <span><%= live_patch "Edit", to: Routes.position_index_path(@socket, :edit, position) %></span>
+          <span><%= live_patch "Close", to: Routes.position_index_path(@socket, :close, position) %></span>
           <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: position.id, data: [confirm: "Are you sure?"] %></span>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
+</form>

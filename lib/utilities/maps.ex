@@ -10,7 +10,10 @@ defmodule OptionsTracker.Utilities.Maps do
 
   def stringify_keys(map = %{}) do
     map
-    |> Enum.map(fn {k, v} -> {Atom.to_string(k), stringify_keys(v)} end)
+    |> Enum.map(fn
+      {k, v} when is_atom(k) -> {Atom.to_string(k), stringify_keys(v)}
+      {k, v} -> {k, v}
+    end)
     |> Enum.into(%{})
   end
 

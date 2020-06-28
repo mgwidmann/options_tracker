@@ -7,7 +7,11 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :positions, list_positions())}
+    changeset = Accounts.change_position(%Position{account_id: 1})
+
+    {:ok, socket
+      |> assign(:positions, list_positions())
+      |> assign(:changeset, changeset)}
   end
 
   @impl true
@@ -21,12 +25,18 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:position, Accounts.get_position!(id))
   end
 
+  defp apply_action(socket, :close, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Close Position")
+    |> assign(:position, Accounts.get_position!(id))
+  end
+
   @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Position")
     |> assign(:position, %Position{
-      account_id: 2,
+      account_id: 1,
       opened_at: DateTime.utc_now(),
       expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second),
       short: true
@@ -45,6 +55,46 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     {:ok, _} = Accounts.delete_position(position)
 
     {:noreply, assign(socket, :positions, list_positions())}
+  end
+
+  def handle_event("validate", %{"position" => position_params}, socket) do
+    changeset =
+      socket.assigns.position
+      |> Accounts.change_position(position_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  def handle_event("save", %{"position" => position_params}, socket) do
+    save_position(socket, socket.assigns.live_action, position_params)
+  end
+
+  defp save_position(socket, :edit, position_params) do
+    case Accounts.update_position(socket.assigns.position, position_params) do
+      {:ok, _position} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Position updated successfully")
+         |> push_redirect(to: socket.assigns.return_to)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+
+  defp save_position(socket, :new, position_params) do
+    case Accounts.create_position(position_params) do
+      {:ok, _position} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Position opened successfully")
+         |> push_redirect(to: Routes.position_index_path(socket, :index))}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        IO.inspect changeset
+        {:noreply, assign(socket, changeset: changeset)}
+    end
   end
 
   defp list_positions do

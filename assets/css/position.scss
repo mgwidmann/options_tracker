@@ -16,3 +16,19 @@
 ::placeholder { /* Recent browsers */
     text-transform: none;
 }
+#positions input.is-small {
+    min-width: 60px;
+    max-width: 90px;
+}
+
+#positions td {
+    min-width: 120px;
+}
+
+#positions span.tag.short:focus-within {
+    border: 1px solid black;
+}
+
+#positions span.tag.long:focus-within {
+    border: 1px solid black;
+}

@@ -274,6 +274,10 @@ defmodule OptionsTracker.Accounts do
     Repo.delete(position)
   end
 
+  @spec change_position(
+          OptionsTracker.Accounts.Position.t(),
+          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
+        ) :: Ecto.Changeset.t()
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking position changes.
 
@@ -283,15 +287,34 @@ defmodule OptionsTracker.Accounts do
       %Ecto.Changeset{data: %Position{}}
 
   """
-  def change_position(%Position{} = position, attrs \\ %{}) do
+  def change_position(position, attrs \\ %{})
+  def change_position(%Position{status: nil} = position, attrs) do
+    Position.open_changeset(position, attrs)
+  end
+
+  def change_position(%Position{} = position, attrs) do
     Position.changeset(position, attrs)
   end
 
+  @spec list_position_types :: [{:call, 1} | {:put, 2} | {:stock, 0}, ...]
   def list_position_types() do
     Position.TransType.__enum_map__()
   end
 
+  @spec name_for_position_type(:call | :put | :stock) :: <<_::24, _::_*8>>
   def name_for_position_type(type) do
     Position.TransType.name_for(type)
+  end
+
+  @spec list_position_statuses :: [
+          {:closed, 1} | {:exercised, 3} | {:open, 0} | {:rolled, 2},
+          ...
+        ]
+  def list_position_statuses() do
+    Position.StatusType.__enum_map__()
+  end
+
+  def name_for_position_status(status, past_tense \\ false) do
+    Position.StatusType.name_for(status, past_tense)
   end
 end

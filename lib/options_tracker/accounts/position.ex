@@ -5,6 +5,7 @@ defmodule OptionsTracker.Accounts.Position do
 
   defmodule TransType do
     use EctoEnum, stock: 0, call: 1, put: 2
+    @spec name_for(:call | :put | :stock) :: String.t()
     def name_for(:stock), do: "Stock"
     def name_for(:call), do: "Call"
     def name_for(:put), do: "Put"
@@ -12,6 +13,16 @@ defmodule OptionsTracker.Accounts.Position do
 
   defmodule StatusType do
     use EctoEnum, open: 0, closed: 1, rolled: 2, exercised: 3
+    @spec name_for(:closed | :open | :rolled, boolean) :: String.t()
+    def name_for(status, past_tense)
+    def name_for(:open, false), do: "Open"
+    def name_for(:open, true), do: "Opened"
+    def name_for(:closed, false), do: "Close"
+    def name_for(:closed, true), do: "Closed"
+    def name_for(:rolled, false), do: "Roll"
+    def name_for(:rolled, true), do: "Rolled"
+    def name_for(:exercised, false), do: "Exercise"
+    def name_for(:exercised, true), do: "Exercised"
   end
 
   schema "positions" do
@@ -85,17 +96,22 @@ defmodule OptionsTracker.Accounts.Position do
     |> add_error(:id, "Cannot perform operation to open on an existing position. This is a bug.")
   end
 
-  defp prepare_attrs(%{"type" => "" <> _ = type} = attrs) do
-    case Integer.parse(type) do
-      {type_int, ""} ->
-        Map.put(attrs, "type", type_int)
+  defp prepare_attrs(attrs) do
+    Enum.reduce(["type", "status"], attrs, fn key, attrs ->
+      value = attrs[key]
+      if value && is_binary(value) do
+        case Integer.parse(value) do
+          {int, ""} ->
+            Map.put(attrs, key, int)
 
-      :error ->
+          :error ->
+            attrs
+        end
+      else
         attrs
-    end
+      end
+    end)
   end
-
-  defp prepare_attrs(attrs), do: attrs
 
   @immutable_fields ~w[stock short type strike opened_at expires_at premium]a
   @fields (@open_fields ++ ~w[basis fees exit_price closed_at]a) -- @immutable_fields
@@ -129,10 +145,11 @@ defmodule OptionsTracker.Accounts.Position do
     changeset
     |> foreign_key_constraint(:account_id)
     |> validate_length(:stock, min: 1)
-    |> validate_number(:premium, greater_than: 0.0)
+    |> upcase_stock()
+    |> validate_number(:premium, [])
     |> validate_number(:strike, greater_than: 0.0)
-    |> validate_number(:fees, greater_than: 0.0)
-    |> validate_number(:exit_price, greater_than: 0.0)
+    |> validate_number(:fees, greater_than_or_equal_to: 0.0)
+    |> validate_number(:exit_price, greater_than_or_equal_to: 0.0)
     |> validate_length(:notes, max: 10_000)
     |> validate_length(:exit_strategy, max: 10_000)
   end
@@ -147,15 +164,9 @@ defmodule OptionsTracker.Accounts.Position do
     strike = get_field(changeset, :strike)
     short = get_field(changeset, :short)
 
-    if prior_status == :open && status == :closed && exit_price && count do
+    if prior_status == :open && status != :open && exit_price && count do
       profit_loss =
         if type == :stock do
-          IO.puts(
-            "exit: #{inspect(exit_price)} strike #{inspect(strike)} short #{inspect(short)} count #{
-              inspect(count)
-            }"
-          )
-
           (exit_price - strike) * if(short, do: -1, else: 1) * count
         else
           (premium - exit_price) * 100 * count
@@ -165,6 +176,16 @@ defmodule OptionsTracker.Accounts.Position do
         |> Decimal.to_float()
 
       put_change(changeset, :profit_loss, profit_loss)
+    else
+      changeset
+    end
+  end
+
+  defp upcase_stock(changeset) do
+    stock = get_field(changeset, :stock)
+
+    if stock && String.upcase(stock) != stock do
+      put_change(changeset, :stock, String.upcase(stock))
     else
       changeset
     end

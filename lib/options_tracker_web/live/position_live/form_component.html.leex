@@ -1,120 +1,110 @@
-
-<%= f = form_for @changeset, "#",
-  id: "position-form",
-  phx_target: @myself,
-  phx_change: "validate",
-  phx_submit: "save" %>
-  <section class="modal-card-body">
-    <div class="columns">
-      <div class="column control">
-        <div class="field">
-          <p class="control has-icons-left">
-            <%= text_input f, :stock, class: "input is-rounded is-small", placeholder: "Ticker" %>
-            <span class="icon is-small is-left">
-              <i class="fa fa-line-chart" aria-hidden="true"></i>
-            </span>
-          </p>
-        </div>
-        <%= error_tag f, :stock %>
-      </div>
-      <div class="column control">
-        <%= radio_button f, :short, true, class: "radio" %>
-        <%= label f, :short_true, "Short", class: "radio" %>
-        <%= radio_button f, :short, false, class: "radio" %>
-        <%= label f, :short_false, "Long", class: "radio" %>
-        <%= error_tag f, :short %>
-      </div>
-      <div class="column control has-icons-left">
-        <div class="field">
-          <p class="control has-icons-left">
-            <%= number_input f, :strike, step: "any", class: "input is-small", placeholder: "Strike" %>
-            <span class="icon is-small is-left">
-              <i class="fa fa-usd"></i>
-            </span>
-          </p>
-        </div>
-        <%= error_tag f, :strike %>
-      </div>
-      <div class="column control">
-        <%= select f, :type, position_type_map(), prompt: "Type", class: "select" %>
-        <%= error_tag f, :type %>
-      </div>
-      <div class="column control">
-        <div class="field">
-          <p class="control has-icons-left">
-            <%= number_input f, :premium, step: "any", placeholder: "Premium", class: "input is-small" %>
-            <span class="icon is-small is-left">
-              <i class="fa fa-usd"></i>
-            </span>
-          </p>
-        </div>
-        <%= error_tag f, :premium %>
-      </div>
+<tr id="position-<%= @position.id %>">
+  <td>
+    <%= hidden_input @f, :account_id %>
+    <div class="control">
+      <%= text_input @f, :opened_at, class: "input is-small datepicker" %>
+      <%= error_tag @f, :opened_at %>
     </div>
-    <div class="columns">
-      <div class="column control">
-        <%= label f, :opened_at %>
-        <%= text_input f, :opened_at, class: "input is-small datepicker" %>
-        <%= error_tag f, :opened_at %>
+  </td>
+  <td>
+    <span class="control px-1">
+      <%= number_input @f, :count, class: "input is-small is-inline", placeholder: "1" %>
+    </span>
+  </td>
+  <td>
+    <div class="control">
+      <div class="field">
+        <p class="control has-icons-left is-inline">
+          <%= text_input @f, :stock, class: "input is-rounded is-small is-inline", placeholder: "Ticker" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-line-chart" aria-hidden="true"></i>
+          </span>
+        </p>
       </div>
-      <div class="column"></div>
-      <div class="column control">
-        <%= label f, :expires_at %>
-        <%= text_input f, :expires_at, class: "input is-small datepicker" %>
-        <%= error_tag f, :expires_at %>
-      </div>
-      <div class="column"></div>
-      <div class="column control">
-        <%= label f, :fees %>
-        <div class="field">
-          <p class="control has-icons-left">
-            <%= number_input f, :fees, step: "any", class: "input is-small" %>
-            <span class="icon is-small is-left">
-              <i class="fa fa-usd"></i>
-            </span>
-          </p>
-        </div>
-        <%= error_tag f, :fees %>
-      </div>
+      <%= error_tag @f, :stock %>
     </div>
-    <div class="columns">
-      <div class="column control">
-        <%= label f, :notes %>
-        <%= textarea f, :notes, class: "textarea" %>
-        <%= error_tag f, :notes %>
-      </div>
-      <div class="column control">
-        <%= label f, :exit_strategy %>
-        <%= textarea f, :exit_strategy, class: "textarea" %>
-        <%= error_tag f, :exit_strategy %>
-      </div>
+  </td>
+  <td>
+    <div class="control tags has-addons">
+      <% short = if(@f.params["short"] != "" || is_nil(@f.params), do: @f.params["short"] == "false", else: @f.data.short) %>
+      <span class="tag short is-danger <%= if(!short, do: "", else: "is-light") %>">
+        <%= label @f, :short_true, class: "radio" do %>
+          <%= radio_button @f, :short, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
+          Short
+        <% end %>
+      </span>
+      <span class="tag long is-success <%= if(short, do: "", else: "is-light") %>">
+        <%= label @f, :short_false, class: "radio" do %>
+          <%= radio_button @f, :short, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
+          Long
+        <% end %>
+      </span>
+      <%= error_tag @f, :short %>
     </div>
-
-    <!--
-    <%= label f, :basis %>
-    <%= number_input f, :basis, step: "any" %>
-    <%= error_tag f, :basis %>
-
-    <%= label f, :exit_price %>
-    <%= number_input f, :exit_price, step: "any" %>
-    <%= error_tag f, :exit_price %>
-
-    <%= label f, :closed_at %>
-    <%= datetime_select f, :closed_at %>
-    <%= error_tag f, :closed_at %>
-
-    <%= label f, :profit_loss %>
-    <%= number_input f, :profit_loss, step: "any" %>
-    <%= error_tag f, :profit_loss %>
-
-    <%= label f, :status %>
-    <%= number_input f, :status %>
-    <%= error_tag f, :status %>
-    -->
-  </section>
-  <footer class="modal-card-foot">
+  </td>
+  <td>
+    <div class="control has-icons-left">
+      <div class="field">
+        <p class="control has-icons-left">
+          <%= number_input @f, :strike, step: "any", class: "input is-small", placeholder: "Strike" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-usd"></i>
+          </span>
+        </p>
+      </div>
+      <%= error_tag @f, :strike %>
+    </div>
+    <div class="control">
+      <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@changeset.data.type) %>
+      <%= error_tag @f, :type %>
+    </div>
+  </td>
+  <td>
+    <div class="control">
+      <%= text_input @f, :expires_at, class: "input is-small datepicker" %>
+      <%= error_tag @f, :expires_at %>
+    </div>
+  </td>
+  <td>
+    <div class="control">
+      <div class="field">
+        <p class="control has-icons-left">
+          <%= number_input @f, :premium, step: "any", placeholder: "0.00", class: "input is-small" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-usd"></i>
+          </span>
+        </p>
+      </div>
+      <%= error_tag @f, :premium %>
+    </div>
+  </td>
+  <td>
+    <div class="control">
+      <div class="field">
+        <p class="control">
+          <%= select @f, :status, position_status_map(), prompt: "Status", class: "select", selected: position_status_map(@changeset.data.status) %>
+        </p>
+      </div>
+      <%= error_tag @f, :status %>
+    </div>
+  </td>
+  <td></td>
+  <td>
+    <div class="control">
+      <div class="field">
+        <p class="control has-icons-left">
+          <%= number_input @f, :fees, step: "any", class: "input is-small" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-usd"></i>
+          </span>
+        </p>
+      </div>
+      <%= error_tag @f, :fees %>
+    </div>
+  </td>
+  <td>
     <div class="control is-grouped is-pulled-right ml-auto">
       <%= submit "Save", phx_disable_with: "Saving...", class: "button is-success" %>
     </div>
-  </footer>
-</form>
+  </td>
+</tr>
