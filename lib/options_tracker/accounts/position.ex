@@ -99,6 +99,7 @@ defmodule OptionsTracker.Accounts.Position do
   defp prepare_attrs(attrs) do
     Enum.reduce(["type", "status"], attrs, fn key, attrs ->
       value = attrs[key]
+
       if value && is_binary(value) do
         case Integer.parse(value) do
           {int, ""} ->

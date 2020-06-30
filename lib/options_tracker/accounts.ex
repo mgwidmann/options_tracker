@@ -219,7 +219,8 @@ defmodule OptionsTracker.Accounts do
           p.stock == ^position.stock and
           p.type == ^stock_enum
     )
-    |> order_by(asc: :opened_at) # Apply logic to oldest opened positions first
+    # Apply logic to oldest opened positions first
+    |> order_by(asc: :opened_at)
     |> Repo.all()
     # Do after retrieval to be able to use index
     |> Enum.reject(fn s ->
@@ -232,7 +233,7 @@ defmodule OptionsTracker.Accounts do
 
       stock =
         if count_delta > 0 do
-          basis_delta = (profit_loss_per_contact / stock.count) * count_delta
+          basis_delta = profit_loss_per_contact / stock.count * count_delta
           # short stock positions add to basis instead of lowering basis
           basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
           change_position(stock, %{basis: stock.basis - basis_delta})
@@ -290,6 +291,7 @@ defmodule OptionsTracker.Accounts do
 
   """
   def change_position(position, attrs \\ %{})
+
   def change_position(%Position{status: nil} = position, attrs) do
     Position.open_changeset(position, attrs)
   end

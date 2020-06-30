@@ -343,7 +343,13 @@ defmodule OptionsTracker.AccountsTest do
       other_stock = stock_position_fixture(%{account_id: account.id, count: 400})
 
       position =
-        position_fixture(%{stock: stock.stock, count: 5, type: :call, premium: 1.50, account_id: account.id})
+        position_fixture(%{
+          stock: stock.stock,
+          count: 5,
+          type: :call,
+          premium: 1.50,
+          account_id: account.id
+        })
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(position, %{
@@ -370,7 +376,13 @@ defmodule OptionsTracker.AccountsTest do
       other_stock = stock_position_fixture(%{short: true, account_id: account.id, count: 400})
 
       position =
-        position_fixture(%{stock: stock.stock, count: 5, type: :put, premium: 1.50, account_id: account.id})
+        position_fixture(%{
+          stock: stock.stock,
+          count: 5,
+          type: :put,
+          premium: 1.50,
+          account_id: account.id
+        })
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(position, %{
@@ -392,13 +404,87 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.basis == other_stock.strike + 1.45
     end
 
+    test "update_position/2 with calls on more long stock than available lowers basis on close" do
+      account = account_fixture()
+      # 600 shares selling 3 contracts
+      stock = stock_position_fixture(%{account_id: account.id, count: 600})
+      # untouched
+      other_stock = stock_position_fixture(%{account_id: account.id, count: 600, opened_at: ~U[2010-04-18 14:00:00Z]})
+
+      position =
+        position_fixture(%{
+          stock: stock.stock,
+          count: 3,
+          type: :call,
+          premium: 1.50,
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(position, %{
+                 exit_price: 0.05,
+                 closed_at: ~U[2011-05-18 15:01:01Z],
+                 status: :closed
+               })
+
+      # 600 shares are updated
+      old_basis = stock.basis
+      stock = Accounts.get_position!(stock.id)
+      assert old_basis != stock.basis
+      assert Float.round(stock.basis, 2) == stock.strike - 0.72
+
+      # 600 other shares are not updated
+      stock = Accounts.get_position!(other_stock.id)
+      assert old_basis == stock.basis
+    end
+
+    test "update_position/2 with puts on more short stock than available raises basis on close" do
+      account = account_fixture()
+      # 600 shares selling 3 contracts
+      stock = stock_position_fixture(%{short: true, account_id: account.id, count: 600})
+      # untouched
+      other_stock = stock_position_fixture(%{short: true, account_id: account.id, count: 600, opened_at: ~U[2010-04-18 14:00:00Z]})
+
+      position =
+        position_fixture(%{
+          stock: stock.stock,
+          count: 3,
+          type: :put,
+          premium: 1.50,
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(position, %{
+                 exit_price: 0.05,
+                 closed_at: ~U[2011-05-18 15:01:01Z],
+                 status: :closed
+               })
+
+      # 600 shares are updated
+      old_basis = stock.basis
+      stock = Accounts.get_position!(stock.id)
+      assert old_basis != stock.basis
+      assert Float.round(stock.basis, 2) == stock.strike + 0.72
+
+      # 600 other shares are not updated
+      stock = Accounts.get_position!(other_stock.id)
+      assert old_basis == stock.basis
+    end
+
     test "update_position/2 with call on uneven amount of long stock lowers basis average on close" do
       account = account_fixture()
       # 110 shares, lowers basis less because the 10 additional shares
       stock = stock_position_fixture(%{account_id: account.id, count: 110})
 
       position =
-        position_fixture(%{stock: stock.stock, count: 5, type: :call, premium: 1.50, account_id: account.id})
+        position_fixture(%{
+          stock: stock.stock,
+          count: 1,
+          type: :call,
+          premium: 1.50,
+          account_id: account.id
+        })
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(position, %{
@@ -410,7 +496,8 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Float.round(stock.basis, 2) == stock.strike - 1.32 # 1.45 spread across 10 additional shares
+      # 1.45 spread across 10 additional shares
+      assert Float.round(stock.basis, 2) == stock.strike - 1.32
     end
 
     test "update_position/2 with put on uneven amount of short stock raises basis average on close" do
@@ -419,7 +506,13 @@ defmodule OptionsTracker.AccountsTest do
       stock = stock_position_fixture(%{short: true, account_id: account.id, count: 110})
 
       position =
-        position_fixture(%{stock: stock.stock, type: :put, premium: 1.50, account_id: account.id})
+        position_fixture(%{
+          stock: stock.stock,
+          count: 1,
+          type: :put,
+          premium: 1.50,
+          account_id: account.id
+        })
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(position, %{
@@ -432,7 +525,65 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Float.round(stock.basis, 2) == stock.strike + 1.32 # 1.45 spread across 10 additional shares
+      # 1.45 spread across 10 additional shares
+      assert Float.round(stock.basis, 2) == stock.strike + 1.32
+    end
+
+    test "update_position/2 with call on less than available long stock lowers basis average on close" do
+      account = account_fixture()
+      # 1000 shares but only 5 contracts leaving 500 shares remaining
+      stock = stock_position_fixture(%{account_id: account.id, count: 1000})
+
+      position =
+        position_fixture(%{
+          stock: stock.stock,
+          count: 5,
+          type: :call,
+          premium: 1.50,
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(position, %{
+                 exit_price: 0.05,
+                 closed_at: ~U[2011-05-18 15:01:01Z],
+                 status: :closed
+               })
+
+      old_basis = stock.basis
+      stock = Accounts.get_position!(stock.id)
+      assert old_basis != stock.basis
+      # 1.45 spread across 500 additional shares
+      assert Float.round(stock.basis, 2) == stock.strike - 0.72
+    end
+
+    test "update_position/2 with put on less than available short stock raises basis average on close" do
+      account = account_fixture()
+      # 1000 shares but only 5 contracts
+      stock = stock_position_fixture(%{short: true, account_id: account.id, count: 1000})
+
+      position =
+        position_fixture(%{
+          stock: stock.stock,
+          count: 5,
+          type: :put,
+          premium: 1.50,
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(position, %{
+                 exit_price: 0.05,
+                 closed_at: ~U[2011-05-18 15:01:01Z],
+                 status: :closed
+               })
+
+      # 100 shares are updated
+      old_basis = stock.basis
+      stock = Accounts.get_position!(stock.id)
+      assert old_basis != stock.basis
+      # 1.45 spread across 500 additional shares
+      assert Float.round(stock.basis, 2) == stock.strike + 0.72
     end
   end
 end

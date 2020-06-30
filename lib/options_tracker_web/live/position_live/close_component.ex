@@ -18,7 +18,9 @@ defmodule OptionsTrackerWeb.PositionLive.CloseComponent do
   def handle_event("validate", %{"position" => position_params}, socket) do
     changeset =
       socket.assigns.position
-      |> Accounts.change_position(Enum.into(%{status: :closed, closed_at: DateTime.utc_now()}, position_params))
+      |> Accounts.change_position(
+        Enum.into(%{status: :closed, closed_at: DateTime.utc_now()}, position_params)
+      )
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
@@ -29,7 +31,7 @@ defmodule OptionsTrackerWeb.PositionLive.CloseComponent do
   end
 
   defp save_position(socket, :close, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params |> IO.inspect) do
+    case Accounts.update_position(socket.assigns.position, position_params |> IO.inspect()) do
       {:ok, _position} ->
         {:noreply,
          socket

@@ -3,7 +3,9 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   alias OptionsTracker.Accounts.Position
 
   @spec type_display(Position.t()) :: String.t()
-  def type_display(%Position{type: :stock, basis: basis}), do: " (#{currency_string(basis)} basis)"
+  def type_display(%Position{type: :stock, basis: basis}),
+    do: " (#{currency_string(basis)} basis)"
+
   def type_display(%Position{type: :call}), do: "c"
   def type_display(%Position{type: :put}), do: "p"
 
@@ -19,6 +21,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   @spec position_type_map(atom) :: non_neg_integer
   def position_type_map(nil), do: nil
+
   def position_type_map(type) do
     Accounts.list_position_types()
     |> Enum.find(fn {t, _value} -> t == type end)
@@ -27,9 +30,12 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   @spec position_status_map(atom | boolean) :: Keyword.t() | non_neg_integer()
   def position_status_map(past_tense \\ false)
+
   def position_status_map(past_tense) when is_boolean(past_tense) do
     Accounts.list_position_statuses()
-    |> Enum.map(fn {status, value} -> {Accounts.name_for_position_status(status, past_tense), value} end)
+    |> Enum.map(fn {status, value} ->
+      {Accounts.name_for_position_status(status, past_tense), value}
+    end)
   end
 
   def position_status_map(nil), do: nil

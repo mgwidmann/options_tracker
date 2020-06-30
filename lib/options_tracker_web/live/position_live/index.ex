@@ -9,9 +9,10 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_position(%Position{account_id: 1})
 
-    {:ok, socket
-      |> assign(:positions, list_positions())
-      |> assign(:changeset, changeset)}
+    {:ok,
+     socket
+     |> assign(:positions, list_positions())
+     |> assign(:changeset, changeset)}
   end
 
   @impl true
@@ -92,7 +93,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
          |> push_redirect(to: Routes.position_index_path(socket, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        IO.inspect changeset
+        IO.inspect(changeset)
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
