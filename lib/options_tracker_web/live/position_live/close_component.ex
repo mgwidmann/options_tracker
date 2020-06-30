@@ -31,7 +31,7 @@ defmodule OptionsTrackerWeb.PositionLive.CloseComponent do
   end
 
   defp save_position(socket, :close, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params |> IO.inspect()) do
+    case Accounts.update_position(socket.assigns.position, position_params) do
       {:ok, _position} ->
         {:noreply,
          socket

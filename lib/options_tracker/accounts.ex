@@ -122,12 +122,14 @@ defmodule OptionsTracker.Accounts do
 
   ## Examples
 
-      iex> list_positions()
+      iex> list_positions(1)
       [%Position{}, ...]
 
   """
-  def list_positions do
-    Repo.all(Position)
+  def list_positions(account_id) do
+    from(p in Position,
+      where: p.account_id == ^account_id)
+    |> Repo.all()
   end
 
   @doc """
@@ -184,6 +186,7 @@ defmodule OptionsTracker.Accounts do
         case Repo.update(changeset) do
           {:ok, position} ->
             update_basis!(position)
+            handle_exercise!(position)
             position
 
           {:error, changeset} ->
@@ -206,43 +209,23 @@ defmodule OptionsTracker.Accounts do
           position
       )
       when call_or_put in ~w[call put]a do
-    open_enum = Position.StatusType.__enum_map__()[:open]
-    stock_enum = Position.TransType.__enum_map__()[:stock]
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
     profit_loss_per_contact = profit_loss / count
 
-    from(p in Position,
-      where:
-        p.account_id == ^position.account_id and
-          p.status == ^open_enum and
-          p.stock == ^position.stock and
-          p.type == ^stock_enum
-    )
-    # Apply logic to oldest opened positions first
-    |> order_by(asc: :opened_at)
+    position
+    |> Position.open_related_positions()
     |> Repo.all()
     # Do after retrieval to be able to use index
     |> Enum.reject(fn s ->
       # Can't be used for this option to lower basis
       s.short != short_long || s.count < 100
     end)
-    |> Enum.reduce({count, []}, fn stock, {count, stocks} ->
-      contracts_can_reduce = div(stock.count, 100)
-      count_delta = if(contracts_can_reduce > count, do: count, else: contracts_can_reduce)
-
-      stock =
-        if count_delta > 0 do
-          basis_delta = profit_loss_per_contact / stock.count * count_delta
-          # short stock positions add to basis instead of lowering basis
-          basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
-          change_position(stock, %{basis: stock.basis - basis_delta})
-        else
-          # unchanged
-          stock
-        end
-
-      {count - count_delta, [stock | stocks]}
+    |> pair_contacts_with_stock(count, fn stock, count ->
+      basis_delta = profit_loss_per_contact / stock.count * count
+      # short stock positions add to basis instead of lowering basis
+      basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
+      change_position(stock, %{basis: stock.basis - basis_delta})
     end)
     |> elem(1)
     |> Enum.map(fn
@@ -259,6 +242,100 @@ defmodule OptionsTracker.Accounts do
   # When not closing a call/put, just return empty since nothing was done
   def update_basis!(_position) do
     []
+  end
+
+  defp pair_contacts_with_stock(stocks, count, stock_transform_fn) do
+    stocks
+    |> Enum.reduce({count, []}, fn stock, {count, stocks} ->
+      contracts_can_reduce = div(stock.count, 100)
+      count_delta = if(contracts_can_reduce > count, do: count, else: contracts_can_reduce)
+
+      stock =
+        if count_delta > 0 do
+          # If all mode, pass in remaining amount of contracts needed to be satisfied
+          stock_transform_fn.(stock, count_delta)
+        else
+          # unchanged
+          stock
+        end
+
+      {count - count_delta, [stock | stocks]}
+    end)
+  end
+
+  def handle_exercise!(%Position{status: :exercised, count: count, type: call_or_put} = position)
+      when call_or_put in ~w[call put]a do
+    # Long stock for call, short stock for put
+    short_long = if(call_or_put == :call, do: false, else: true)
+
+    position
+    |> Position.open_related_positions()
+    |> Repo.all()
+    # Do after retrieval to be able to use index
+    |> Enum.reject(fn s ->
+      # Can't be used for this option
+      s.short != short_long
+    end)
+    |> Enum.sort_by(fn %Position{count: c} -> c end, &Kernel.>=/2)
+    |> handle_exercise_close(position, count * 100)
+    |> Enum.map(fn
+      %Ecto.Changeset{} = changeset ->
+        {:ok, position} = if(changeset.data.id, do: Repo.update(changeset), else: Repo.insert(changeset))
+        position
+
+      %Position{} = position ->
+        # Do nothing as this stock was unchanged
+        position
+    end)
+  end
+  def handle_exercise!(_position) do
+    []
+  end
+
+  defp handle_exercise_close(stocks, position, shares_needed) do
+    {shares_uncovered, stocks} =
+      stocks
+      |> Enum.reduce({shares_needed, []}, fn stock, {shares_needed, stocks} ->
+        {stock, shares_covered} =
+          if stock.count <= shares_needed do
+            {
+              change_position(stock, %{exit_price: position.strike, status: :closed, closed_at: DateTime.utc_now()}),
+              stock.count
+            }
+          else
+            {stock, 0}
+          end
+
+        {shares_needed - shares_covered, [stock | stocks]}
+      end)
+
+    [last_stock | stocks] = Enum.reverse(stocks)
+
+    cond do
+      # Last position hasn't been closed out since it is larger than shares_needed
+      shares_uncovered > 0 && match?(%Position{}, last_stock) ->
+        new_position =
+          Position.duplicate_changeset(last_stock, %{
+            count: shares_uncovered,
+            status: :closed,
+            exit_price: position.strike,
+            closed_at: DateTime.utc_now()
+          })
+
+        [
+          new_position,
+          change_position(last_stock, %{count: last_stock.count - shares_uncovered}) | stocks
+        ]
+
+      # All positions have been closed out and a new one must be created
+      shares_uncovered > 0 && match?(%Ecto.Changeset{}, last_stock) ->
+        new_position = Position.to_stock_attrs(last_stock) |> Map.put(:short, !last_stock.short)
+        [create_position(new_position), last_stock | stocks]
+
+      # Everything fit perfectly
+      shares_uncovered == 0 ->
+        [last_stock | stocks]
+    end
   end
 
   @doc """

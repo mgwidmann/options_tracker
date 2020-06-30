@@ -11,7 +11,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     {:ok,
      socket
-     |> assign(:positions, list_positions())
+     |> assign(:positions, list_positions(1))
      |> assign(:changeset, changeset)}
   end
 
@@ -55,7 +55,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     position = Accounts.get_position!(id)
     {:ok, _} = Accounts.delete_position(position)
 
-    {:noreply, assign(socket, :positions, list_positions())}
+    {:noreply, assign(socket, :positions, list_positions(1))}
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
@@ -98,7 +98,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     end
   end
 
-  defp list_positions do
-    Accounts.list_positions()
+  defp list_positions(account_id) do
+    Accounts.list_positions(account_id)
   end
 end

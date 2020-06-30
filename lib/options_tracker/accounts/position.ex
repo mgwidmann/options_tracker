@@ -142,6 +142,83 @@ defmodule OptionsTracker.Accounts.Position do
     end
   end
 
+  @duplicate_fields @fields ++ @immutable_fields
+  def duplicate_changeset(position, attrs) do
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> prepare_attrs()
+
+    attrs =
+      position
+      |> to_stock_attrs()
+      |> stringify_keys()
+      |> Map.merge(attrs)
+
+    %__MODULE__{}
+    |> cast(attrs, @duplicate_fields)
+    |> standard_validations()
+    |> calculate_profit_loss()
+  end
+
+  @spec open_related_positions(Position.t()) :: Ecto.Query.t()
+  def open_related_positions(position) do
+    import Ecto.Query
+
+    open_enum = StatusType.__enum_map__()[:open]
+    stock_enum = TransType.__enum_map__()[:stock]
+
+    from(p in __MODULE__,
+      where:
+        p.account_id == ^position.account_id and
+          p.status == ^open_enum and
+          p.stock == ^position.stock and
+          p.type == ^stock_enum
+    )
+    # Apply logic to oldest opened positions first
+    |> order_by(asc: :opened_at)
+  end
+
+  @spec to_stock_attrs(Position.t()) :: %{
+          account_id: any,
+          count: number,
+          fees: number,
+          opened_at: DateTime.t(),
+          short: any,
+          status: :open,
+          stock: any,
+          strike: any,
+          type: :stock
+        }
+  def to_stock_attrs(%__MODULE__{
+        type: call_or_put,
+        stock: stock,
+        strike: strike,
+        short: short,
+        count: count,
+        account: account
+      })
+      when call_or_put in ~w[call put]a do
+    %{
+      stock: stock,
+      strike: strike,
+      short: short,
+      count: count * 100,
+      type: :stock,
+      opened_at: DateTime.utc_now(),
+      fees: account.stock_open_fee * count * 100,
+      status: :open,
+      account_id: account.id
+    }
+  end
+
+  def to_stock_attrs(%__MODULE__{type: :stock} = position) do
+    position
+    |> Map.from_struct()
+    # Don't need relationship, just account ID
+    |> Map.drop(~w[account id]a)
+  end
+
   defp standard_validations(changeset) do
     changeset
     |> foreign_key_constraint(:account_id)
