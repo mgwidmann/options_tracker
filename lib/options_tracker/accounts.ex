@@ -210,6 +210,7 @@ defmodule OptionsTracker.Accounts do
     stock_enum = Position.TransType.__enum_map__()[:stock]
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
+    profit_loss_per_contact = profit_loss / count
 
     from(p in Position,
       where:
@@ -218,6 +219,7 @@ defmodule OptionsTracker.Accounts do
           p.stock == ^position.stock and
           p.type == ^stock_enum
     )
+    |> order_by(asc: :opened_at) # Apply logic to oldest opened positions first
     |> Repo.all()
     # Do after retrieval to be able to use index
     |> Enum.reject(fn s ->
@@ -230,7 +232,7 @@ defmodule OptionsTracker.Accounts do
 
       stock =
         if count_delta > 0 do
-          basis_delta = profit_loss / stock.count
+          basis_delta = (profit_loss_per_contact / stock.count) * count_delta
           # short stock positions add to basis instead of lowering basis
           basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
           change_position(stock, %{basis: stock.basis - basis_delta})
