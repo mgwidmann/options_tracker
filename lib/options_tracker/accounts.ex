@@ -329,8 +329,9 @@ defmodule OptionsTracker.Accounts do
 
       # All positions have been closed out and a new one must be created
       shares_uncovered > 0 && match?(%Ecto.Changeset{}, last_stock) ->
-        new_position = Position.to_stock_attrs(last_stock) |> Map.put(:short, !last_stock.short)
-        [create_position(new_position), last_stock | stocks]
+        new_position_attrs = Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
+        {:ok, new_position} = create_position(new_position_attrs)
+        [new_position, last_stock | stocks]
 
       # Everything fit perfectly
       shares_uncovered == 0 ->

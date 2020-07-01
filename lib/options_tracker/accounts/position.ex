@@ -235,14 +235,13 @@ defmodule OptionsTracker.Accounts.Position do
   defp calculate_profit_loss(changeset) do
     premium = get_field(changeset, :premium)
     status = get_change(changeset, :status)
-    prior_status = changeset.data.status
     exit_price = get_field(changeset, :exit_price)
     count = get_field(changeset, :count)
     type = get_field(changeset, :type)
     strike = get_field(changeset, :strike)
     short = get_field(changeset, :short)
 
-    if prior_status == :open && status != :open && exit_price && count do
+    if status != :open && exit_price && count do
       profit_loss =
         if type == :stock do
           (exit_price - strike) * if(short, do: -1, else: 1) * count
