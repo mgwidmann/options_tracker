@@ -1,0 +1,39 @@
+<div class="columns">
+  <div class="column is-one-third"></div>
+  <div class="column is-one-third">
+    <h1 class="title">Reset password</h1>
+
+    <%= form_for @changeset, Routes.user_reset_password_path(@conn, :update, @token), fn f -> %>
+      <%= if @changeset.action do %>
+        <div class="alert alert-danger">
+          <p>Oops, something went wrong! Please check the errors below.</p>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= label f, :password, "New password", class: "label" %>
+        <div class="control">
+          <%= password_input f, :password, required: true, class: "input" %>
+          <%= error_tag f, :password %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= label f, :password_confirmation, "Confirm new password", class: "label" %>
+        <div class="control">
+          <%= password_input f, :password_confirmation, required: true, class: "input" %>
+          <%= error_tag f, :password_confirmation %>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <%= submit "Reset password", class: "button is-primary" %>
+      </div>
+    <% end %>
+
+    <p class="mt-5">
+      <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+      <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
+    </p>
+  </div>
+</div>

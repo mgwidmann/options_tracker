@@ -693,9 +693,12 @@ defmodule OptionsTracker.AccountsTest do
       # 600 shares are updated
       stock = Accounts.get_position!(stock.id)
       assert stock.status == :open
-      assert stock.count == 300 # Count lowered
+      # Count lowered
+      assert stock.count == 300
 
-      new_position = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      new_position =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert new_position.status == :closed
       assert new_position.count == 300
       assert new_position.profit_loss == 300.00
@@ -739,9 +742,12 @@ defmodule OptionsTracker.AccountsTest do
       # 600 shares are updated
       stock = Accounts.get_position!(stock.id)
       assert stock.status == :open
-      assert stock.count == 300 # Count lowered
+      # Count lowered
+      assert stock.count == 300
 
-      new_position = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      new_position =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert new_position.status == :closed
       assert new_position.count == 300
       assert new_position.profit_loss == 300.00
@@ -807,7 +813,6 @@ defmodule OptionsTracker.AccountsTest do
                  status: :exercised
                })
 
-
       stock = Accounts.get_position!(stock.id)
       assert stock.status == :closed
       assert stock.profit_loss == 100.00
@@ -843,7 +848,9 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.count == 10
       assert stock.status == :open
 
-      closed_stock = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      closed_stock =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert closed_stock.status == :closed
       assert closed_stock.count == 100
       assert closed_stock.profit_loss == 100.00
@@ -875,7 +882,9 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.count == 10
       assert stock.status == :open
 
-      closed_stock = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      closed_stock =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert closed_stock.status == :closed
       assert closed_stock.count == 100
       assert closed_stock.profit_loss == 100.00
@@ -908,7 +917,9 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.status == :closed
       assert stock.profit_loss == 250.00
 
-      open_shares = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      open_shares =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert open_shares.status == :open
       assert open_shares.count == 250
       assert open_shares.short == true
@@ -941,7 +952,9 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.status == :closed
       assert stock.profit_loss == 250.00
 
-      open_shares = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      open_shares =
+        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+
       assert open_shares.status == :open
       assert open_shares.count == 250
       assert open_shares.short == false

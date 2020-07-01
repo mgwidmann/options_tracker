@@ -1,0 +1,44 @@
+<div class="columns">
+  <div class="column is-one-third"></div>
+  <div class="column is-one-third">
+    <h1 class="title">Log in</h1>
+
+    <%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
+      <%= if @error_message do %>
+        <div class="alert alert-danger">
+          <p><%= @error_message %></p>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= label f, :email, class: "label" %>
+        <div class="control">
+          <%= email_input f, :email, required: true, class: "input" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= label f, :password, class: "label" %>
+        <div class="control">
+          <%= password_input f, :password, required: true, class: "input" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= label f, :remember_me, class: "label" do %>
+          <%= checkbox f, :remember_me, class: "checkbox" %>
+          Keep me logged in for 60 days
+        <% end %>
+      </div>
+
+      <div class="mt-5">
+        <%= submit "Log in", class: "button is-primary" %>
+      </div>
+    <% end %>
+
+    <p class="mt-5">
+      <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+      <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+    </p>
+  </div>
+</div>

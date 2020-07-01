@@ -33,6 +33,7 @@ defmodule OptionsTracker.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 2.0"},
       {:phoenix, "~> 1.5.1"},
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
@@ -50,7 +51,8 @@ defmodule OptionsTracker.MixProject do
 
       # Additional Dependencies
       {:ecto_enum, "~> 1.4"},
-      {:decimal, "~> 1.8"}
+      {:decimal, "~> 1.8"},
+      {:phx_gen_auth, "~> 0.4.0", only: [:dev], runtime: false}
     ]
   end
 

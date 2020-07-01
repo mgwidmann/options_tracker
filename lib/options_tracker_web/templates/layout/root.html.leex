@@ -14,51 +14,46 @@
   <body class="">
     <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="https://bulma.io">
-          <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
-        </a>
-
-        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
+        <a class="navbar-item" href="/">
+          <img src="/images/options-tracker.png">
         </a>
       </div>
 
-      <div id="navbarBasicExample" class="navbar-menu">
-        <div class="navbar-start">
-          <a class="navbar-item" href="/positions">
-            Positions
-          </a>
-
-          <a class="navbar-item" href="/dashboard">
-            Dashboard
-          </a>
-        </div>
-        <div class="navbar-end">
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              Settings
+      <%= if @current_user do %>
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/positions">
+              Positions
             </a>
-            <div class="navbar-dropdown is-right">
-              <a class="navbar-item" href="/accounts">
-                Accounts
-              </a>
-              <hr class="navbar-divider">
-              <a class="navbar-item" href="/preferences">
-                Preferences
-              </a>
-            </div>
+
+            <a class="navbar-item" href="/dashboard">
+              Dashboard
+            </a>
           </div>
-          <div class="navbar-item">
-            <div class="buttons">
-              <a class="button" href="/">
-                Sign out
+          <div class="navbar-end">
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link">
+                Settings
               </a>
+              <div class="navbar-dropdown is-right">
+                <a class="navbar-item" href="/accounts">
+                  Accounts
+                </a>
+                <hr class="navbar-divider">
+                <a class="navbar-item" href="<%= Routes.user_settings_path(@conn, :edit) %>">
+                  Settings
+                </a>
+              </div>
+            </div>
+            <div class="navbar-item">
+              <div class="buttons">
+                <%= link "Sign out", to: Routes.user_session_path(@conn, :delete), class: "button", method: :delete %>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      <% end %>
+      <%#= render "_user_menu.html", assigns %>
     </nav>
     <section class="section">
       <%= @inner_content %>

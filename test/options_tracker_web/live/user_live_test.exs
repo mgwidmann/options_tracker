@@ -47,7 +47,7 @@ defmodule OptionsTrackerWeb.UserLiveTest do
         |> render_submit()
         |> follow_redirect(conn, Routes.user_index_path(conn, :index))
 
-      assert html =~ "User created successfully"
+      assert html =~ "Registration successful! Welcome to Options Tracker!"
       assert html =~ "some email"
     end
 

@@ -4,13 +4,15 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   alias OptionsTracker.Accounts
   alias OptionsTracker.Accounts.Position
+  alias OptionsTracker.Users
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, %{"user_token" => user_token} = _session, socket) do
     changeset = Accounts.change_position(%Position{account_id: 1})
 
     {:ok,
      socket
+     |> assign(:current_user, Users.get_user_by_session_token(user_token))
      |> assign(:positions, list_positions(1))
      |> assign(:changeset, changeset)}
   end

@@ -1,0 +1,37 @@
+<section class="hero is-primary is-large">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-vcentered">
+        <div class="column">
+          <img src="/images/options-large.png">
+        </div>
+        <div class="column">
+          <h1 class="title is-pulled-right">
+            Keeping track of your options
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero is-white is-large">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns">
+        <%= if @current_user do %>
+          <div class="column is-one-third"></div>
+          <div class="column is-one-third">
+            <a class="button is-large is-primary is-fullwidth" href="<%= Routes.position_index_path(@conn, :index) %>">Positions</a>
+          </div>
+        <% else %>
+          <div class="column">
+            <a class="button is-large is-primary is-fullwidth" href="<%= Routes.user_registration_path(@conn, :new) %>">Register</a>
+          </div>
+          <div class="column">
+            <a class="button is-large is-fullwidth" href="<%= Routes.user_session_path(@conn, :new) %>">Login</a>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>

@@ -128,7 +128,8 @@ defmodule OptionsTracker.Accounts do
   """
   def list_positions(account_id) do
     from(p in Position,
-      where: p.account_id == ^account_id)
+      where: p.account_id == ^account_id
+    )
     |> Repo.all()
   end
 
@@ -280,7 +281,9 @@ defmodule OptionsTracker.Accounts do
     |> handle_exercise_close(position, count * 100)
     |> Enum.map(fn
       %Ecto.Changeset{} = changeset ->
-        {:ok, position} = if(changeset.data.id, do: Repo.update(changeset), else: Repo.insert(changeset))
+        {:ok, position} =
+          if(changeset.data.id, do: Repo.update(changeset), else: Repo.insert(changeset))
+
         position
 
       %Position{} = position ->
@@ -288,6 +291,7 @@ defmodule OptionsTracker.Accounts do
         position
     end)
   end
+
   def handle_exercise!(_position) do
     []
   end
@@ -299,7 +303,11 @@ defmodule OptionsTracker.Accounts do
         {stock, shares_covered} =
           if stock.count <= shares_needed do
             {
-              change_position(stock, %{exit_price: position.strike, status: :closed, closed_at: DateTime.utc_now()}),
+              change_position(stock, %{
+                exit_price: position.strike,
+                status: :closed,
+                closed_at: DateTime.utc_now()
+              }),
               stock.count
             }
           else
@@ -329,7 +337,9 @@ defmodule OptionsTracker.Accounts do
 
       # All positions have been closed out and a new one must be created
       shares_uncovered > 0 && match?(%Ecto.Changeset{}, last_stock) ->
-        new_position_attrs = Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
+        new_position_attrs =
+          Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
+
         {:ok, new_position} = create_position(new_position_attrs)
         [new_position, last_stock | stocks]
 

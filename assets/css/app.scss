@@ -3,6 +3,9 @@
 $fa-font-path: "~font-awesome/fonts/";
 @import "~font-awesome/scss/font-awesome";
 @import "../node_modules/js-datepicker/dist/datepicker.min.css";
+
+$primary: #45EE97;
+$green: #48C700;
 @import "bulma";
 
 
@@ -19,6 +22,18 @@ $fa-font-path: "~font-awesome/fonts/";
   margin-right: auto !important;
 }
 
+.navbar-item img {
+  max-height: 3rem;
+}
+.navbar {
+  background-color: $primary;
+}
+a.navbar-item:hover, a.navbar-link:hover, a.navbar-item:focus, a.navbar-link:focus {
+  color: $white;
+}
+.navbar-link:not(.is-arrowless)::after {
+  border-color: $grey;
+}
 
 /* LiveView specific classes for your customizations */
 .invalid-feedback {

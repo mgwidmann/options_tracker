@@ -2,10 +2,13 @@ defmodule OptionsTrackerWeb.PositionLive.Show do
   use OptionsTrackerWeb, :live_view
 
   alias OptionsTracker.Accounts
+  alias OptionsTracker.Users
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(_params, %{"user_token" => user_token} = _session, socket) do
+    {:ok,
+     socket
+     |> assign(:current_user, Users.get_user_by_session_token(user_token))}
   end
 
   @impl true

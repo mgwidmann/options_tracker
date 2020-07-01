@@ -3,7 +3,7 @@
     <h1 class="title">
       Positions
       <div class="mx-auto is-pulled-right">
-        <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary" do %>
+        <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary", disabled: true do %>
           <i class="fa fa-plus" aria-hidden="true"></i>
         <% end %>
       </div>
