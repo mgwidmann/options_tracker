@@ -26,4 +26,14 @@ defmodule OptionsTracker.Utilities.Maps do
   def stringify_keys(not_a_map) do
     not_a_map
   end
+
+  def compact(map = %{}) do
+    map
+    |> Enum.filter(fn
+      {_key, ""} -> false
+      {_key, nil} -> false
+      _ -> true
+    end)
+    |> Enum.into(%{})
+  end
 end

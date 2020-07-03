@@ -2,6 +2,7 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   use OptionsTrackerWeb, :live_component
 
   alias OptionsTracker.Accounts
+  import OptionsTrackerWeb.AccountLive.Helpers
 
   @impl true
   @spec update(%{account: Account.t()}, Phoenix.LiveView.Socket.t()) ::
@@ -21,7 +22,7 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   def handle_event("validate", %{"account" => account_params}, socket) do
     changeset =
       socket.assigns.account
-      |> Accounts.change_account(account_params)
+      |> Accounts.change_account(account_params |> compact() |> defaults_for_type())
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
@@ -57,9 +58,13 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
     end
   end
 
-  @spec account_type_map :: Keyword.t()
-  def account_type_map() do
-    Accounts.list_account_types()
-    |> Enum.map(fn {type, value} -> {Accounts.name_for_type(type) || "Other", value} end)
+  for {t, value} <- Accounts.list_account_types() do
+    defp defaults_for_type(%{"type" => unquote(to_string(value))} = params) do
+      Accounts.defaults_for_type(unquote(t))
+      |> stringify_keys()
+      |> Map.merge(params)
+    end
   end
+
+  defp defaults_for_type(params), do: params
 end

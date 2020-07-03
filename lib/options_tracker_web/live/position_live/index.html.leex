@@ -1,13 +1,26 @@
 <header class="header">
-  <section class="section">
-    <h1 class="title">
-      Positions
-      <div class="mx-auto is-pulled-right">
-        <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary", disabled: true do %>
+  <section class="section columns">
+    <h1 class="title column is-pulled-left">Positions</h1>
+    <div class="column rows">
+    <div class="is-pulled-right">
+      <div class="row mh-3">
+        <% no_account = @current_account == nil %>
+        <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must create an account first!", else: "Add a position"), disabled: no_account do %>
           <i class="fa fa-plus" aria-hidden="true"></i>
         <% end %>
       </div>
-    </h1>
+      <div class="row">
+        <%= if @current_user.accounts == [] do %>
+          <%= live_patch "Create your first Account", to: Routes.account_index_path(@socket, :new), class: "is-pulled-right" %>
+        <% else %>
+          <%= form_tag "#", phx_change: "change_account", class: "is-pulled-right" do %>
+            <%= content_tag :select, name: :account_id, class: "select" do %>
+              <%= options_for_select accounts_select(@current_user.accounts), @current_account.id %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </section>
 </header>
 
@@ -25,15 +38,6 @@
   </div>
 </nav>
 
-<%#= if @live_action in [:new, :edit] do %>
-  <%#= live_modal @socket, OptionsTrackerWeb.PositionLive.FormComponent,
-    id: @position.id || :new,
-    title: @page_title,
-    action: @live_action,
-    position: @position,
-    modal_title: if(@live_action == :new, do: "New Position", else: "Edit Position"),
-    return_to: Routes.position_index_path(@socket, :index) %>
-<%# end %>
 <%= if @live_action in [:close] do %>
   <%= live_modal @socket, OptionsTrackerWeb.PositionLive.CloseComponent,
     id: @position.id,
@@ -45,12 +49,53 @@
 <% end %>
 
 
+<%= mobile_f = form_for @changeset, "#",
+  id: "position-form",
+  phx_change: "validate",
+  phx_submit: "save" %>
+
+<div class="rows is-hidden-desktop">
+  <%= if @live_action in [:new] do %>
+    <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+      id: :new_mobile,
+      f: mobile_f,
+      title: @page_title,
+      action: @live_action,
+      position: @position,
+      account_id: @current_account.id,
+      mobile: true,
+      return_to: Routes.position_index_path(@socket, :index)) %>
+  <% end %>
+  <%= for position <- @positions do %>
+    <div class="row">
+      <div class="columns">
+        <div class="column <%= row_class_for_status(position.status) %>">
+          <%= position.count %>&nbsp;<%= count_type(position) %>
+          <span class="tag is-rounded"><%= position.stock %></span>
+          <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span>
+          <%= currency_string(position.strike) %><%= type_display(position) %>
+          <%= position.expires_at %>
+          <span class="<%= if(position.premium >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
+          </span>
+          <%= position_status_display(position.status, true) %>
+          <span class="<%= if(position.profit_loss >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
+          </span>
+          <%= currency_string(position.fees) %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+</form>
+
 <%= f = form_for @changeset, "#",
   id: "position-form",
   phx_change: "validate",
   phx_submit: "save" %>
 
-<table class="table is-striped is-narrow is-hoverable is-fullwidth">
+<table id="positions-table" class="table is-striped is-narrow is-hoverable is-fullwidth is-hidden-touch">
   <thead>
     <tr>
       <th>Opened</th>
@@ -74,6 +119,8 @@
         title: @page_title,
         action: @live_action,
         position: @position,
+        account_id: @current_account.id,
+        mobile: false,
         return_to: Routes.position_index_path(@socket, :index)) %>
     <% end %>
     <%= for position <- @positions do %>

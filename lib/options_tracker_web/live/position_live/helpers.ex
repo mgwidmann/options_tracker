@@ -1,10 +1,11 @@
 defmodule OptionsTrackerWeb.PositionLive.Helpers do
   alias OptionsTracker.Accounts
+  alias OptionsTracker.Accounts.Account
   alias OptionsTracker.Accounts.Position
 
   @spec type_display(Position.t()) :: String.t()
   def type_display(%Position{type: :stock, basis: basis}),
-    do: " (#{currency_string(basis)} basis)"
+    do: " (#{OptionsTrackerWeb.LiveHelpers.currency_string(basis)} basis)"
 
   def type_display(%Position{type: :call}), do: "c"
   def type_display(%Position{type: :put}), do: "p"
@@ -33,8 +34,8 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   def position_status_map(past_tense) when is_boolean(past_tense) do
     Accounts.list_position_statuses()
-    |> Enum.map(fn {status, value} ->
-      {Accounts.name_for_position_status(status, past_tense), value}
+    |> Enum.map(fn {status, _value} ->
+      {Accounts.name_for_position_status(status, past_tense), status}
     end)
   end
 
@@ -54,12 +55,23 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     |> Accounts.name_for_position_status(past_tense)
   end
 
+  def accounts_select(accounts) do
+    [
+      # Placeholder
+      {"Select an Account", ""}
+      | accounts
+        |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
+          {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
+        end)
+    ]
+  end
+
   @spec credit_debit_display(number) :: String.t()
   def credit_debit_display(value) do
     value_string =
       value
       |> abs()
-      |> currency_string()
+      |> OptionsTrackerWeb.LiveHelpers.currency_string()
 
     "#{value_string}#{if(value >= 0, do: "cr", else: "db")}"
   end
@@ -68,13 +80,4 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def row_class_for_status(:open), do: ""
   def row_class_for_status(:rolled), do: "has-background-warning-light"
   def row_class_for_status(:exercised), do: "has-background-grey-lighter"
-
-  @spec currency_string(float) :: String.t()
-  def currency_string(float) do
-    float
-    |> Decimal.from_float()
-    |> Decimal.round(2, :half_up)
-    |> Decimal.to_string()
-    |> String.replace_prefix("", "$")
-  end
 end

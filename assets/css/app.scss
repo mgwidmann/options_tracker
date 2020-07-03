@@ -2,11 +2,11 @@
 @import "../node_modules/nprogress/nprogress.css";
 $fa-font-path: "~font-awesome/fonts/";
 @import "~font-awesome/scss/font-awesome";
-@import "../node_modules/js-datepicker/dist/datepicker.min.css";
 
 $primary: #45EE97;
 $green: #48C700;
 @import "bulma";
+@import "../node_modules/@creativebulma/bulma-tooltip";
 
 
 @import "./position.scss";
@@ -20,6 +20,18 @@ $green: #48C700;
 }
 .mr-auto {
   margin-right: auto !important;
+}
+
+@for $i from 1 through 7 {
+  .mh-#{$i} {
+    min-height: #{$i}rem !important;
+  }
+}
+
+@for $i from 1 through 7 {
+  .mw-#{$i} {
+    min-width: #{$i}rem !important;
+  }
 }
 
 .navbar-item img {

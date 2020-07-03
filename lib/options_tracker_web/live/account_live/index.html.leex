@@ -1,4 +1,16 @@
-<h1>Listing Accounts</h1>
+<header class="header">
+  <section class="section columns">
+    <h1 class="title column is-pulled-left">Accounts</h1>
+    <div class="column rows">
+    <div class="is-pulled-right">
+      <div class="row mh-3">
+        <%= live_patch to: Routes.account_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": "Add an Account" do %>
+          <i class="fa fa-plus" aria-hidden="true"></i>
+        <% end %>
+      </div>
+    </div>
+  </section>
+</header>
 
 <%= if @live_action in [:new, :edit] do %>
   <%= live_modal @socket, OptionsTrackerWeb.AccountLive.FormComponent,
@@ -6,6 +18,7 @@
     title: @page_title,
     action: @live_action,
     account: @account,
+    current_user: @current_user,
     modal_title: if(@live_action == :new, do: "New Account", else: "Edit Account"),
     return_to: Routes.account_index_path(@socket, :index) %>
 <% end %>
@@ -29,22 +42,27 @@
     <%= for account <- @accounts do %>
       <tr id="account-<%= account.id %>">
         <td><%= account.name %></td>
-        <td><%= account.type %></td>
-        <td><%= account.opt_open_fee %></td>
-        <td><%= account.opt_close_fee %></td>
-        <td><%= account.stock_open_fee %></td>
-        <td><%= account.stock_close_fee %></td>
-        <td><%= account.exercise_fee %></td>
-        <td><%= account.cash %></td>
+        <td><%= account_type_display(account.type, account.broker_name) %></td>
+        <td><%= currency_string(account.opt_open_fee) %></td>
+        <td><%= currency_string(account.opt_close_fee) %></td>
+        <td><%= currency_string(account.stock_open_fee) %></td>
+        <td><%= currency_string(account.stock_close_fee) %></td>
+        <td><%= currency_string(account.exercise_fee) %></td>
+        <td><%= currency_string(account.cash) %></td>
 
         <td>
-          <span><%= live_redirect "Show", to: Routes.account_show_path(@socket, :show, account) %></span>
-          <span><%= live_patch "Edit", to: Routes.account_index_path(@socket, :edit, account) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: account.id, data: [confirm: "Are you sure?"] %></span>
+          <span class="px-2">
+            <%= live_patch to: Routes.account_index_path(@socket, :edit, account), class: "button is-size-7" do %>
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+            <% end %>
+          </span>
+          <span class="px-2">
+            <%= link to: "#", phx_click: "delete", phx_value_id: account.id, class: "button is-danger is-size-7", data: [confirm: "Are you sure? This will delete all your positions as well!"] do %>
+              <i class="fa fa-trash" aria-hidden="true"></i>
+            <% end %>
+          </span>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
-
-<span><%= live_patch "New Account", to: Routes.account_index_path(@socket, :new) %></span>

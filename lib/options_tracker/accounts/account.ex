@@ -3,24 +3,23 @@ defmodule OptionsTracker.Accounts.Account do
   import Ecto.Changeset
 
   defmodule TypeEnum do
-    use EctoEnum, tasty_works: 0, robinhood: 1, td_ameritrade: 2, other: 1000
+    use EctoEnum, tasty_works: 0, robinhood: 1, other: 1000
 
-    @spec name_for(:robinhood | :tasty_works | :td_ameritrade | any) :: String.t() | nil
+    @spec name_for(:robinhood | :tasty_works | any) :: String.t() | nil
     def name_for(:tasty_works), do: "TastyWorks"
     def name_for(:robinhood), do: "Robinhood"
-    def name_for(:td_ameritrade), do: "TD Ameritrade"
     def name_for(_other), do: nil
   end
 
   schema "accounts" do
     field :cash, :decimal
-    field :exercise_fee, :float
+    field :exercise_fee, :decimal
     field :name, :string
     field :broker_name, :string
-    field :opt_close_fee, :float
-    field :opt_open_fee, :float
-    field :stock_close_fee, :float
-    field :stock_open_fee, :float
+    field :opt_close_fee, :decimal
+    field :opt_open_fee, :decimal
+    field :stock_close_fee, :decimal
+    field :stock_open_fee, :decimal
     field :type, TypeEnum
 
     belongs_to :user, OptionsTracker.Users.User
@@ -28,31 +27,26 @@ defmodule OptionsTracker.Accounts.Account do
     timestamps()
   end
 
+  @required_fields ~w[name type opt_open_fee opt_close_fee stock_open_fee stock_close_fee exercise_fee cash user_id]a
+  @optional_fields ~w[broker_name]a
+  @fields @required_fields ++ @optional_fields
+  @spec create_changeset(Account.t(), %{optional(String.t()) => String.t() | number}) :: Ecto.Changeset.t()
+  @doc false
+  def create_changeset(account, attrs) do
+    account
+    |> cast(prepare_attrs(attrs), @fields)
+    |> cast_broker_name(attrs)
+    |> validate_required(@required_fields)
+  end
+
+  @update_fields @fields -- ~w[user_id]a
+  @spec changeset(Account.t(), %{optional(String.t()) => String.t() | number}) :: Ecto.Changeset.t()
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(prepare_attrs(attrs), [
-      :name,
-      :broker_name,
-      :type,
-      :opt_open_fee,
-      :opt_close_fee,
-      :stock_open_fee,
-      :stock_close_fee,
-      :exercise_fee,
-      :cash
-    ])
+    |> cast(prepare_attrs(attrs), @update_fields)
     |> cast_broker_name(attrs)
-    |> validate_required([
-      :name,
-      :type,
-      :opt_open_fee,
-      :opt_close_fee,
-      :stock_open_fee,
-      :stock_close_fee,
-      :exercise_fee,
-      :cash
-    ])
+    |> validate_required(@update_fields)
   end
 
   defp prepare_attrs(%{"type" => "" <> _ = type} = attrs) do

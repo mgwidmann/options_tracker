@@ -4,13 +4,17 @@ defmodule OptionsTrackerWeb.AccountLive.Index do
   alias OptionsTracker.Accounts
   alias OptionsTracker.Accounts.Account
   alias OptionsTracker.Users
+  alias OptionsTracker.Users.User
+  import OptionsTrackerWeb.AccountLive.Helpers
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
+    current_user = Users.get_user_by_session_token(user_token)
+
     {:ok,
      socket
-     |> assign(:accounts, list_accounts())
-     |> assign(:current_user, Users.get_user_by_session_token(user_token))}
+     |> assign(:accounts, list_accounts(current_user))
+     |> assign(:current_user, current_user)}
   end
 
   @impl true
@@ -41,10 +45,10 @@ defmodule OptionsTrackerWeb.AccountLive.Index do
     account = Accounts.get_account!(id)
     {:ok, _} = Accounts.delete_account(account)
 
-    {:noreply, assign(socket, :accounts, list_accounts())}
+    {:noreply, assign(socket, :accounts, list_accounts(socket.assigns.current_user))}
   end
 
-  defp list_accounts do
-    Accounts.list_accounts()
+  defp list_accounts(%User{id: user_id}) do
+    Accounts.list_accounts(user_id)
   end
 end

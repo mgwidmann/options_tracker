@@ -18,11 +18,21 @@
 }
 #positions input.is-small {
     min-width: 60px;
-    max-width: 90px;
+    max-width: 95px;
 }
 
-#positions td {
-    min-width: 120px;
+#positions input.input-super-small {
+    width: 60px;
+}
+
+#positions input.date {
+    min-width: 130px;
+    font-size: 0.7rem;
+}
+
+#positions-table th, #positions-table td {
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 #positions span.tag.short:focus-within {

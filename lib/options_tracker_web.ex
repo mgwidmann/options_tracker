@@ -55,6 +55,7 @@ defmodule OptionsTrackerWeb do
       use Phoenix.LiveComponent
 
       unquote(view_helpers())
+      import OptionsTracker.Utilities.Maps
     end
   end
 
@@ -90,6 +91,7 @@ defmodule OptionsTrackerWeb do
       import OptionsTrackerWeb.ErrorHelpers
       import OptionsTrackerWeb.Gettext
       alias OptionsTrackerWeb.Router.Helpers, as: Routes
+      import OptionsTracker.Utilities.Maps
     end
   end
 

@@ -6,6 +6,7 @@ defmodule OptionsTracker.Users do
   import Ecto.Query, warn: false
   alias OptionsTracker.Repo
   alias OptionsTracker.Users.{User, UserToken, UserNotifier}
+  alias OptionsTracker.Accounts.{Account}
 
   ## Database getters
 
@@ -230,7 +231,7 @@ defmodule OptionsTracker.Users do
 
     query
     |> Repo.one()
-    |> Repo.preload(:accounts)
+    |> Repo.preload(accounts: from(a in Account, order_by: a.id))
   end
 
   @doc """

@@ -28,4 +28,29 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
     live_component(socket, OptionsTrackerWeb.ModalComponent, modal_opts)
   end
+
+  @spec currency_string(float | Decimal.t(), boolean) :: String.t()
+  def currency_string(float_or_decimal, prepend_unit \\ true)
+
+  def currency_string(float, prepend_unit) when is_float(float) do
+    float
+    |> Decimal.from_float()
+    |> currency_string(prepend_unit)
+  end
+
+  def currency_string(%Decimal{} = decimal, prepend_unit) do
+    decimal
+    |> Decimal.round(2, :half_up)
+    |> Decimal.to_string()
+    |> String.replace_prefix("", if(prepend_unit, do: "$", else: ""))
+  end
+
+  @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil
+  def format_currency(changeset, field) do
+    value = changeset.changes[field] || Map.get(changeset.data, field)
+
+    if value do
+      currency_string(value, false)
+    end
+  end
 end

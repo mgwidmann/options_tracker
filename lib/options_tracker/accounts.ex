@@ -17,8 +17,11 @@ defmodule OptionsTracker.Accounts do
       [%Account{}, ...]
 
   """
-  def list_accounts do
-    Repo.all(Account)
+  def list_accounts(user_id) do
+    from(a in Account,
+      where: a.user_id == ^user_id)
+    |> order_by(asc: :id)
+    |> Repo.all()
   end
 
   @doc """
@@ -51,7 +54,7 @@ defmodule OptionsTracker.Accounts do
   """
   def create_account(attrs \\ %{}) do
     %Account{}
-    |> Account.changeset(attrs)
+    |> Account.create_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -103,7 +106,7 @@ defmodule OptionsTracker.Accounts do
   end
 
   @spec list_account_types :: [
-          {:other, 1000} | {:robinhood, 1} | {:tasty_works, 0} | {:td_ameritrade, 2},
+          {:other, 1000} | {:robinhood, 1} | {:tasty_works, 0},
           ...
         ]
   def list_account_types() do
@@ -113,6 +116,33 @@ defmodule OptionsTracker.Accounts do
   @spec name_for_type(atom) :: nil | String.t()
   def name_for_type(type) do
     Account.TypeEnum.name_for(type)
+  end
+
+  def defaults_for_type(:tasty_works) do
+    %{
+      opt_open_fee: Decimal.from_float(1.15),
+      opt_close_fee: Decimal.from_float(0.14),
+      stock_open_fee: Decimal.from_float(0.00),
+      stock_close_fee: Decimal.from_float(0.00),
+      exercise_fee: Decimal.from_float(5.00),
+      cash: Decimal.from_float(2_000.00)
+    }
+  end
+
+  def defaults_for_type(:robinhood) do
+    %{
+      opt_open_fee: Decimal.from_float(0.00),
+      opt_close_fee: Decimal.from_float(0.00),
+      stock_open_fee: Decimal.from_float(0.00),
+      stock_close_fee: Decimal.from_float(0.00),
+      exercise_fee: Decimal.from_float(0.00),
+      cash: Decimal.from_float(2_000.00)
+    }
+  end
+
+  def defaults_for_type(_other) do
+    # No defaults
+    %{}
   end
 
   alias OptionsTracker.Accounts.Position

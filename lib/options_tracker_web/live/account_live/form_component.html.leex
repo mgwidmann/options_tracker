@@ -4,6 +4,8 @@
   phx_change: "validate",
   phx_submit: "save" %>
 
+  <%= hidden_input f, :user_id, value: @current_user.id %>
+
   <section class="modal-card-body">
     <div class="columns">
       <div class="column control">
@@ -23,10 +25,10 @@
         <%= error_tag f, :name %>
       </div>
       <div class="column control">
-        <%= label f, :cash %>
+        <%= label f, :cash, "Starting Cash" %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :cash, step: "any", class: "input" %>
+            <%= number_input f, :cash, step: "0.01", class: "input", value: format_currency(@changeset, :cash) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -40,7 +42,7 @@
         <%= label f, :opt_open_fee %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :opt_open_fee, step: "any", class: "input" %>
+            <%= number_input f, :opt_open_fee, step: "0.01", class: "input", value: format_currency(@changeset, :opt_open_fee) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -52,7 +54,7 @@
         <%= label f, :opt_close_fee %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :opt_close_fee, step: "any", class: "input" %>
+            <%= number_input f, :opt_close_fee, step: "0.01", class: "input", value: format_currency(@changeset, :opt_close_fee) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -64,7 +66,7 @@
         <%= label f, :stock_open_fee %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :stock_open_fee, step: "any", class: "input" %>
+            <%= number_input f, :stock_open_fee, step: "0.01", class: "input", value: format_currency(@changeset, :stock_open_fee) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -76,7 +78,7 @@
         <%= label f, :stock_close_fee %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :stock_close_fee, step: "any", class: "input" %>
+            <%= number_input f, :stock_close_fee, step: "0.01", class: "input", value: format_currency(@changeset, :stock_close_fee) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -88,7 +90,7 @@
         <%= label f, :exercise_fee %>
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input f, :exercise_fee, step: "any", class: "input" %>
+            <%= number_input f, :exercise_fee, step: "0.01", class: "input", value: format_currency(@changeset, :exercise_fee) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>

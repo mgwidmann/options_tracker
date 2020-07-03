@@ -15,17 +15,17 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"position" => position_params}, socket) do
-    changeset =
-      socket.assigns.position
-      |> Accounts.change_position(position_params)
-      |> Map.put(:action, :validate)
+  # def handle_event("validate", %{"position" => position_params}, socket) do
+  #   changeset =
+  #     socket.assigns.position
+  #     |> Accounts.change_position(position_params |> compact())
+  #     |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, :changeset, changeset)}
-  end
+  #   {:noreply, assign(socket, :changeset, changeset)}
+  # end
 
   def handle_event("save", %{"position" => position_params}, socket) do
-    save_position(socket, socket.assigns.action, position_params)
+    save_position(socket, socket.assigns.action, position_params |> compact())
   end
 
   defp save_position(socket, :edit, position_params) do
