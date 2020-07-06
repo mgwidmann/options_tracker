@@ -5,12 +5,14 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
   alias OptionsTracker.Accounts
 
   @impl true
-  def update(%{position: position} = assigns, socket) do
+  def update(%{position: position, account_id: account_id} = assigns, socket) do
     changeset = Accounts.change_position(position)
+    current_account = Accounts.get_account!(account_id)
 
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(:current_account, current_account)
      |> assign(:changeset, changeset)}
   end
 

@@ -10,7 +10,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
-    changeset = Accounts.change_position(%Position{account_id: 1})
+    changeset = Accounts.change_position(%Position{})
 
     current_user = Users.get_user_by_session_token(user_token)
     current_account = current_user |> get_account()
@@ -29,9 +29,13 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    changeset = Accounts.change_position(position)
+
     socket
     |> assign(:page_title, "Edit Position")
-    |> assign(:position, Accounts.get_position!(id))
+    |> assign(:position, position)
+    |> assign(:changeset, changeset)
   end
 
   defp apply_action(socket, :close, %{"id" => id}) do
@@ -41,10 +45,9 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   @seconds_in_a_day 86_400
-  defp apply_action(socket, :new, %{"account_id" => account_id}) do
+  defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Position")
-    |> assign(:account_id, account_id)
     |> assign(:position, %Position{
       account_id: 1,
       opened_at: DateTime.utc_now(),
@@ -57,6 +60,17 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     socket
     |> assign(:page_title, "Positions")
     |> assign(:position, nil)
+    |> assign(:changeset, nil) # Clear out
+  end
+
+  defp apply_action(socket, :notes, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    changeset = Accounts.change_position(position)
+
+    socket
+    |> assign(:page_title, "Edit Notes")
+    |> assign(:position, position)
+    |> assign(:changeset, changeset)
   end
 
   @impl true
@@ -86,6 +100,12 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     {:noreply,
       socket
       |> assign(:current_account, socket.assigns.current_user.accounts |> Enum.find(&(&1.id == account_id)) || socket.assigns.current_account)}
+  end
+
+  def handle_event("cancel", _, socket) do
+    {:noreply,
+      socket
+      |> push_redirect(to: socket.assigns[:return_to] || Routes.position_index_path(socket, :index))}
   end
 
   defp save_position(socket, :edit, position_params) do

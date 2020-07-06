@@ -428,11 +428,16 @@ defmodule OptionsTracker.Accounts do
     Position.TransType.name_for(type)
   end
 
-  @spec list_position_statuses :: [
+  @spec list_position_statuses(atom | non_neg_integer) :: [
           {:closed, 1} | {:exercised, 3} | {:open, 0} | {:rolled, 2},
           ...
         ]
-  def list_position_statuses() do
+  def list_position_statuses(stock_type) when stock_type in [1, :stock] do
+    Position.StatusType.__enum_map__()
+    |> Enum.reject(fn {status, _value} -> status in [:exercised, :rolled] end)
+  end
+
+  def list_position_statuses(_other) do
     Position.StatusType.__enum_map__()
   end
 

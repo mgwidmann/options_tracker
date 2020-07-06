@@ -32,16 +32,16 @@ defmodule OptionsTracker.Accounts.Position do
     field :short, :boolean
     field :spread, :boolean
     field :type, TransType
-    field :opened_at, :utc_datetime
+    field :opened_at, OptionsTracker.Fields.Date
     field :premium, :float
-    field :expires_at, :utc_datetime
+    field :expires_at, OptionsTracker.Fields.Date
     field :fees, :float, default: 0.00
     field :spread_width, :float
     field :count, :integer, default: 1
 
     # Updated later
     field :basis, :float
-    field :closed_at, :utc_datetime
+    field :closed_at, OptionsTracker.Fields.Date
     field :profit_loss, :float
     field :status, StatusType
     field :exit_price, :float
@@ -97,6 +97,7 @@ defmodule OptionsTracker.Accounts.Position do
   end
 
   defp prepare_attrs(attrs) do
+    # Handle integers which come in as strings
     Enum.reduce(["type", "status"], attrs, fn key, attrs ->
       value = attrs[key]
 
@@ -128,14 +129,14 @@ defmodule OptionsTracker.Accounts.Position do
 
     if position.type in [:stock, "stock", 0] do
       position
-      |> cast(prepare_attrs(attrs), @fields -- @not_allowed_stock_fields)
+      |> cast(attrs, @fields -- @not_allowed_stock_fields)
       |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
       |> standard_validations()
       |> validate_number(:basis, greater_than: 0.0)
       |> calculate_profit_loss()
     else
       position
-      |> cast(prepare_attrs(attrs), @fields -- @not_allowed_option_fields)
+      |> cast(attrs, @fields -- @not_allowed_option_fields)
       |> validate_required(@required_open_fields -- @not_allowed_option_fields)
       |> standard_validations()
       |> calculate_profit_loss()

@@ -1,12 +1,12 @@
-defmodule OptionsTrackerWeb.PositionLive.CloseComponent do
+defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   use OptionsTrackerWeb, :live_component
   import OptionsTrackerWeb.PositionLive.Helpers
 
   alias OptionsTracker.Accounts
 
   @impl true
-  def update(%{position: position} = assigns, socket) do
-    changeset = Accounts.change_position(position)
+  def update(%{position: position, action: action} = assigns, socket) do
+    changeset = Accounts.change_position(position, if(action == :close, do: %{status: :closed}, else: %{}))
 
     {:ok,
      socket
@@ -28,6 +28,19 @@ defmodule OptionsTrackerWeb.PositionLive.CloseComponent do
 
   def handle_event("save", %{"position" => position_params}, socket) do
     save_position(socket, socket.assigns.action, position_params)
+  end
+
+  defp save_position(socket, :notes, position_params) do
+    case Accounts.update_position(socket.assigns.position, position_params) do
+      {:ok, _position} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Notes updated successfully")
+         |> push_redirect(to: socket.assigns.return_to)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
   end
 
   defp save_position(socket, :close, position_params) do

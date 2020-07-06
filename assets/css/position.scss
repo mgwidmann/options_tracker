@@ -21,8 +21,29 @@
     max-width: 95px;
 }
 
-#positions input.input-super-small {
+#positions input.input-super-small, #positions-mobile input.input-super-small {
     width: 60px;
+}
+
+#positions-mobile {
+    input#position_stock {
+        width: 100px;
+    }
+    input#position_strike {
+        width: 100%;
+    }
+    select#position_type {
+        width: 100%;
+    }
+    .tags .tag {
+        margin-top: 5px;
+    }
+    .ticker-container {
+        min-width: 70px;
+    }
+    select#position_status {
+        width: 100%;
+    }
 }
 
 #positions input.date {

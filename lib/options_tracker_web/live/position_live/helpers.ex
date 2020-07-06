@@ -25,45 +25,46 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   def position_type_map(type) do
     Accounts.list_position_types()
-    |> Enum.find(fn {t, _value} -> t == type end)
+    |> Enum.find(fn {t, value} -> t == type || value == type end)
     |> elem(1)
   end
 
-  @spec position_status_map(atom | boolean) :: Keyword.t() | non_neg_integer()
-  def position_status_map(past_tense \\ false)
+  @spec position_status_map(atom | non_neg_integer, atom | boolean) :: Keyword.t() | non_neg_integer()
+  def position_status_map(type, past_tense \\ false)
 
-  def position_status_map(past_tense) when is_boolean(past_tense) do
-    Accounts.list_position_statuses()
+  def position_status_map(type, past_tense) when is_boolean(past_tense) do
+    Accounts.list_position_statuses(type)
+    |> Enum.reject(fn {s, _value} -> s in [:rolled] end)
     |> Enum.map(fn {status, _value} ->
       {Accounts.name_for_position_status(status, past_tense), status}
     end)
   end
 
-  def position_status_map(nil), do: nil
+  def position_status_map(_type, nil), do: nil
 
-  def position_status_map(status) when is_atom(status) do
-    Accounts.list_position_statuses()
-    |> Enum.find(fn {s, _value} -> s == status end)
+  def position_status_map(type, status) when is_atom(status) do
+    Accounts.list_position_statuses(type)
+    |> Enum.find(fn {s, value} -> s == status || value == status end)
     |> elem(1)
   end
 
-  @spec position_status_display(atom, boolean) :: String.t()
-  def position_status_display(status, past_tense) do
-    Accounts.list_position_statuses()
+  @spec position_status_display(atom, atom, boolean) :: String.t()
+  def position_status_display(type, status, past_tense) do
+    Accounts.list_position_statuses(type)
     |> Enum.find(fn {s, _value} -> s == status end)
     |> elem(0)
     |> Accounts.name_for_position_status(past_tense)
   end
 
-  def accounts_select(accounts) do
-    [
-      # Placeholder
-      {"Select an Account", ""}
-      | accounts
-        |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
-          {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
-        end)
-    ]
+  @spec accounts_select([Account.t()], String.t()) :: Keyword.t()
+  def accounts_select(accounts, placeholder) do
+    account_options =
+      accounts
+      |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
+        {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
+      end)
+
+    [placeholder | account_options]
   end
 
   @spec credit_debit_display(number) :: String.t()
@@ -76,8 +77,49 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     "#{value_string}#{if(value >= 0, do: "cr", else: "db")}"
   end
 
+  @spec is_option?(%{
+          data: OptionsTracker.Accounts.Position.t(),
+          params: nil | maybe_improper_list | map
+        } | OptionsTracker.Accounts.Position.t()) :: boolean
+  def is_option?(%{params: params, data: %Position{} = position}) do
+    type = params["type"] || position.type
+    if is_atom(type) do
+      type != :stock
+    else
+      type != OptionsTracker.Accounts.Position.TransType.__enum_map__()[:stock]
+    end
+  end
+  def is_option?(%Position{type: type}) do
+    type != :stock
+  end
+
+  @spec is_short?(%{
+          data: OptionsTracker.Accounts.Position.t(),
+          params: nil | maybe_improper_list | map
+        }) :: any
+  def is_short?(%{params: params, data: %Position{} = position}) do
+    short = params["short"] || position.short
+
+    if is_binary(short) do
+      short != "" && short != "false"
+    else
+      short
+    end
+  end
+
+  @spec row_class_for_status(:closed | :exercised | :open | :rolled) :: binary
   def row_class_for_status(:closed), do: "has-background-grey-lighter"
   def row_class_for_status(:open), do: ""
   def row_class_for_status(:rolled), do: "has-background-warning-light"
   def row_class_for_status(:exercised), do: "has-background-grey-lighter"
+
+  @spec date_display(Date.t(), boolean) :: String.t()
+  def date_display(%Date{year: year, month: month, day: day}, show_year) do
+    if show_year do
+      "#{month}/#{day}/#{year}"
+    else
+      "#{month}/#{day}"
+    end
+  end
+  def date_display(nil, _), do: ""
 end
