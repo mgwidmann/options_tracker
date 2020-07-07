@@ -12,7 +12,7 @@ $green: #48C700;
 @import "./position.scss";
 
 .modal-card.wide {
-  width: 60vw;
+  width: 80vw;
 }
 
 .ml-auto {
@@ -33,6 +33,21 @@ $green: #48C700;
     min-width: #{$i}rem !important;
   }
 }
+
+@include until(mobile) {
+  .navbar-link {
+    color: black;
+  }
+}
+
+body {
+    overflow-x: hidden;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+}
+
 
 .navbar-item img {
   max-height: 3rem;

@@ -48,10 +48,13 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     |> elem(1)
   end
 
-  @spec position_status_display(atom, atom, boolean) :: String.t()
+  @spec position_status_display(atom, atom | non_neg_integer, boolean) :: String.t()
+  def position_status_display(type, nil, past_tense) do
+    position_status_display(type, Accounts.position_status_open(), past_tense)
+  end
   def position_status_display(type, status, past_tense) do
     Accounts.list_position_statuses(type)
-    |> Enum.find(fn {s, _value} -> s == status end)
+    |> Enum.find(fn {s, value} -> s == status || value == status end)
     |> elem(0)
     |> Accounts.name_for_position_status(past_tense)
   end
@@ -78,23 +81,26 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   end
 
   @spec is_option?(%{
-          data: OptionsTracker.Accounts.Position.t(),
+          data: OptionsTracker.Accounts.Position.t() | map,
           params: nil | maybe_improper_list | map
         } | OptionsTracker.Accounts.Position.t()) :: boolean
-  def is_option?(%{params: params, data: %Position{} = position}) do
+  def is_option?(%Phoenix.HTML.Form{params: params, data: %Position{} = position}) do
     type = params["type"] || position.type
     if is_atom(type) do
-      type != :stock
+      type != OptionsTracker.Accounts.Position.TransType.stock_key()
     else
-      type != OptionsTracker.Accounts.Position.TransType.__enum_map__()[:stock]
+      type != OptionsTracker.Accounts.Position.TransType.stock()
     end
   end
+  def is_option?(%Phoenix.HTML.Form{data: %{}}) do
+    true
+  end
   def is_option?(%Position{type: type}) do
-    type != :stock
+    type != OptionsTracker.Accounts.Position.TransType.stock_key()
   end
 
   @spec is_short?(%{
-          data: OptionsTracker.Accounts.Position.t(),
+          data: OptionsTracker.Accounts.Position.t() | map,
           params: nil | maybe_improper_list | map
         }) :: any
   def is_short?(%{params: params, data: %Position{} = position}) do
@@ -105,6 +111,19 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     else
       short
     end
+  end
+  def is_short?(%{data: %{}}) do
+    true
+  end
+
+  @spec is_closed?(OptionsTracker.Accounts.Position.t()) :: boolean
+  def is_closed?(%Position{status: status}) do
+    status != Accounts.position_status_open() && status != Accounts.position_status_open_key()
+  end
+
+  @spec is_open?(OptionsTracker.Accounts.Position.t()) :: boolean
+  def is_open?(%Position{status: status}) do
+    status == Accounts.position_status_open() || status == Accounts.position_status_open_key()
   end
 
   @spec row_class_for_status(:closed | :exercised | :open | :rolled) :: binary

@@ -19,7 +19,7 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     changeset =
       socket.assigns.position
       |> Accounts.change_position(
-        Enum.into(%{status: :closed, closed_at: DateTime.utc_now()}, position_params)
+        Enum.into(%{status: :closed, closed_at: DateTime.utc_now() |> DateTime.to_date()}, position_params)
       )
       |> Map.put(:action, :validate)
 

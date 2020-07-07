@@ -1,0 +1,11 @@
+<section class="modal-card-body has-text-centered">
+    <span class="is-size-4">Are you sure you would like to delete this position? This is not the same as closing!</span>
+    <br/><br/>
+    Any past side effects caused by this position on other stock positions <b>will not</b> be reversed.
+</section>
+<footer class="modal-card-foot">
+    <div class="buttons is-right ml-auto">
+        <a href="#" class="button" phx-click="cancel">Cancel</a>
+        <%= link "Delete", to: "#", phx_click: "delete", phx_value_id: @position.id, class: "button is-danger"%>
+    </div>
+</footer>

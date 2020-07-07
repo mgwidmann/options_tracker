@@ -1,6 +1,6 @@
 <%= if @mobile do %>
-  <%= hidden_input @f, :account_id, value: @account_id %>
   <div class="card">
+    <%= hidden_input @f, :account_id, value: @account_id %>
     <div class="card-content">
       <div class="media">
         <div class="media-left">
@@ -12,7 +12,7 @@
                   <%= error_tag @f, :count %>
                 </p>
               </div>
-              <div class="field">
+              <div class="field py-3">
                 <p class="control is-expanded has-icons-left has-icons-right">
                   <%= text_input @f, :stock, class: "input is-rounded is-small input-super-small", placeholder: "Ticker" %>
                   <span class="icon is-small is-left">
@@ -52,7 +52,7 @@
             </div>
           </div>
           <div class="column">
-            <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@f.params["type"] || @f.data.type) %>
+            <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@f.params["type"] || Map.get(@f.data, :type)) %>
             <%= error_tag @f, :type %>
           </div>
         </div>
@@ -84,7 +84,7 @@
               </div>
               <div class="column">
                 <%= label @f, :status, class: "label" %>
-                <b><%= position_status_display(@f.data.type, @f.data.status, true) %></b>
+                <%= position_status_display(Map.get(@f.data, :type), Map.get(@f.data, :status), true) %>
               </div>
             </div>
           </div>
@@ -207,7 +207,7 @@
       <div class="control">
         <div class="field">
           <p class="control">
-            <%= position_status_display(@f.data.type, @f.data.status, true) %>
+            <%= position_status_display(Map.get(@f.data, :type), Map.get(@f.data, :status), true) %>
           </p>
         </div>
         <%= error_tag @f, :status %>

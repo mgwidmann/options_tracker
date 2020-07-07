@@ -1,10 +1,14 @@
 defmodule OptionsTracker.Fields.Date do
+  require Logger
+
   def type(), do: :date
 
   def cast(date_string) when is_binary(date_string) do
     case DateTimeParser.parse(date_string) do
       {:ok, date} -> {:ok, date}
-      {:error, _reason} -> :error
+      {:error, reason} ->
+        Logger.warn("Unable to parse date correctly: #{inspect date_string}, got: #{reason}")
+        :error
     end
   end
   def cast(%Date{} = date), do: {:ok, date}

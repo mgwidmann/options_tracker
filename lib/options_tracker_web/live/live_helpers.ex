@@ -46,11 +46,14 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   end
 
   @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil
-  def format_currency(changeset, field) do
+  def format_currency(%Ecto.Changeset{} = changeset, field) do
     value = changeset.changes[field] || Map.get(changeset.data, field)
 
     if value do
       currency_string(value, false)
     end
+  end
+  def format_currency(nil, _field) do
+    nil
   end
 end

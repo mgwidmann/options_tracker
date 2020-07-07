@@ -46,20 +46,34 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
+    position = %Position{}
+    position_params = %{
+      account_id: socket.assigns.current_account.id,
+      opened_at: DateTime.utc_now() |> DateTime.to_date(),
+      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
+      short: true,
+      type: :put,
+    }
+    changeset = Accounts.change_position(position, position_params)
+
     socket
     |> assign(:page_title, "New Position")
-    |> assign(:position, %Position{
-      account_id: 1,
-      opened_at: DateTime.utc_now(),
-      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second),
-      short: true
-    })
+    |> assign(:position, position)
+    |> assign(:changeset, changeset)
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Positions")
     |> assign(:position, nil)
+    |> assign(:changeset, nil) # Clear out
+  end
+
+  defp apply_action(socket, :delete, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    socket
+    |> assign(:page_title, "Delete Position")
+    |> assign(:position, position)
     |> assign(:changeset, nil) # Clear out
   end
 
@@ -78,7 +92,11 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     position = Accounts.get_position!(id)
     {:ok, _} = Accounts.delete_position(position)
 
-    {:noreply, assign(socket, :positions, list_positions(socket.assigns.current_account))}
+    {:noreply,
+      socket
+      |> assign(:positions, list_positions(socket.assigns.current_account))
+      |> put_flash(:danger, "Position deleted successfully!")
+      |> push_redirect(to: Routes.position_index_path(socket, :index))}
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
@@ -88,6 +106,9 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
+  end
+  def handle_event("validate", _attrs, socket) do
+    handle_event("validate", %{"position" => %{}}, socket)
   end
 
   def handle_event("save", %{"position" => position_params}, socket) do
@@ -122,7 +143,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   defp save_position(socket, :new, position_params) do
-    case Accounts.create_position(position_params) do
+    case Accounts.create_position(position_params |> Map.merge(%{status: Accounts.position_status_open()})) do
       {:ok, _position} ->
         {:noreply,
          socket

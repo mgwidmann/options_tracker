@@ -46,6 +46,11 @@
     }
 }
 
+.section {
+    @include mobile;
+    padding: 2rem 0.75rem !important;
+}
+
 #positions input.date {
     min-width: 130px;
     font-size: 0.7rem;

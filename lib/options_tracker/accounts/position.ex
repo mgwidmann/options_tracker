@@ -4,15 +4,22 @@ defmodule OptionsTracker.Accounts.Position do
   import OptionsTracker.Utilities.Maps
 
   defmodule TransType do
-    use EctoEnum, stock: 0, call: 1, put: 2
+    @enum [stock: 0, call: 1, put: 2]
+    use EctoEnum, @enum
     @spec name_for(:call | :put | :stock) :: String.t()
     def name_for(:stock), do: "Stock"
     def name_for(:call), do: "Call"
     def name_for(:put), do: "Put"
+
+    for {type, value} <- @enum do
+      def unquote(:"#{type}")(), do: unquote(value)
+      def unquote(:"#{type}_key")(), do: unquote(type)
+    end
   end
 
   defmodule StatusType do
-    use EctoEnum, open: 0, closed: 1, rolled: 2, exercised: 3
+    @enum [open: 0, closed: 1, rolled: 2, exercised: 3]
+    use EctoEnum, @enum
     @spec name_for(:closed | :open | :rolled, boolean) :: String.t()
     def name_for(status, past_tense)
     def name_for(:open, false), do: "Open"
@@ -23,6 +30,11 @@ defmodule OptionsTracker.Accounts.Position do
     def name_for(:rolled, true), do: "Rolled"
     def name_for(:exercised, false), do: "Exercise"
     def name_for(:exercised, true), do: "Exercised"
+
+    for {type, value} <- @enum do
+      def unquote(:"#{type}")(), do: unquote(value)
+      def unquote(:"#{type}_key")(), do: unquote(type)
+    end
   end
 
   schema "positions" do
@@ -166,8 +178,8 @@ defmodule OptionsTracker.Accounts.Position do
   def open_related_positions(position) do
     import Ecto.Query
 
-    open_enum = StatusType.__enum_map__()[:open]
-    stock_enum = TransType.__enum_map__()[:stock]
+    open_enum = StatusType.open()
+    stock_enum = TransType.stock()
 
     from(p in __MODULE__,
       where:

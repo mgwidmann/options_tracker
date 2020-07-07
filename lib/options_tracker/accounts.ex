@@ -336,7 +336,7 @@ defmodule OptionsTracker.Accounts do
               change_position(stock, %{
                 exit_price: position.strike,
                 status: :closed,
-                closed_at: DateTime.utc_now()
+                closed_at: position.closed_at
               }),
               stock.count
             }
@@ -357,7 +357,7 @@ defmodule OptionsTracker.Accounts do
             count: shares_uncovered,
             status: :closed,
             exit_price: position.strike,
-            closed_at: DateTime.utc_now()
+            closed_at: position.closed_at
           })
 
         [
@@ -439,6 +439,11 @@ defmodule OptionsTracker.Accounts do
 
   def list_position_statuses(_other) do
     Position.StatusType.__enum_map__()
+  end
+
+  for {status, value} <- Position.StatusType.__enum_map__() do
+    def unquote(:"position_status_#{status}")(), do: unquote(value)
+    def unquote(:"position_status_#{status}_key")(), do: unquote(status)
   end
 
   def name_for_position_status(status, past_tense \\ false) do
