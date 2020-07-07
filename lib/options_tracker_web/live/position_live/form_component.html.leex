@@ -178,7 +178,9 @@
               <i class="fa fa-usd"></i>
             </span>
             <%= error_tag @f, :strike %>
-            <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@changeset.data.type) %>
+            <span>
+              <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@changeset.changes["type"] || @changeset.data.type) %>
+            </span>
             <%= error_tag @f, :type %>
           </p>
         </div>

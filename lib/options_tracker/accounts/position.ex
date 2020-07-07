@@ -219,7 +219,7 @@ defmodule OptionsTracker.Accounts.Position do
       count: count * 100,
       type: :stock,
       opened_at: DateTime.utc_now(),
-      fees: account.stock_open_fee * count * 100,
+      fees: Decimal.to_float(account.stock_open_fee) * count * 100,
       status: :open,
       account_id: account.id
     }

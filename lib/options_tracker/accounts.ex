@@ -299,6 +299,8 @@ defmodule OptionsTracker.Accounts do
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
 
+    position = position |> Repo.preload(:account)
+
     position
     |> Position.open_related_positions()
     |> Repo.all()
@@ -347,7 +349,14 @@ defmodule OptionsTracker.Accounts do
         {shares_needed - shares_covered, [stock | stocks]}
       end)
 
-    [last_stock | stocks] = Enum.reverse(stocks)
+    {last_stock, stocks} =
+      case stocks do
+        [_ | _] ->
+          [last_stock | stocks] = Enum.reverse(stocks)
+          {last_stock, stocks}
+        _ ->
+          {nil, stocks}
+      end
 
     cond do
       # Last position hasn't been closed out since it is larger than shares_needed
@@ -372,6 +381,28 @@ defmodule OptionsTracker.Accounts do
 
         {:ok, new_position} = create_position(new_position_attrs)
         [new_position, last_stock | stocks]
+
+      # There are no stocks at all so the entire position must be created
+      shares_uncovered > 0 && last_stock == nil ->
+        {short, basis_delta} = cond do
+          position.type == Position.TransType.call() || position.type == Position.TransType.call_key() ->
+            {true, -position.premium}
+          position.type == Position.TransType.put() || position.type == Position.TransType.put_key() ->
+            {false, position.premium}
+          true ->
+            raise "Unexpected position type of stock: #{inspect position}"
+        end
+        new_position_attrs =
+          position
+          |> Position.to_stock_attrs()
+          |> Map.merge(%{
+            short: short,
+            opened_at: DateTime.utc_now() |> DateTime.to_date(),
+            basis: position.strike - basis_delta,
+          })
+
+        {:ok, new_position} = create_position(new_position_attrs)
+        [new_position | stocks]
 
       # Everything fit perfectly
       shares_uncovered == 0 ->

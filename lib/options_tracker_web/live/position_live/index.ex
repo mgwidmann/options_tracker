@@ -101,7 +101,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   def handle_event("validate", %{"position" => position_params}, socket) do
     changeset =
-      socket.assigns.position
+      (socket.assigns.position || %Position{})
       |> Accounts.change_position(position_params |> compact())
       |> Map.put(:action, :validate)
 

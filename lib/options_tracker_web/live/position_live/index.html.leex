@@ -262,16 +262,24 @@
             <%= currency_string(position.fees) %>
           </td>
           <td>
-            <%= live_patch to: Routes.position_index_path(@socket, :edit, position), class: "button is-primary mr-1 is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Edit" do %>
-              <i class="fa fa-pencil" aria-hidden="true"></i>
+            <%= if is_closed?(position) do %>
+              <%= live_patch to: Routes.position_index_path(@socket, :reopen, position), class: "button is-primary mr-1 is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Reopen" do %>
+                <i class="fa fa-undo" aria-hidden="true"></i>
+              <% end %>
+            <% else %>
+              <%= live_patch to: Routes.position_index_path(@socket, :edit, position), class: "button is-primary mr-1 is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Edit" do %>
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              <% end %>
             <% end %>
-            <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Close" do %>
-              <i class="fa fa-times" aria-hidden="true"></i>
+            <%= if is_open?(position) do %>
+              <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Close" do %>
+                <i class="fa fa-times" aria-hidden="true"></i>
+              <% end %>
             <% end %>
             <%= live_patch to: Routes.position_index_path(@socket, :notes, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Notes" do %>
               <i class="fa fa-paperclip" aria-hidden="true"></i>
             <% end %>
-            <%= if is_option?(position) do %>
+            <%= if is_open?(position) && is_option?(position) do %>
               <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll (Coming Soon)", disabled: true do %>
                 <i class="fa fa-clock-o" aria-hidden="true"></i>
               <% end %>
