@@ -37,6 +37,7 @@ defmodule OptionsTracker.Accounts.Position do
     end
   end
 
+  @derive {Jason.Encoder, except: [:account, :__meta__]}
   schema "positions" do
     # Require info on open
     field :stock, :string

@@ -58,7 +58,7 @@ defmodule OptionsTrackerWeb.PositionLiveTest do
   }
 
   defp fixture(:position) do
-    {:ok, position} = Accounts.create_position(@create_attrs)
+    {:ok, position} = Accounts.create_position(%User{id: 123}, @create_attrs)
     position
   end
 

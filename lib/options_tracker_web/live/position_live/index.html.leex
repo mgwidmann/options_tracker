@@ -6,7 +6,7 @@
         <div class="is-pulled-right">
           <div class="mh-3">
             <% no_account = @current_account == nil %>
-            <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must create an account first!", else: "Add a position"), disabled: no_account do %>
+            <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
               <i class="fa fa-plus" aria-hidden="true"></i>
             <% end %>
           </div>
@@ -15,8 +15,8 @@
               <%= live_patch "Create your first Account", to: Routes.account_index_path(@socket, :new), class: "is-pulled-right" %>
             <% else %>
               <%= form_tag "#", phx_change: "change_account", class: "is-pulled-right" do %>
-                <%= content_tag :select, name: :account_id, class: "select" do %>
-                  <%= options_for_select accounts_select(@current_user.accounts, "Select an Account"), @current_account.id %>
+                <%= content_tag :select, prompt: "Select an Account", name: :account_id, class: "select" do %>
+                  <%= options_for_select [{"All", "all"} | accounts_select(@current_user.accounts)], @current_account != nil && !match?([_|_], @current_account) && @current_account.id || "all" %>
                 <% end %>
               <% end %>
             <% end %>
@@ -27,19 +27,39 @@
   </section>
 </header>
 
-<nav class="panel">
-  <p class="panel-heading">
-    Search for a position
-  </p>
-  <div class="panel-block">
-    <p class="control has-icons-left">
-      <input class="input" type="text" placeholder="Search">
-      <span class="icon is-left">
-        <i class="fa fa-search" aria-hidden="true"></i>
-      </span>
-    </p>
+<%= search_form = form_for @search_changeset, "#", id: "search-form", as: :search_form, phx_change: "search" %>
+<div class="columns">
+  <div class="column is-one-quarter">
+    <nav class="panel">
+      <p class="panel-heading">
+        Search for a position
+      </p>
+      <div class="panel-block">
+        <div class="control mb-0 tags has-addons">
+          <span class="tag long is-success <%= if(@search_changeset.changes[:open] in [true, nil], do: "", else: "is-light") %>">
+            <%= label search_form, :open_true, class: "radio" do %>
+              <%= radio_button search_form, :open, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
+              Open
+            <% end %>
+          </span>
+          <span class="tag short is-danger <%= if(@search_changeset.changes[:open] == false, do: "", else: "is-light") %>">
+            <%= label search_form, :open_false, class: "radio" do %>
+              <%= radio_button search_form, :open, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
+              Closed
+            <% end %>
+          </span>
+        </div>
+        <p class="control has-icons-left">
+          <%= text_input search_form, :search, class: "input", placeholder: "Search" %>
+          <span class="icon is-left">
+            <i class="fa fa-search" aria-hidden="true"></i>
+          </span>
+        </p>
+      </div>
+    </nav>
   </div>
-</nav>
+</div>
+</form>
 
 <%= if @live_action in [:close] do %>
   <%= live_modal @socket, OptionsTrackerWeb.PositionLive.EditModalComponent,
@@ -135,7 +155,7 @@
             </div>
             <div class="columns is-mobile">
               <div class="column is-size-4">
-                <span class="" data-tooltip="<%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
+                <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Expires on <%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
               </div>
 
               <div class="column">
@@ -208,7 +228,7 @@
       <th>Stock</th>
       <th>Long / Short</th>
       <th>Strike / Type</th>
-      <th>Expires at</th>
+      <th>Expires on</th>
       <th>Premium</th>
       <th>Status</th>
       <th>Profit / Loss</th>

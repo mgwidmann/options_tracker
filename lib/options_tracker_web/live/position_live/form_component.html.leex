@@ -52,7 +52,7 @@
             </div>
           </div>
           <div class="column">
-            <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@f.params["type"] || Map.get(@f.data, :type)) %>
+            <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
             <%= error_tag @f, :type %>
           </div>
         </div>
@@ -179,7 +179,7 @@
             </span>
             <%= error_tag @f, :strike %>
             <span>
-              <%= select @f, :type, position_type_map(), prompt: "Type", class: "select", selected: position_type_map(@changeset.changes["type"] || @changeset.data.type) %>
+              <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
             </span>
             <%= error_tag @f, :type %>
           </p>

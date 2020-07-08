@@ -7,7 +7,9 @@ defmodule OptionsTracker.Users.User do
     field :email, :string
     field :password, :string, virtual: true
     field :hashed_password, :string
-    field :confirmed_at, :naive_datetime
+    field :confirmed_at, :utc_datetime
+
+    field :admin?, :boolean, source: :admin, default: false
 
     has_many :accounts, OptionsTracker.Accounts.Account
 

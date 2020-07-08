@@ -7,7 +7,9 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
   @impl true
   def update(%{position: position, account_id: account_id} = assigns, socket) do
     changeset = Accounts.change_position(position)
-    current_account = Accounts.get_account!(account_id)
+
+    current_account =
+      Map.get_lazy(socket.assigns, :current_account, fn -> Accounts.get_account!(account_id) end)
 
     {:ok,
      socket
@@ -17,21 +19,16 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
   end
 
   @impl true
-  # def handle_event("validate", %{"position" => position_params}, socket) do
-  #   changeset =
-  #     socket.assigns.position
-  #     |> Accounts.change_position(position_params |> compact())
-  #     |> Map.put(:action, :validate)
-
-  #   {:noreply, assign(socket, :changeset, changeset)}
-  # end
-
   def handle_event("save", %{"position" => position_params}, socket) do
     save_position(socket, socket.assigns.action, position_params |> compact())
   end
 
   defp save_position(socket, :edit, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params) do
+    case Accounts.update_position(
+           socket.assigns.position,
+           position_params,
+           socket.assigns.current_user
+         ) do
       {:ok, _position} ->
         {:noreply,
          socket
@@ -44,7 +41,7 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
   end
 
   defp save_position(socket, :new, position_params) do
-    case Accounts.create_position(position_params) do
+    case Accounts.create_position(position_params, socket.assigns.current_user) do
       {:ok, _position} ->
         {:noreply,
          socket

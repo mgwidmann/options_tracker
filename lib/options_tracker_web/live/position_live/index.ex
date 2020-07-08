@@ -7,6 +7,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   alias OptionsTracker.Accounts.Position
   alias OptionsTracker.Users
   alias OptionsTracker.Users.User
+  alias OptionsTracker.Search
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
@@ -14,13 +15,15 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     current_user = Users.get_user_by_session_token(user_token)
     current_account = current_user |> get_account()
+    search_changeset = Search.new(current_account)
 
     {:ok,
      socket
      |> assign(:current_user, current_user)
      |> assign(:current_account, current_account)
-     |> assign(:positions, list_positions(current_account))
-     |> assign(:changeset, changeset)}
+     |> assign(:positions, list_positions(search_changeset))
+     |> assign(:changeset, changeset)
+     |> assign(:search_changeset, search_changeset)}
   end
 
   @impl true
@@ -47,13 +50,16 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
     position = %Position{}
+
     position_params = %{
       account_id: socket.assigns.current_account.id,
       opened_at: DateTime.utc_now() |> DateTime.to_date(),
-      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
+      expires_at:
+        DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
       short: true,
-      type: :put,
+      type: :put
     }
+
     changeset = Accounts.change_position(position, position_params)
 
     socket
@@ -66,15 +72,18 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     socket
     |> assign(:page_title, "Positions")
     |> assign(:position, nil)
-    |> assign(:changeset, nil) # Clear out
+    # Clear out
+    |> assign(:changeset, nil)
   end
 
   defp apply_action(socket, :delete, %{"id" => id}) do
     position = Accounts.get_position!(id)
+
     socket
     |> assign(:page_title, "Delete Position")
     |> assign(:position, position)
-    |> assign(:changeset, nil) # Clear out
+    # Clear out
+    |> assign(:changeset, nil)
   end
 
   defp apply_action(socket, :notes, %{"id" => id}) do
@@ -90,13 +99,13 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     position = Accounts.get_position!(id)
-    {:ok, _} = Accounts.delete_position(position)
+    {:ok, _} = Accounts.delete_position(socket.assigns.current_user, position)
 
     {:noreply,
-      socket
-      |> assign(:positions, list_positions(socket.assigns.current_account))
-      |> put_flash(:danger, "Position deleted successfully!")
-      |> push_redirect(to: Routes.position_index_path(socket, :index))}
+     socket
+     |> assign(:positions, list_positions(socket.assigns.search_changeset))
+     |> put_flash(:danger, "Position deleted successfully!")
+     |> push_redirect(to: Routes.position_index_path(socket, :index))}
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
@@ -107,30 +116,66 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
+
   def handle_event("validate", _attrs, socket) do
     handle_event("validate", %{"position" => %{}}, socket)
+  end
+
+  def handle_event("search", %{"search_form" => params}, socket) do
+    search_changeset = Search.new(socket.assigns.current_account, params)
+
+    {:noreply,
+     socket
+     |> assign(:search_changeset, search_changeset)
+     |> assign(:positions, list_positions(search_changeset))}
   end
 
   def handle_event("save", %{"position" => position_params}, socket) do
     save_position(socket, socket.assigns.live_action, position_params)
   end
 
+  def handle_event("change_account", %{"account_id" => "all"}, socket) do
+    current_account = socket.assigns.current_user.accounts
+    search_changeset = Search.new(current_account)
+
+    {:noreply,
+     socket
+     |> assign(:current_account, nil)
+     |> assign(:positions, list_positions(search_changeset))
+     |> assign(:current_account, current_account)
+     |> assign(:search_changeset, search_changeset)}
+  end
+
   def handle_event("change_account", %{"account_id" => account_id}, socket) do
     {account_id, ""} = Integer.parse(account_id)
 
+    current_account =
+      socket.assigns.current_user.accounts |> Enum.find(&(&1.id == account_id)) ||
+        socket.assigns.current_account
+
+    search_changeset = Search.new(current_account)
+
     {:noreply,
-      socket
-      |> assign(:current_account, socket.assigns.current_user.accounts |> Enum.find(&(&1.id == account_id)) || socket.assigns.current_account)}
+     socket
+     |> assign(:current_account, current_account)
+     |> assign(:positions, list_positions(search_changeset))
+     |> assign(:search_changeset, search_changeset)}
   end
 
   def handle_event("cancel", _, socket) do
     {:noreply,
-      socket
-      |> push_redirect(to: socket.assigns[:return_to] || Routes.position_index_path(socket, :index))}
+     socket
+     |> push_redirect(
+       to: socket.assigns[:return_to] || Routes.position_index_path(socket, :index)
+     )}
   end
 
   defp save_position(socket, :edit, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params) do
+    case Accounts.update_position(
+           socket.assigns.current_user,
+           socket.assigns.position,
+           position_params
+         ) do
       {:ok, _position} ->
         {:noreply,
          socket
@@ -143,7 +188,11 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   defp save_position(socket, :new, position_params) do
-    case Accounts.create_position(position_params |> Map.merge(%{status: Accounts.position_status_open()})) do
+    case Accounts.create_position(
+           position_params
+           |> Map.merge(%{status: Accounts.position_status_open()}),
+           socket.assigns.current_user
+         ) do
       {:ok, _position} ->
         {:noreply,
          socket
@@ -163,9 +212,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     account
   end
 
-  defp list_positions(nil), do: []
-
-  defp list_positions(%Account{id: account_id}) do
-    Accounts.list_positions(account_id)
+  defp list_positions(search_changeset) do
+    Search.search(search_changeset)
   end
 end

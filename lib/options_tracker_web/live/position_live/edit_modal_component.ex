@@ -6,7 +6,8 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
 
   @impl true
   def update(%{position: position, action: action} = assigns, socket) do
-    changeset = Accounts.change_position(position, if(action == :close, do: %{status: :closed}, else: %{}))
+    changeset =
+      Accounts.change_position(position, if(action == :close, do: %{status: :closed}, else: %{}))
 
     {:ok,
      socket
@@ -19,7 +20,10 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     changeset =
       socket.assigns.position
       |> Accounts.change_position(
-        Enum.into(%{status: :closed, closed_at: DateTime.utc_now() |> DateTime.to_date()}, position_params)
+        Enum.into(
+          %{status: :closed, closed_at: DateTime.utc_now() |> DateTime.to_date()},
+          position_params
+        )
       )
       |> Map.put(:action, :validate)
 
@@ -31,7 +35,11 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   end
 
   defp save_position(socket, :notes, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params) do
+    case Accounts.update_position(
+           socket.assigns.position,
+           position_params,
+           socket.assigns.current_user
+         ) do
       {:ok, _position} ->
         {:noreply,
          socket
@@ -44,7 +52,11 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   end
 
   defp save_position(socket, :close, position_params) do
-    case Accounts.update_position(socket.assigns.position, position_params) do
+    case Accounts.update_position(
+           socket.assigns.position,
+           position_params,
+           socket.assigns.current_user
+         ) do
       {:ok, _position} ->
         {:noreply,
          socket

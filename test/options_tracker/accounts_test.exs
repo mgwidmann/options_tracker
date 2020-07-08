@@ -141,11 +141,12 @@ defmodule OptionsTracker.AccountsTest do
     def position_fixture(attrs \\ %{}) do
       account = account_fixture()
 
-      {:ok, position} =
+      attrs =
         attrs
         |> Enum.into(@valid_attrs)
         |> Enum.into(%{account_id: account.id})
-        |> Accounts.create_position()
+
+      {:ok, position} = Accounts.create_position(%User{id: 123}, attrs)
 
       position
     end
@@ -186,7 +187,10 @@ defmodule OptionsTracker.AccountsTest do
       account = account_fixture()
 
       assert {:ok, %Position{} = position} =
-               Accounts.create_position(@valid_attrs |> Enum.into(%{account_id: account.id}))
+               Accounts.create_position(
+                 %User{id: 123},
+                 @valid_attrs |> Enum.into(%{account_id: account.id})
+               )
 
       # Not valid on non-stocks
       assert position.basis == nil
@@ -211,7 +215,7 @@ defmodule OptionsTracker.AccountsTest do
       attrs = @valid_stock_attrs |> Enum.into(%{account_id: account.id})
 
       assert {:ok, %Position{} = position} =
-               Accounts.create_position(attrs |> Enum.into(@valid_attrs))
+               Accounts.create_position(%User{id: 123}, attrs |> Enum.into(@valid_attrs))
 
       assert position.basis == 100.00
       assert position.closed_at == nil
@@ -231,7 +235,8 @@ defmodule OptionsTracker.AccountsTest do
     end
 
     test "create_position/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Accounts.create_position(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} =
+               Accounts.create_position(%User{id: 123}, @invalid_attrs)
     end
 
     test "update_position/2 with valid data updates the position" do

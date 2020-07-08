@@ -40,9 +40,11 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
   def currency_string(%Decimal{} = decimal, prepend_unit) do
     decimal
-    |> Decimal.round(2, :half_up)
-    |> Decimal.to_string()
-    |> String.replace_prefix("", if(prepend_unit, do: "$", else: ""))
+    |> Decimal.to_float()
+    |> Kernel.*(100)
+    |> trunc()
+    |> Money.new()
+    |> Money.to_string(symbol: prepend_unit)
   end
 
   @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil
@@ -53,6 +55,7 @@ defmodule OptionsTrackerWeb.LiveHelpers do
       currency_string(value, false)
     end
   end
+
   def format_currency(nil, _field) do
     nil
   end

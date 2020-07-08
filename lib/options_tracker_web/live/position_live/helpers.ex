@@ -17,7 +17,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   @spec position_type_map :: Keyword.t()
   def position_type_map() do
     Accounts.list_position_types()
-    |> Enum.map(fn {type, value} -> {Accounts.name_for_position_type(type), value} end)
+    |> Enum.map(fn {type, _value} -> {Accounts.name_for_position_type(type), type} end)
   end
 
   @spec position_type_map(atom) :: non_neg_integer
@@ -29,7 +29,8 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     |> elem(1)
   end
 
-  @spec position_status_map(atom | non_neg_integer, atom | boolean) :: Keyword.t() | non_neg_integer()
+  @spec position_status_map(atom | non_neg_integer, atom | boolean) ::
+          Keyword.t() | non_neg_integer()
   def position_status_map(type, past_tense \\ false)
 
   def position_status_map(type, past_tense) when is_boolean(past_tense) do
@@ -52,6 +53,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def position_status_display(type, nil, past_tense) do
     position_status_display(type, Accounts.position_status_open(), past_tense)
   end
+
   def position_status_display(type, status, past_tense) do
     Accounts.list_position_statuses(type)
     |> Enum.find(fn {s, value} -> s == status || value == status end)
@@ -59,15 +61,12 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     |> Accounts.name_for_position_status(past_tense)
   end
 
-  @spec accounts_select([Account.t()], String.t()) :: Keyword.t()
-  def accounts_select(accounts, placeholder) do
-    account_options =
-      accounts
-      |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
-        {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
-      end)
-
-    [placeholder | account_options]
+  @spec accounts_select([Account.t()]) :: Keyword.t()
+  def accounts_select(accounts) do
+    accounts
+    |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
+      {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
+    end)
   end
 
   @spec credit_debit_display(number) :: String.t()
@@ -80,21 +79,27 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     "#{value_string}#{if(value >= 0, do: "cr", else: "db")}"
   end
 
-  @spec is_option?(%{
-          data: OptionsTracker.Accounts.Position.t() | map,
-          params: nil | maybe_improper_list | map
-        } | OptionsTracker.Accounts.Position.t()) :: boolean
+  @spec is_option?(
+          %{
+            data: OptionsTracker.Accounts.Position.t() | map,
+            params: nil | maybe_improper_list | map
+          }
+          | OptionsTracker.Accounts.Position.t()
+        ) :: boolean
   def is_option?(%Phoenix.HTML.Form{params: params, data: %Position{} = position}) do
     type = params["type"] || position.type
+
     if is_atom(type) do
       type != OptionsTracker.Accounts.Position.TransType.stock_key()
     else
       type != OptionsTracker.Accounts.Position.TransType.stock()
     end
   end
+
   def is_option?(%Phoenix.HTML.Form{data: %{}}) do
     true
   end
+
   def is_option?(%Position{type: type}) do
     type != OptionsTracker.Accounts.Position.TransType.stock_key()
   end
@@ -112,6 +117,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
       short
     end
   end
+
   def is_short?(%{data: %{}}) do
     true
   end
@@ -140,5 +146,6 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
       "#{month}/#{day}"
     end
   end
+
   def date_display(nil, _), do: ""
 end

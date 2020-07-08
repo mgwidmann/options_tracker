@@ -30,7 +30,8 @@ defmodule OptionsTracker.Accounts.Account do
   @required_fields ~w[name type opt_open_fee opt_close_fee stock_open_fee stock_close_fee exercise_fee cash user_id]a
   @optional_fields ~w[broker_name]a
   @fields @required_fields ++ @optional_fields
-  @spec create_changeset(Account.t(), %{optional(String.t()) => String.t() | number}) :: Ecto.Changeset.t()
+  @spec create_changeset(Account.t(), %{optional(String.t()) => String.t() | number}) ::
+          Ecto.Changeset.t()
   @doc false
   def create_changeset(account, attrs) do
     account
@@ -40,7 +41,8 @@ defmodule OptionsTracker.Accounts.Account do
   end
 
   @update_fields @fields -- ~w[user_id]a
-  @spec changeset(Account.t(), %{optional(String.t()) => String.t() | number}) :: Ecto.Changeset.t()
+  @spec changeset(Account.t(), %{optional(String.t()) => String.t() | number}) ::
+          Ecto.Changeset.t()
   @doc false
   def changeset(account, attrs) do
     account

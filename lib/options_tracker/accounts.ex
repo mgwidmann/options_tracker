@@ -8,6 +8,8 @@ defmodule OptionsTracker.Accounts do
 
   alias OptionsTracker.Accounts.Account
 
+  @system_action_user_id -1
+
   @doc """
   Returns the list of accounts.
 
@@ -19,7 +21,8 @@ defmodule OptionsTracker.Accounts do
   """
   def list_accounts(user_id) do
     from(a in Account,
-      where: a.user_id == ^user_id)
+      where: a.user_id == ^user_id
+    )
     |> order_by(asc: :id)
     |> Repo.all()
   end
@@ -146,6 +149,8 @@ defmodule OptionsTracker.Accounts do
   end
 
   alias OptionsTracker.Accounts.Position
+  alias OptionsTracker.Users.User
+  alias OptionsTracker.Audits
 
   @doc """
   Returns the list of positions.
@@ -156,11 +161,42 @@ defmodule OptionsTracker.Accounts do
       [%Position{}, ...]
 
   """
-  def list_positions(account_id) do
+  def list_positions(account_id) when is_number(account_id), do: list_positions([account_id])
+
+  def list_positions(account_ids) when is_list(account_ids) do
     from(p in Position,
-      where: p.account_id == ^account_id
+      where: p.account_id in ^account_ids
     )
     |> Repo.all()
+  end
+
+  def search_positions(params) when is_map(params) do
+    account_ids = Map.get(params, :account_ids)
+    search = Map.get(params, :search)
+    open = Map.get(params, :open, true)
+
+    query =
+      from(p in Position,
+        where: p.account_id in ^account_ids
+      )
+
+    query =
+      if search not in ["", nil] do
+        where(query, [p], p.stock == ^search)
+      else
+        query
+      end
+
+    open_val = Position.StatusType.open()
+
+    query =
+      if open do
+        where(query, [p], p.status in ^[open_val])
+      else
+        where(query, [p], p.status not in ^[open_val])
+      end
+
+    Repo.all(query |> IO.inspect())
   end
 
   @doc """
@@ -179,37 +215,59 @@ defmodule OptionsTracker.Accounts do
   """
   def get_position!(id), do: Repo.get!(Position, id)
 
+  @spec create_position(
+          %{optional(:__struct__) => none, optional(atom | binary) => any},
+          User.t()
+        ) ::
+          {:ok, Position.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Creates a position.
 
   ## Examples
 
-      iex> create_position(%{field: value})
+      iex> create_position(%{stock: "XYZ"}, %User{id: 123})
       {:ok, %Position{}}
 
-      iex> create_position(%{field: bad_value})
+      iex> create_position(%{stock: 45.0}, %User{id: 123})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_position(attrs \\ %{}) do
-    %Position{}
-    |> Position.open_changeset(attrs)
-    |> Repo.insert()
+  def create_position(attrs, user)
+
+  def create_position(attrs, %User{id: user_id}) do
+    Repo.transaction(fn ->
+      case %Position{} |> Position.open_changeset(attrs) |> Repo.insert() do
+        {:ok, position} ->
+          {:ok, _audit} =
+            Audits.position_audit_changeset(:insert, user_id, position) |> Repo.insert()
+
+          position
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+    |> IO.inspect(label: "create_position_result")
   end
 
+  @spec update_position(
+          OptionsTracker.Accounts.Position.t(),
+          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any},
+          User.t()
+        ) :: Position.t() | {:error, Ecto.Changeset.t()}
   @doc """
   Updates a position.
 
   ## Examples
 
-      iex> update_position(position, %{field: new_value})
+      iex> update_position(position, %{notes: "some notes"}, %User{id: 123})
       {:ok, %Position{}}
 
-      iex> update_position(position, %{field: bad_value})
+      iex> update_position(position, %{notes: 1}, %User{id: 123})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_position(%Position{} = position, attrs) do
+  def update_position(%Position{} = position, attrs, %User{id: user_id}) do
     changeset = position |> Position.changeset(attrs)
 
     if changeset.valid? do
@@ -218,6 +276,11 @@ defmodule OptionsTracker.Accounts do
           {:ok, position} ->
             update_basis!(position)
             handle_exercise!(position)
+
+            # These changes were made by the user
+            Audits.position_audit_changeset(:update, user_id, changeset.data)
+            |> Repo.insert!()
+
             position
 
           {:error, changeset} ->
@@ -229,17 +292,15 @@ defmodule OptionsTracker.Accounts do
     end
   end
 
-  @doc """
-  Updates any long or short stock positions' basis field which were used as collateral for this position.
-  """
+  ### Updates any long or short stock positions' basis field which were used as collateral for this position.
   @spec update_basis!(OptionsTracker.Accounts.Position.t()) :: [
           OptionsTracker.Accounts.Position.t()
         ]
-  def update_basis!(
-        %Position{status: :closed, count: count, type: call_or_put, profit_loss: profit_loss} =
-          position
-      )
-      when call_or_put in ~w[call put]a do
+  defp update_basis!(
+         %Position{status: :closed, count: count, type: call_or_put, profit_loss: profit_loss} =
+           position
+       )
+       when call_or_put in ~w[call put]a do
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
     profit_loss_per_contact = profit_loss / count
@@ -261,6 +322,10 @@ defmodule OptionsTracker.Accounts do
     |> elem(1)
     |> Enum.map(fn
       %Ecto.Changeset{} = changeset ->
+        Repo.insert!(
+          Audits.position_audit_changeset(:update, @system_action_user_id, changeset.data)
+        )
+
         {:ok, position} = Repo.update(changeset)
         position
 
@@ -271,7 +336,7 @@ defmodule OptionsTracker.Accounts do
   end
 
   # When not closing a call/put, just return empty since nothing was done
-  def update_basis!(_position) do
+  defp update_basis!(_position) do
     []
   end
 
@@ -294,8 +359,8 @@ defmodule OptionsTracker.Accounts do
     end)
   end
 
-  def handle_exercise!(%Position{status: :exercised, count: count, type: call_or_put} = position)
-      when call_or_put in ~w[call put]a do
+  defp handle_exercise!(%Position{status: :exercised, count: count, type: call_or_put} = position)
+       when call_or_put in ~w[call put]a do
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
 
@@ -314,7 +379,19 @@ defmodule OptionsTracker.Accounts do
     |> Enum.map(fn
       %Ecto.Changeset{} = changeset ->
         {:ok, position} =
-          if(changeset.data.id, do: Repo.update(changeset), else: Repo.insert(changeset))
+          if changeset.data.id do
+            Repo.insert!(
+              Audits.position_audit_changeset(:update, @system_action_user_id, changeset.data)
+            )
+
+            Repo.update(changeset)
+          else
+            Repo.insert!(
+              Audits.position_audit_changeset(:insert, @system_action_user_id, changeset.data)
+            )
+
+            Repo.insert(changeset)
+          end
 
         position
 
@@ -324,7 +401,7 @@ defmodule OptionsTracker.Accounts do
     end)
   end
 
-  def handle_exercise!(_position) do
+  defp handle_exercise!(_position) do
     []
   end
 
@@ -354,6 +431,7 @@ defmodule OptionsTracker.Accounts do
         [_ | _] ->
           [last_stock | stocks] = Enum.reverse(stocks)
           {last_stock, stocks}
+
         _ ->
           {nil, stocks}
       end
@@ -379,29 +457,39 @@ defmodule OptionsTracker.Accounts do
         new_position_attrs =
           Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
 
-        {:ok, new_position} = create_position(new_position_attrs)
+        {:ok, new_position} =
+          create_position(new_position_attrs, %User{id: @system_action_user_id})
+
         [new_position, last_stock | stocks]
 
       # There are no stocks at all so the entire position must be created
       shares_uncovered > 0 && last_stock == nil ->
-        {short, basis_delta} = cond do
-          position.type == Position.TransType.call() || position.type == Position.TransType.call_key() ->
-            {true, -position.premium}
-          position.type == Position.TransType.put() || position.type == Position.TransType.put_key() ->
-            {false, position.premium}
-          true ->
-            raise "Unexpected position type of stock: #{inspect position}"
-        end
+        {short, basis_delta} =
+          cond do
+            position.type == Position.TransType.call() ||
+                position.type == Position.TransType.call_key() ->
+              {true, -position.premium}
+
+            position.type == Position.TransType.put() ||
+                position.type == Position.TransType.put_key() ->
+              {false, position.premium}
+
+            true ->
+              raise "Unexpected position type of stock: #{inspect(position)}"
+          end
+
         new_position_attrs =
           position
           |> Position.to_stock_attrs()
           |> Map.merge(%{
             short: short,
             opened_at: DateTime.utc_now() |> DateTime.to_date(),
-            basis: position.strike - basis_delta,
+            basis: position.strike - basis_delta
           })
 
-        {:ok, new_position} = create_position(new_position_attrs)
+        {:ok, new_position} =
+          create_position(new_position_attrs, %User{id: @system_action_user_id})
+
         [new_position | stocks]
 
       # Everything fit perfectly
@@ -410,20 +498,33 @@ defmodule OptionsTracker.Accounts do
     end
   end
 
+  @spec delete_position(OptionsTracker.Accounts.Position.t(), User.t()) ::
+          {:ok, Position.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Deletes a position.
 
   ## Examples
 
-      iex> delete_position(position)
+      iex> delete_position(position, %User{id: 123})
       {:ok, %Position{}}
 
-      iex> delete_position(position)
+      iex> delete_position(position, %User{id: 123})
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_position(%Position{} = position) do
-    Repo.delete(position)
+  def delete_position(%Position{} = position, %User{id: user_id}) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.delete(:position, position)
+    |> Ecto.Multi.insert(
+      :position_audit,
+      Audits.position_audit_changeset(:delete, user_id, position)
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{position: position}} -> {:ok, position}
+      {:error, :position, changeset, _} -> {:error, changeset}
+      result -> raise "An unexpected failure occurred deleting a position! #{inspect(result)}"
+    end
   end
 
   @spec change_position(
