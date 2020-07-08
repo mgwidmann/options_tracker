@@ -196,7 +196,7 @@ defmodule OptionsTracker.Accounts do
         where(query, [p], p.status not in ^[open_val])
       end
 
-    Repo.all(query |> IO.inspect())
+    Repo.all(query)
   end
 
   @doc """
@@ -247,7 +247,6 @@ defmodule OptionsTracker.Accounts do
           Repo.rollback(changeset)
       end
     end)
-    |> IO.inspect(label: "create_position_result")
   end
 
   @spec update_position(

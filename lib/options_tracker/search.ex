@@ -23,6 +23,6 @@ defmodule OptionsTracker.Search do
   end
 
   def search(%Ecto.Changeset{changes: params, valid?: true}) do
-    Accounts.search_positions(params |> IO.inspect(label: "search params"))
+    Accounts.search_positions(params)
   end
 end
