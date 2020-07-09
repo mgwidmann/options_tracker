@@ -148,6 +148,41 @@ defmodule OptionsTracker.Accounts do
     %{}
   end
 
+  defmodule ProfitLoss do
+    defstruct daily: 0, weekly: 0, monthly: 0, total: 0
+  end
+
+  @doc """
+
+  """
+  def profit_loss(%Account{} = account), do: profit_loss([account])
+
+  def profit_loss(accounts) when is_list(accounts) or is_nil(accounts) do
+    positions = list_positions(for(a <- accounts || [], do: a.id))
+
+    day_date = Timex.today()
+    week_date = Timex.beginning_of_week(day_date, :sun)
+    month_date = Timex.beginning_of_month(day_date)
+
+    positions_stream = Stream.filter(positions, & &1.closed_at)
+
+    day_positions =
+      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, day_date, :day) == 0))
+
+    week_positions =
+      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, week_date, :day) >= 0))
+
+    month_positions =
+      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, month_date, :day) >= 0))
+
+    %ProfitLoss{
+      daily: day_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
+      weekly: week_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
+      monthly: month_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
+      total: positions_stream |> Enum.reduce(0.0, &(&1.profit_loss + &2))
+    }
+  end
+
   alias OptionsTracker.Accounts.Position
   alias OptionsTracker.Users.User
   alias OptionsTracker.Audits
@@ -170,9 +205,22 @@ defmodule OptionsTracker.Accounts do
     |> Repo.all()
   end
 
+  @spec search_positions(%{
+          account_ids: list(non_neg_integer()),
+          search: String.t(),
+          open: boolean
+        }) :: list(Position.t())
+  @doc """
+  Search for positions given a set of criteria.
+  Parameters:
+    * :account_ids - The account IDs to search.
+    * :search - The ticker to search.
+    * :open - Boolean to indicate to look for open or closed positions.
+  """
   def search_positions(params) when is_map(params) do
     account_ids = Map.get(params, :account_ids)
     search = Map.get(params, :search)
+    search = if(search, do: "%#{String.upcase(search)}%")
     open = Map.get(params, :open, true)
 
     query =
@@ -181,8 +229,8 @@ defmodule OptionsTracker.Accounts do
       )
 
     query =
-      if search not in ["", nil] do
-        where(query, [p], p.stock == ^search)
+      if search != "" && search != nil do
+        where(query, [p], like(p.stock, ^search))
       else
         query
       end
@@ -199,6 +247,7 @@ defmodule OptionsTracker.Accounts do
     Repo.all(query)
   end
 
+  @spec get_position!(number | String.t()) :: Position.t()
   @doc """
   Gets a single position.
 

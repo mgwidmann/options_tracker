@@ -32,9 +32,11 @@
               Positions
             </a>
 
-            <a class="navbar-item" href="/dashboard">
-              Dashboard
-            </a>
+            <%= if @current_user.admin? do %>
+              <a class="navbar-item" href="/dashboard">
+                Dashboard
+              </a>
+            <% end %>
           </div>
           <div class="navbar-end">
             <div class="navbar-item has-dropdown is-hoverable">

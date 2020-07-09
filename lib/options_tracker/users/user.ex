@@ -29,6 +29,7 @@ defmodule OptionsTracker.Users.User do
     |> cast(attrs, [:email, :password])
     |> validate_email()
     |> validate_password()
+    |> unique_constraint(:email, name: :users_email_index)
   end
 
   defp validate_email(changeset) do

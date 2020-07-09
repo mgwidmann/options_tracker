@@ -3,7 +3,6 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   import OptionsTrackerWeb.PositionLive.Helpers
 
   alias OptionsTracker.Accounts
-  alias OptionsTracker.Accounts.Account
   alias OptionsTracker.Accounts.Position
   alias OptionsTracker.Users
   alias OptionsTracker.Users.User
@@ -23,6 +22,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:current_account, current_account)
      |> assign(:positions, list_positions(search_changeset))
      |> assign(:changeset, changeset)
+     |> assign(:profit_loss, Accounts.profit_loss(current_account))
      |> assign(:search_changeset, search_changeset)}
   end
 
@@ -143,6 +143,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:current_account, nil)
      |> assign(:positions, list_positions(search_changeset))
      |> assign(:current_account, current_account)
+     |> assign(:profit_loss, Accounts.profit_loss(current_account))
      |> assign(:search_changeset, search_changeset)}
   end
 
@@ -159,6 +160,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      socket
      |> assign(:current_account, current_account)
      |> assign(:positions, list_positions(search_changeset))
+     |> assign(:profit_loss, Accounts.profit_loss(current_account))
      |> assign(:search_changeset, search_changeset)}
   end
 

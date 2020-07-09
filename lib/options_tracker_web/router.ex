@@ -17,6 +17,10 @@ defmodule OptionsTrackerWeb.Router do
     plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root_full}
   end
 
+  pipeline :admin do
+    plug :restrict_admin
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -65,7 +69,7 @@ defmodule OptionsTrackerWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
+      pipe_through [:browser, :admin]
       live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
     end
   end
@@ -97,5 +101,13 @@ defmodule OptionsTrackerWeb.Router do
     get "/users/confirm", UserConfirmationController, :new
     post "/users/confirm", UserConfirmationController, :create
     get "/users/confirm/:token", UserConfirmationController, :confirm
+  end
+
+  def restrict_admin(conn, []) do
+    if conn.assigns.current_user.admin? do
+      conn
+    else
+      halt(conn)
+    end
   end
 end

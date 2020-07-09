@@ -10,6 +10,7 @@
     "@creativebulma/bulma-tooltip": "^1.2.0",
     "bulma": "^0.9.0",
     "bulma-calendar": "^6.0.7",
+    "bulma-divider": "^0.2.0",
     "font-awesome": "^4.7.0",
     "js-datepicker": "^5.14.2",
     "nprogress": "^0.2.0",

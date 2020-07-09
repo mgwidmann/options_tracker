@@ -11,11 +11,11 @@ defmodule OptionsTracker.Search do
   def new(account, params \\ %{})
   def new(%Account{} = account, params), do: new([account], params)
 
-  def new(accounts, params) when is_list(accounts) do
+  def new(accounts, params) when is_list(accounts) or is_nil(accounts) do
     changeset =
       {%{}, @schema}
       |> Ecto.Changeset.cast(
-        params |> Map.put("account_ids", for(a <- accounts, do: a.id)),
+        params |> Map.put("account_ids", for(a <- accounts || [], do: a.id)),
         Map.keys(@schema)
       )
 

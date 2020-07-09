@@ -5,10 +5,14 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   @spec type_display(Position.t()) :: String.t()
   def type_display(%Position{type: :stock, basis: basis}),
-    do: " (#{OptionsTrackerWeb.LiveHelpers.currency_string(basis)} basis)"
+    do: "#{OptionsTrackerWeb.LiveHelpers.currency_string(basis)} basis"
 
-  def type_display(%Position{type: :call}), do: "c"
-  def type_display(%Position{type: :put}), do: "p"
+  def type_display(%Position{type: :call}), do: "Call"
+  def type_display(%Position{type: :put}), do: "Put"
+
+  def type_display_class(%Position{type: :stock}), do: "is-info"
+  def type_display_class(%Position{type: :call}), do: "is-success"
+  def type_display_class(%Position{type: :put}), do: "is-danger"
 
   def count_type(%Position{type: :stock, count: 1}), do: "share"
   def count_type(%Position{type: :stock, count: c}) when c > 1, do: "shares"

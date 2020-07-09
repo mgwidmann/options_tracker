@@ -5,7 +5,7 @@
         <h1 class="title mb-0 is-pulled-left">Positions</h1>
         <div class="is-pulled-right">
           <div class="mh-3">
-            <% no_account = @current_account == nil %>
+            <% no_account = @current_account == nil || match?([_|_], @current_account) %>
             <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
               <i class="fa fa-plus" aria-hidden="true"></i>
             <% end %>
@@ -28,35 +28,77 @@
 </header>
 
 <%= search_form = form_for @search_changeset, "#", id: "search-form", as: :search_form, phx_change: "search" %>
-<div class="columns">
+<div class="columns pb-3">
   <div class="column is-one-quarter">
-    <nav class="panel">
+    <div class="panel">
       <p class="panel-heading">
         Search for a position
       </p>
       <div class="panel-block">
-        <div class="control mb-0 tags has-addons">
-          <span class="tag long is-success <%= if(@search_changeset.changes[:open] in [true, nil], do: "", else: "is-light") %>">
-            <%= label search_form, :open_true, class: "radio" do %>
-              <%= radio_button search_form, :open, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
-              Open
-            <% end %>
-          </span>
-          <span class="tag short is-danger <%= if(@search_changeset.changes[:open] == false, do: "", else: "is-light") %>">
-            <%= label search_form, :open_false, class: "radio" do %>
-              <%= radio_button search_form, :open, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
-              Closed
-            <% end %>
+        <div class="column">
+          <div class="control mb-0 tags has-addons">
+            <span class="tag long is-success <%= if(@search_changeset.changes[:open] in [true, nil], do: "", else: "is-light") %>">
+              <%= label search_form, :open_true, class: "radio" do %>
+                <%= radio_button search_form, :open, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
+                Open
+              <% end %>
+            </span>
+            <span class="tag short is-danger <%= if(@search_changeset.changes[:open] == false, do: "", else: "is-light") %>">
+              <%= label search_form, :open_false, class: "radio" do %>
+                <%= radio_button search_form, :open, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
+                Closed
+              <% end %>
+            </span>
+          </div>
+        </div>
+        <div class="column">
+          <p class="control has-icons-left">
+            <%= text_input search_form, :search, class: "input is-rounded", placeholder: "Ticker" %>
+            <span class="icon is-left">
+              <i class="fa fa-search" aria-hidden="true"></i>
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="column is-half">
+    <div class="panel">
+      <div class="panel-heading">
+        Realized Profit / Loss
+      </div>
+      <div class="panel-block py-0 px-0">
+        <div class="column has-text-centered is-size-7 py-1">Daily</div>
+        <div class="column has-text-centered is-size-7 py-1">Weekly</div>
+        <div class="column has-text-centered is-size-7 py-1">Monthly</div>
+        <div class="column has-text-centered is-size-7 py-1">Total</div>
+      </div>
+      <div class="panel-block py-0">
+        <div class="column has-text-centered">
+          <span class="<%= if(@profit_loss.daily >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= currency_string(@profit_loss.daily) %>
           </span>
         </div>
-        <p class="control has-icons-left">
-          <%= text_input search_form, :search, class: "input", placeholder: "Search" %>
-          <span class="icon is-left">
-            <i class="fa fa-search" aria-hidden="true"></i>
+        <div class="is-divider-vertical"></div>
+        <div class="column has-text-centered">
+          <span class="<%= if(@profit_loss.weekly >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= currency_string(@profit_loss.weekly) %>
           </span>
-        </p>
+        </div>
+        <div class="is-divider-vertical"></div>
+        <div class="column has-text-centered">
+          <span class="<%= if(@profit_loss.monthly >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= currency_string(@profit_loss.monthly) %>
+          </span>
+        </div>
+        <div class="is-divider-vertical"></div>
+        <div class="column has-text-centered">
+          <span class="<%= if(@profit_loss.total >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <%= currency_string(@profit_loss.total) %>
+          </span>
+        </div>
       </div>
-    </nav>
+    </div>
   </div>
 </div>
 </form>
@@ -137,8 +179,11 @@
                 </div>
               </div>
               <div class="column is-half">
-                <div class="is-size-5">
-                  <%= currency_string(position.strike) %><%= type_display(position) %>
+                <div class="tags mb-0 is-size-5">
+                  <%= currency_string(position.strike) %>
+                  <span class="tag is-small ml-2 <%= type_display_class(position) %>">
+                    <%= type_display(position) %>
+                  </span>
                 </div>
                 <div class="">
                   <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span>
@@ -192,9 +237,10 @@
           </div>
           <div class="columns is-mobile is-gapless">
             <div class="column is-one-quarter">
-              <%= date_display(position.opened_at, true) %>
+              <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.expires_at, true) %>"><%= date_display(position.opened_at, false) %></span>
+              <br/>
               <%= if position.fees == 0.00 do %>
-                (<%= currency_string(position.fees) %> fees)
+                <%= currency_string(position.fees) %> fees
               <% end %>
             </div>
             <div class="column is-half has-text-right">
@@ -261,12 +307,23 @@
           return_to: Routes.position_index_path(@socket, :index)) %>
       <% else %>
         <tr id="position-<%= position.id %>" class="<%= row_class_for_status(position.status) %>">
-          <td></td>
+          <td>
+            <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.opened_at, true) %>"><%= date_display(position.opened_at, false) %></span>
+          </td>
           <td><%= position.count %>&nbsp;<%= count_type(position) %></td>
           <td><span class="tag is-rounded"><%= position.stock %></span></td>
           <td><span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span></td>
-          <td><%= currency_string(position.strike) %><%= type_display(position) %></td>
-          <td><%= position.expires_at %></td>
+          <td>
+            <div class="tags">
+              <%= currency_string(position.strike) %>
+              <span class="tag is-small ml-2 <%= type_display_class(position) %>">
+                <%= type_display(position) %>
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Expires on <%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
+          </td>
           <td>
             <span class="<%= if(position.premium >= 0, do: "has-text-success", else: "has-text-danger") %>">
               <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
