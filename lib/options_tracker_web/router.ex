@@ -65,13 +65,11 @@ defmodule OptionsTrackerWeb.Router do
   # If your application does not have an admins-only section yet,
   # you can use Plug.BasicAuth to set up some basic authentication
   # as long as you are also using SSL (which you should anyway).
-  if Mix.env() in [:dev, :test] do
-    import Phoenix.LiveDashboard.Router
+  import Phoenix.LiveDashboard.Router
 
-    scope "/" do
-      pipe_through [:browser, :admin]
-      live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
-    end
+  scope "/" do
+    pipe_through [:browser, :admin]
+    live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
   end
 
   ## Authentication routes
