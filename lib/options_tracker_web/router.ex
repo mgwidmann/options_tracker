@@ -105,7 +105,10 @@ defmodule OptionsTrackerWeb.Router do
     if conn.assigns.current_user.admin? do
       conn
     else
-      halt(conn)
+      conn
+      |> put_status(:unauthorized)
+      |> Phoenix.Controller.render(OptionsTrackerWeb.ErrorView, "404.html")
+      |> halt
     end
   end
 end

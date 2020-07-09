@@ -16,6 +16,8 @@ defmodule OptionsTracker.Users.User do
     timestamps()
   end
 
+  @fields ~w[email password hashed_password confirmed_at admin?]a
+  @registration_fields ~w[email password]a
   @doc """
   A user changeset for registration.
 
@@ -26,7 +28,7 @@ defmodule OptionsTracker.Users.User do
   """
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, @registration_fields)
     |> validate_email()
     |> validate_password()
     |> unique_constraint(:email, name: :users_email_index)
@@ -49,6 +51,15 @@ defmodule OptionsTracker.Users.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> prepare_changes(&hash_password/1)
+  end
+
+  @doc """
+  Admin changeset which can change all fields. Not intended to be used within the codebase.
+  """
+  def admin_changeset(user, attrs) do
+    user
+    |> cast(attrs, @fields)
+    |> unique_constraint(:email, name: :users_email_index)
   end
 
   defp hash_password(changeset) do

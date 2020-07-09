@@ -212,6 +212,16 @@ defmodule OptionsTracker.Users do
     end
   end
 
+  @doc """
+  This function makes a user an admin in the system. It is not called anywhere within the code base as it is intended to be used
+  from the iex console to upgrade a specific user.
+  """
+  def make_admin!(user, admin \\ true) do
+    user
+    |> User.admin_changeset(%{admin?: admin})
+    |> Repo.update!()
+  end
+
   ## Session
 
   @doc """
