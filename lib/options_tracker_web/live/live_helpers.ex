@@ -40,9 +40,8 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
   def currency_string(%Decimal{} = decimal, prepend_unit) do
     decimal
-    |> Decimal.to_float()
-    |> Kernel.*(100)
-    |> trunc()
+    |> Decimal.mult(100)
+    |> Decimal.to_integer()
     |> Money.new()
     |> Money.to_string(symbol: prepend_unit)
   end

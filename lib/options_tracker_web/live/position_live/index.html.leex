@@ -239,7 +239,7 @@
             <div class="column is-one-quarter">
               <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.expires_at, true) %>"><%= date_display(position.opened_at, false) %></span>
               <br/>
-              <%= if position.fees == 0.00 do %>
+              <%= if Decimal.cmp(position.fees, Decimal.new(0)) == :gt do %>
                 <%= currency_string(position.fees) %> fees
               <% end %>
             </div>

@@ -73,14 +73,17 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     end)
   end
 
-  @spec credit_debit_display(number) :: String.t()
-  def credit_debit_display(value) do
+
+  @spec credit_debit_display(Decimal.t()) :: String.t()
+  def credit_debit_display(%Decimal{} = value) do
     value_string =
       value
-      |> abs()
+      |> Decimal.abs()
       |> OptionsTrackerWeb.LiveHelpers.currency_string()
 
-    "#{value_string}#{if(value >= 0, do: "cr", else: "db")}"
+    credit_debit_str = if(Decimal.cmp(value, Decimal.new(0)) in [:eq, :gt], do: "cr", else: "db")
+
+    "#{value_string}#{credit_debit_str}"
   end
 
   @spec is_option?(

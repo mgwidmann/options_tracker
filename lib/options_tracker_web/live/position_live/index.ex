@@ -165,24 +165,31 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   def handle_event("cancel", _, socket) do
+    search_changest = Search.new(socket.assigns.current_account)
+
     {:noreply,
-     socket
-     |> push_redirect(
-       to: socket.assigns[:return_to] || Routes.position_index_path(socket, :index)
-     )}
+      socket
+      |> assign(:search_changeset, search_changest)
+      |> assign(:live_action, nil)
+      |> assign(:changeset, Accounts.change_position(%Position{}))
+      |> assign(:positions, list_positions(search_changest))}
   end
 
   defp save_position(socket, :edit, position_params) do
     case Accounts.update_position(
-           socket.assigns.current_user,
            socket.assigns.position,
-           position_params
+           position_params |> IO.inspect(label: "position_params"),
+           socket.assigns.current_user
          ) do
       {:ok, _position} ->
+        search_changest = Search.new(socket.assigns.current_account)
+
         {:noreply,
          socket
-         |> put_flash(:info, "Position updated successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+         |> assign(:search_changeset, search_changest)
+         |> assign(:live_action, nil)
+         |> assign(:changeset, Accounts.change_position(%Position{}))
+         |> assign(:positions, list_positions(search_changest))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -196,10 +203,14 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
            socket.assigns.current_user
          ) do
       {:ok, _position} ->
+        search_changest = Search.new(socket.assigns.current_account)
+
         {:noreply,
          socket
-         |> put_flash(:info, "Position opened successfully")
-         |> push_redirect(to: Routes.position_index_path(socket, :index))}
+         |> assign(:search_changeset, search_changest)
+         |> assign(:live_action, nil)
+         |> assign(:changeset, Accounts.change_position(%Position{}))
+         |> assign(:positions, list_positions(search_changest))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}

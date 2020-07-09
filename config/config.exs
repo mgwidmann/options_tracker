@@ -41,8 +41,8 @@ config :money,
   symbol_space: false,
   # display units after the delimeter
   fractional_unit: true,
-  # don’t display the insignificant zeros or the delimeter
-  strip_insignificant_zeros: true
+  # display the insignificant zeros or the delimeter
+  strip_insignificant_zeros: false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

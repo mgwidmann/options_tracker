@@ -41,23 +41,22 @@ defmodule OptionsTracker.Accounts.Position do
   schema "positions" do
     # Require info on open
     field :stock, :string
-    field :strike, :float
+    field :strike, :decimal
     field :short, :boolean
-    field :spread, :boolean
     field :type, TransType
     field :opened_at, OptionsTracker.Fields.Date
-    field :premium, :float
+    field :premium, :decimal
     field :expires_at, OptionsTracker.Fields.Date
-    field :fees, :float, default: 0.00
-    field :spread_width, :float
+    field :fees, :decimal, default: Decimal.from_float(0.00)
+    field :spread_width, :decimal
     field :count, :integer, default: 1
 
     # Updated later
-    field :basis, :float
+    field :basis, :decimal
     field :closed_at, OptionsTracker.Fields.Date
-    field :profit_loss, :float
+    field :profit_loss, :decimal
     field :status, StatusType
-    field :exit_price, :float
+    field :exit_price, :decimal
 
     field :notes, :string
     field :exit_strategy, :string
@@ -68,9 +67,9 @@ defmodule OptionsTracker.Accounts.Position do
   end
 
   @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status count account_id]a
-  @not_allowed_stock_fields ~w[expires_at premium spread spread_width]a
+  @not_allowed_stock_fields ~w[expires_at premium spread_width]a
   @not_allowed_option_fields ~w[basis]a
-  @optional_open_fields ~w[spread spread_width basis notes exit_strategy]a
+  @optional_open_fields ~w[spread_width basis notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
   @spec open_changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
@@ -128,8 +127,7 @@ defmodule OptionsTracker.Accounts.Position do
     end)
   end
 
-  @immutable_fields ~w[stock short type strike opened_at expires_at premium]a
-  @fields (@open_fields ++ ~w[basis fees exit_price closed_at]a) -- @immutable_fields
+  @fields @open_fields ++ ~w[basis short type strike opened_at premium fees exit_price expires_at closed_at]a
   @spec changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
@@ -156,7 +154,6 @@ defmodule OptionsTracker.Accounts.Position do
     end
   end
 
-  @duplicate_fields @fields ++ @immutable_fields
   def duplicate_changeset(position, attrs) do
     attrs =
       attrs
@@ -170,7 +167,7 @@ defmodule OptionsTracker.Accounts.Position do
       |> Map.merge(attrs)
 
     %__MODULE__{}
-    |> cast(attrs, @duplicate_fields)
+    |> cast(attrs, @fields)
     |> standard_validations()
     |> calculate_profit_loss()
   end

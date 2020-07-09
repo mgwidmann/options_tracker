@@ -14,7 +14,7 @@
               </div>
               <div class="field py-3">
                 <p class="control is-expanded has-icons-left has-icons-right">
-                  <%= text_input @f, :stock, class: "input is-rounded is-small input-super-small", placeholder: "Ticker" %>
+                  <%= text_input @f, :stock, class: "input is-rounded is-small input-super-small", id: "position_stock_mobile", placeholder: "Ticker", "phx-hook": "AddPosition" %>
                   <span class="icon is-small is-left">
                     <i class="fa fa-line-chart" aria-hidden="true"></i>
                   </span>
@@ -143,7 +143,7 @@
       <div class="control">
         <div class="field">
           <p class="control has-icons-left is-inline">
-            <%= text_input @f, :stock, class: "input is-rounded is-small is-inline", placeholder: "Ticker" %>
+            <%= text_input @f, :stock, class: "input is-rounded is-small is-inline", id: "position_stock", placeholder: "Ticker", "phx-hook": "AddPosition" %>
             <span class="icon is-small is-left">
               <i class="fa fa-line-chart" aria-hidden="true"></i>
             </span>

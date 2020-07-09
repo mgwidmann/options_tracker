@@ -175,11 +175,13 @@ defmodule OptionsTracker.Accounts do
     month_positions =
       positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, month_date, :day) >= 0))
 
+    zero = Decimal.from_float(0.0)
+
     %ProfitLoss{
-      daily: day_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
-      weekly: week_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
-      monthly: month_positions |> Enum.reduce(0.0, &(&1.profit_loss + &2)),
-      total: positions_stream |> Enum.reduce(0.0, &(&1.profit_loss + &2))
+      daily: day_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
+      weekly: week_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
+      monthly: month_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
+      total: positions_stream |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2)))
     }
   end
 
@@ -316,12 +318,13 @@ defmodule OptionsTracker.Accounts do
 
   """
   def update_position(%Position{} = position, attrs, %User{id: user_id}) do
-    changeset = position |> Position.changeset(attrs)
+    changeset = position |> Position.changeset(attrs) |> IO.inspect(label: "changeset")
 
     if changeset.valid? do
       Repo.transaction(fn ->
         case Repo.update(changeset) do
           {:ok, position} ->
+            IO.inspect position, label: "updated position"
             update_basis!(position)
             handle_exercise!(position)
 
