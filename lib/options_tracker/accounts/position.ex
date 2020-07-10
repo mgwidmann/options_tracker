@@ -96,6 +96,8 @@ defmodule OptionsTracker.Accounts.Position do
       position
       |> cast(prepare_attrs(attrs), @open_fields -- @not_allowed_option_fields)
       |> validate_required(@required_open_fields -- @not_allowed_option_fields)
+      |> reverse_sign_for(:premium)
+      |> reverse_sign_for(:exit_price)
       |> validate_position_open()
       |> standard_validations()
     end
@@ -127,6 +129,17 @@ defmodule OptionsTracker.Accounts.Position do
     end)
   end
 
+  defp reverse_sign_for(changeset, field) do
+    value = get_field(changeset, field)
+    short = get_field(changeset, :short)
+
+    if value != nil && short != nil do
+      put_change(changeset, field, Decimal.abs(value) |> Decimal.mult(if(short, do: 1, else: -1)))
+    else
+      changeset
+    end
+  end
+
   @fields @open_fields ++ ~w[basis short type strike opened_at premium fees exit_price expires_at closed_at]a
   @spec changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
@@ -150,6 +163,8 @@ defmodule OptionsTracker.Accounts.Position do
       |> cast(attrs, @fields -- @not_allowed_option_fields)
       |> validate_required(@required_open_fields -- @not_allowed_option_fields)
       |> standard_validations()
+      |> reverse_sign_for(:premium)
+      |> reverse_sign_for(:exit_price)
       |> calculate_profit_loss()
     end
   end
@@ -238,7 +253,7 @@ defmodule OptionsTracker.Accounts.Position do
     |> validate_number(:premium, [])
     |> validate_number(:strike, greater_than: 0.0)
     |> validate_number(:fees, greater_than_or_equal_to: 0.0)
-    |> validate_number(:exit_price, greater_than_or_equal_to: 0.0)
+    |> validate_number(:exit_price, [])
     |> validate_length(:notes, max: 10_000)
     |> validate_length(:exit_strategy, max: 10_000)
   end
@@ -255,13 +270,14 @@ defmodule OptionsTracker.Accounts.Position do
     if status != :open && exit_price && count do
       profit_loss =
         if type == :stock do
-          (exit_price - strike) * if(short, do: -1, else: 1) * count
+          Decimal.sub(exit_price, strike)
+          |> Decimal.mult(if(short, do: -1, else: 1))
+          |> Decimal.mult(count)
         else
-          (premium - exit_price) * 100 * count
+          Decimal.sub(premium, exit_price)
+          |> Decimal.mult(100)
+          |> Decimal.mult(count)
         end
-        |> Decimal.from_float()
-        |> Decimal.round(2, :half_up)
-        |> Decimal.to_float()
 
       put_change(changeset, :profit_loss, profit_loss)
     else

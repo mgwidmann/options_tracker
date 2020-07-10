@@ -109,6 +109,7 @@
     title: @page_title,
     action: @live_action,
     position: @position,
+    current_user: @current_user,
     modal_title: "Close Position",
     only_notes: false,
     return_to: Routes.position_index_path(@socket, :index) %>
@@ -120,6 +121,7 @@
     title: @page_title,
     action: @live_action,
     position: @position,
+    current_user: @current_user,
     modal_title: "Edit Notes",
     only_notes: true,
     return_to: Routes.position_index_path(@socket, :index) %>
@@ -192,7 +194,7 @@
               <div class="column is-one-quarter">
                 <div class="has-text-right">
                   <b><%= position_status_display(position.type, position.status, true) %></b>
-                  <span class="is-size-4 <%= if(position.premium >= 0, do: "has-text-success", else: "has-text-danger") %>">
+                  <span class="is-size-4 <%= if(position.premium && Decimal.cmp(position.premium, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
                     <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
                   </span>
                 </div>
@@ -244,7 +246,7 @@
               <% end %>
             </div>
             <div class="column is-half has-text-right">
-              <span class="<%= if(position.profit_loss >= 0, do: "has-text-success", else: "has-text-danger") %>">
+              <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
                 <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
               </span>
             </div>
@@ -325,13 +327,13 @@
             <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Expires on <%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
           </td>
           <td>
-            <span class="<%= if(position.premium >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <span class="<%= if(position.premium && Decimal.cmp(position.premium, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
               <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
             </span>
           </td>
           <td><%= position_status_display(position.type, position.status, true) %></td>
           <td>
-            <span class="<%= if(position.profit_loss >= 0, do: "has-text-success", else: "has-text-danger") %>">
+            <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
               <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
             </span>
           </td>

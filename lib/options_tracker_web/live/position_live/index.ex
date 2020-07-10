@@ -99,7 +99,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     position = Accounts.get_position!(id)
-    {:ok, _} = Accounts.delete_position(socket.assigns.current_user, position)
+    {:ok, _} = Accounts.delete_position(position)
 
     {:noreply,
      socket

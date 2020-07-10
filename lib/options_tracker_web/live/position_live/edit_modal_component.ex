@@ -7,7 +7,7 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   @impl true
   def update(%{position: position, action: action} = assigns, socket) do
     changeset =
-      Accounts.change_position(position, if(action == :close, do: %{status: :closed}, else: %{}))
+      Accounts.change_position(position, if(action == :close, do: %{status: :closed, closed_at: Timex.today()}, else: %{}))
 
     {:ok,
      socket
@@ -43,7 +43,6 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
       {:ok, _position} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Notes updated successfully")
          |> push_redirect(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -60,7 +59,6 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
       {:ok, _position} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Position closed successfully")
          |> push_redirect(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

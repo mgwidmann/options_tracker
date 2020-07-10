@@ -19,14 +19,35 @@
           </div>
           <%= error_tag f, :status %>
         </div>
+        <%= if @changeset.data.type == OptionsTracker.Accounts.position_type_stock_key() do %>
+          <div class="column control has-icons-left">
+            <%= label f, :basis, "data-tooltip": "Only edit this manually if you know what you're doing!" %>
+            <div class="field">
+              <p class="control has-icons-left">
+                <%= number_input f, :basis, step: "any", class: "input is-small" %>
+                <span class="icon is-small is-left">
+                  <i class="fa fa-usd"></i>
+                </span>
+              </p>
+            </div>
+            <%= error_tag f, :basis %>
+          </div>
+        <% end %>
         <div class="column control has-icons-left">
           <%= label f, :exit_price %>
           <div class="field">
             <p class="control has-icons-left">
-              <%= number_input f, :exit_price, step: "any", class: "input is-small", placeholder: if(@changeset.data.premium, do: currency_string(@changeset.data.premium), else: currency_string(@changeset.data.basis)) %>
+              <%= number_input f, :exit_price, step: "any", class: "input is-small", "phx-hook": "ClosePosition", placeholder: if(@changeset.data.premium, do: currency_string(Decimal.abs(@changeset.data.premium)), else: currency_string(@changeset.data.basis)) %>
               <span class="icon is-small is-left">
                 <i class="fa fa-usd"></i>
               </span>
+              <div class="mh-2 pt-2 has-text-centered">
+                <%= if f.source.changes[:profit_loss] do %>
+                  <span data-tooltip="Profit / Loss" class="has-tooltip-arrow has-tooltip-bottom <%= if(Decimal.cmp(f.source.changes.profit_loss, Decimal.new(0)) in [:eq, :gt], do: "has-text-success", else: "has-text-danger") %>">
+                    <%= credit_debit_display(f.source.changes.profit_loss) %>
+                  </span>
+                <% end %>
+              </div>
             </p>
           </div>
           <%= error_tag f, :exit_price %>
@@ -35,6 +56,13 @@
           <%= label f, :closed_at %>
           <%= text_input f, :closed_at, type: :date, class: "input is-small datepicker" %>
           <%= error_tag f, :closed_at %>
+          <div class="mh-2 pt-2 has-text-centered">
+            <%= if f.source.changes[:closed_at] do %>
+              <span data-tooltip="Days Open" class="has-tooltip-arrow has-tooltip-bottom">
+                <%= Timex.diff(f.source.changes.closed_at, f.data.opened_at, :days) %> days open
+              </span>
+            <% end %>
+          </div>
         </div>
         <div class="column control">
           <%= label f, :fees %>

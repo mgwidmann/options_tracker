@@ -246,6 +246,8 @@ defmodule OptionsTracker.Accounts do
         where(query, [p], p.status not in ^[open_val])
       end
 
+    query = order_by(query, [p], asc_nulls_first: p.expires_at, asc: p.opened_at)
+
     Repo.all(query)
   end
 
@@ -324,7 +326,6 @@ defmodule OptionsTracker.Accounts do
       Repo.transaction(fn ->
         case Repo.update(changeset) do
           {:ok, position} ->
-            IO.inspect position, label: "updated position"
             update_basis!(position)
             handle_exercise!(position)
 
@@ -354,7 +355,7 @@ defmodule OptionsTracker.Accounts do
        when call_or_put in ~w[call put]a do
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
-    profit_loss_per_contact = profit_loss / count
+    profit_loss_per_contact = Decimal.div(profit_loss, count)
 
     position
     |> Position.open_related_positions()
@@ -365,10 +366,10 @@ defmodule OptionsTracker.Accounts do
       s.short != short_long || s.count < 100
     end)
     |> pair_contacts_with_stock(count, fn stock, count ->
-      basis_delta = profit_loss_per_contact / stock.count * count
+      basis_delta = Decimal.div(profit_loss_per_contact, stock.count) |> Decimal.mult(count)
       # short stock positions add to basis instead of lowering basis
-      basis_delta = if(short_long, do: -basis_delta, else: basis_delta)
-      change_position(stock, %{basis: stock.basis - basis_delta})
+      basis_delta = if(short_long, do: Decimal.mult(basis_delta, -1), else: basis_delta)
+      change_position(stock, %{basis: Decimal.sub(stock.basis, basis_delta)})
     end)
     |> elem(1)
     |> Enum.map(fn
@@ -519,7 +520,7 @@ defmodule OptionsTracker.Accounts do
           cond do
             position.type == Position.TransType.call() ||
                 position.type == Position.TransType.call_key() ->
-              {true, -position.premium}
+              {true, Decimal.mult(position.premium, -1)}
 
             position.type == Position.TransType.put() ||
                 position.type == Position.TransType.put_key() ->
@@ -535,7 +536,7 @@ defmodule OptionsTracker.Accounts do
           |> Map.merge(%{
             short: short,
             opened_at: DateTime.utc_now() |> DateTime.to_date(),
-            basis: position.strike - basis_delta
+            basis: Decimal.sub(position.strike, basis_delta)
           })
 
         {:ok, new_position} =
@@ -549,7 +550,7 @@ defmodule OptionsTracker.Accounts do
     end
   end
 
-  @spec delete_position(OptionsTracker.Accounts.Position.t(), User.t()) ::
+  @spec delete_position(OptionsTracker.Accounts.Position.t()) ::
           {:ok, Position.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Deletes a position.
@@ -563,13 +564,18 @@ defmodule OptionsTracker.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_position(%Position{} = position, %User{id: user_id}) do
+  def delete_position(%Position{id: id} = position) do
     Ecto.Multi.new()
-    |> Ecto.Multi.delete(:position, position)
-    |> Ecto.Multi.insert(
+    |> Ecto.Multi.run(
       :position_audit,
-      Audits.position_audit_changeset(:delete, user_id, position)
+      fn repo, _changes ->
+        case from(p in Audits.Position, where: p.position_id == ^id) |> repo.delete_all() do
+          {count, nil} -> {:ok, count}
+          other -> {:error, other}
+        end
+      end
     )
+    |> Ecto.Multi.delete(:position, position)
     |> Repo.transaction()
     |> case do
       {:ok, %{position: position}} -> {:ok, position}
@@ -627,6 +633,11 @@ defmodule OptionsTracker.Accounts do
   for {status, value} <- Position.StatusType.__enum_map__() do
     def unquote(:"position_status_#{status}")(), do: unquote(value)
     def unquote(:"position_status_#{status}_key")(), do: unquote(status)
+  end
+
+  for {type, value} <- Position.TransType.__enum_map__() do
+    def unquote(:"position_type_#{type}")(), do: unquote(value)
+    def unquote(:"position_type_#{type}_key")(), do: unquote(type)
   end
 
   def name_for_position_status(status, past_tense \\ false) do
