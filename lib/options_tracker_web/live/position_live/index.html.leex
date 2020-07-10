@@ -247,7 +247,7 @@
             </div>
             <div class="column is-half has-text-right">
               <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-                <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
+                <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price || 0.0)} exit)", else: nil) %>
               </span>
             </div>
             <div class="column is-one-quarter">
@@ -334,7 +334,7 @@
           <td><%= position_status_display(position.type, position.status, true) %></td>
           <td>
             <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-              <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price)} exit)", else: nil) %>
+              <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price || 0.0)} exit)", else: nil) %>
             </span>
           </td>
           <td>

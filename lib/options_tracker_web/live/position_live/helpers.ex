@@ -73,7 +73,6 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     end)
   end
 
-
   @spec credit_debit_display(Decimal.t()) :: String.t()
   def credit_debit_display(%Decimal{} = value) do
     value_string =

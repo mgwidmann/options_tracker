@@ -178,10 +178,10 @@ defmodule OptionsTracker.Accounts do
     zero = Decimal.from_float(0.0)
 
     %ProfitLoss{
-      daily: day_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
-      weekly: week_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
-      monthly: month_positions |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2))),
-      total: positions_stream |> Enum.reduce(zero, &(Decimal.add(&1.profit_loss, &2)))
+      daily: day_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
+      weekly: week_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
+      monthly: month_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
+      total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2))
     }
   end
 

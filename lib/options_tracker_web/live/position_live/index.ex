@@ -15,7 +15,13 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
 
     current_user = Users.get_user_by_session_token(user_token)
-    current_account = if(account_id == :all, do: current_user.accounts, else: get_account(current_user, account_id))
+
+    current_account =
+      if(account_id == :all,
+        do: current_user.accounts,
+        else: get_account(current_user, account_id)
+      )
+
     search_changeset = Search.new(current_account)
 
     {:ok,
@@ -99,8 +105,39 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:changeset, changeset)
   end
 
+  defp apply_action(socket, :reopen, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+
+    case Accounts.update_position(
+           position,
+           %{
+             status: Accounts.position_status_open(),
+             closed_at: nil,
+             exit_price: nil,
+             profit_loss: nil
+           },
+           socket.assigns.current_user
+         ) do
+      {:ok, _position} ->
+        search_changest = Search.new(socket.assigns.current_account)
+
+        socket
+        |> assign(:search_changeset, search_changest)
+        |> assign(:live_action, nil)
+        |> assign(:changeset, Accounts.change_position(%Position{}))
+        |> assign(:positions, list_positions(search_changest))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        assign(socket, :changeset, changeset)
+    end
+  end
+
   @impl true
-  def handle_event("delete", %{"delete_params" => %{"id" => id, "return_to" => return_to}}, socket) do
+  def handle_event(
+        "delete",
+        %{"delete_params" => %{"id" => id, "return_to" => return_to}},
+        socket
+      ) do
     position = Accounts.get_position!(id)
     {:ok, _} = Accounts.delete_position(position)
 
@@ -148,19 +185,18 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     {:noreply,
      socket
-     |> push_redirect(to: Routes.position_account_index_path(socket, :index, account_id))
-     }
+     |> push_redirect(to: Routes.position_account_index_path(socket, :index, account_id))}
   end
 
   def handle_event("cancel", _, socket) do
     search_changest = Search.new(socket.assigns.current_account)
 
     {:noreply,
-      socket
-      |> assign(:search_changeset, search_changest)
-      |> assign(:live_action, nil)
-      |> assign(:changeset, Accounts.change_position(%Position{}))
-      |> assign(:positions, list_positions(search_changest))}
+     socket
+     |> assign(:search_changeset, search_changest)
+     |> assign(:live_action, nil)
+     |> assign(:changeset, Accounts.change_position(%Position{}))
+     |> assign(:positions, list_positions(search_changest))}
   end
 
   defp save_position(socket, :edit, position_params) do

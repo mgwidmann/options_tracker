@@ -140,7 +140,8 @@ defmodule OptionsTracker.Accounts.Position do
     end
   end
 
-  @fields @open_fields ++ ~w[basis short type strike opened_at premium fees exit_price expires_at closed_at]a
+  @fields @open_fields ++
+            ~w[basis short type strike opened_at premium profit_loss fees exit_price expires_at closed_at]a
   @spec changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}

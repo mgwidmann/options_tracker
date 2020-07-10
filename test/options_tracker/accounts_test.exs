@@ -15,7 +15,7 @@ defmodule OptionsTracker.AccountsTest do
       opt_open_fee: 120.5,
       stock_close_fee: 120.5,
       stock_open_fee: 120.5,
-      type: 0,
+      type: 0
     }
     @update_attrs %{
       cash: "456.7",
@@ -40,7 +40,10 @@ defmodule OptionsTracker.AccountsTest do
 
     def user_fixture() do
       {:ok, user} =
-        OptionsTracker.Users.register_user(%{email: "user#{Enum.random(1..1_000_000_000)}@email.com", password: "longpassword"})
+        OptionsTracker.Users.register_user(%{
+          email: "user#{Enum.random(1..1_000_000_000)}@email.com",
+          password: "longpassword"
+        })
 
       user
     end
@@ -223,7 +226,9 @@ defmodule OptionsTracker.AccountsTest do
       attrs = @valid_stock_attrs |> Enum.into(%{account_id: account.id})
 
       assert {:ok, %Position{} = position} =
-               Accounts.create_position(attrs |> Enum.into(@valid_attrs), %User{id: account.user_id})
+               Accounts.create_position(attrs |> Enum.into(@valid_attrs), %User{
+                 id: account.user_id
+               })
 
       assert position.basis == Decimal.from_float(100.00)
       assert position.closed_at == nil
@@ -250,7 +255,10 @@ defmodule OptionsTracker.AccountsTest do
     test "update_position/3 with valid data updates the position" do
       account = account_fixture()
       position = position_fixture()
-      assert {:ok, %Position{} = position} = Accounts.update_position(position, @update_attrs, %User{id: account.user_id})
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(position, @update_attrs, %User{id: account.user_id})
+
       # Basis are always nil on options and cannot be updated
       assert position.basis == nil
       assert position.closed_at == ~D[2011-05-18]
@@ -276,7 +284,11 @@ defmodule OptionsTracker.AccountsTest do
       position = stock_position_fixture()
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{exit_price: 150} |> Enum.into(@update_attrs), %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{exit_price: 150} |> Enum.into(@update_attrs),
+                 %User{id: account.user_id}
+               )
 
       assert position.basis == Decimal.from_float(100.00)
       assert position.closed_at == ~D[2011-05-18]
@@ -300,7 +312,10 @@ defmodule OptionsTracker.AccountsTest do
     test "update_position/3 with invalid data returns error changeset" do
       account = account_fixture()
       position = position_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.update_position(position, @invalid_attrs, %User{id: account.user_id})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Accounts.update_position(position, @invalid_attrs, %User{id: account.user_id})
+
       assert position == Accounts.get_position!(position.id)
     end
 
@@ -326,11 +341,15 @@ defmodule OptionsTracker.AccountsTest do
         position_fixture(%{stock: stock.stock, type: :call, premium: 1.50, account_id: account.id})
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
@@ -346,11 +365,15 @@ defmodule OptionsTracker.AccountsTest do
         position_fixture(%{stock: stock.stock, type: :put, premium: 1.50, account_id: account.id})
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
@@ -374,11 +397,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
@@ -407,11 +434,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 100 shares are updated
       old_basis = stock.basis
@@ -448,17 +479,23 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 600 shares are updated
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(0.72)))
+
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(0.72)))
 
       # 600 other shares are not updated
       stock = Accounts.get_position!(other_stock.id)
@@ -488,17 +525,23 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 600 shares are updated
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(0.72)))
+
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(0.72)))
 
       # 600 other shares are not updated
       stock = Accounts.get_position!(other_stock.id)
@@ -520,17 +563,22 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 10 additional shares
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(1.32)))
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(1.32)))
     end
 
     test "update_position/3 with put on uneven amount of short stock raises basis average on close" do
@@ -548,18 +596,23 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 100 shares are updated
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 10 additional shares
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(1.32)))
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(1.32)))
     end
 
     test "update_position/3 with call on less than available long stock lowers basis average on close" do
@@ -577,17 +630,22 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 500 additional shares
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(0.72)))
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.sub(stock.strike, Decimal.from_float(0.72)))
     end
 
     test "update_position/3 with put on less than available short stock raises basis average on close" do
@@ -605,18 +663,23 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.05),
-                 closed_at: ~D[2011-05-18],
-                 status: :closed
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.05),
+                   closed_at: ~D[2011-05-18],
+                   status: :closed
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 100 shares are updated
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 500 additional shares
-      assert Decimal.from_float(Float.round(stock.basis, 2)) |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(0.72)))
+      assert Decimal.from_float(Float.round(stock.basis, 2))
+             |> Decimal.eq?(Decimal.add(stock.strike, Decimal.from_float(0.72)))
     end
 
     ################# HANDLING EXERCISE ####################
@@ -635,11 +698,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       # Profit from premium
       assert position.profit_loss == Decimal.from_float(150.00)
@@ -663,11 +730,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       # Profit from premium
       assert position.profit_loss == Decimal.from_float(150.00)
@@ -701,11 +772,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 600 shares are updated
       stock = Accounts.get_position!(stock.id)
@@ -750,11 +825,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       # 600 shares are updated
       stock = Accounts.get_position!(stock.id)
@@ -792,11 +871,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.status == :closed
@@ -824,11 +907,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.status == :closed
@@ -855,11 +942,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.count == 10
@@ -889,11 +980,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.count == 10
@@ -923,11 +1018,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.count == 250
@@ -958,11 +1057,15 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, %{
-                 exit_price: Decimal.from_float(0.00),
-                 closed_at: ~D[2011-05-18],
-                 status: :exercised
-               }, %User{id: account.user_id})
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
 
       stock = Accounts.get_position!(stock.id)
       assert stock.count == 250

@@ -18,59 +18,62 @@ alias OptionsTracker.Accounts.Position
 alias OptionsTracker.Repo
 
 user = Users.get_user_by_email("admin@gmail.com")
-user = if user == nil do
-  %User{
-    id: 1,
-    email: "admin@gmail.com",
-    admin?: true,
-    confirmed_at: DateTime.utc_now() |> DateTime.truncate(:second),
-    hashed_password: Bcrypt.hash_pwd_salt("adminpassword")
-  }
-  |> Repo.insert!()
-  |> Repo.preload(:accounts)
-else
-  user
-end
 
-{rh, tw} = if user.accounts == [] do
-  rh =
-    %Account{
+user =
+  if user == nil do
+    %User{
       id: 1,
-      broker_name: nil,
-      cash: Decimal.from_float(2_000.00),
-      exercise_fee: Decimal.from_float(0.00),
-      name: "Robinhood",
-      opt_close_fee: Decimal.from_float(0.00),
-      opt_open_fee: Decimal.from_float(0.00),
-      stock_close_fee: Decimal.from_float(0.00),
-      stock_open_fee: Decimal.from_float(0.00),
-      type: :robinhood,
-      user_id: user.id
+      email: "admin@gmail.com",
+      admin?: true,
+      confirmed_at: DateTime.utc_now() |> DateTime.truncate(:second),
+      hashed_password: Bcrypt.hash_pwd_salt("adminpassword")
     }
     |> Repo.insert!()
+    |> Repo.preload(:accounts)
+  else
+    user
+  end
 
-  tw =
-    %Account{
-      id: 2,
-      broker_name: nil,
-      cash: Decimal.from_float(4_000.00),
-      exercise_fee: Decimal.from_float(5.00),
-      name: "TW Margin",
-      opt_close_fee: Decimal.from_float(0.14),
-      opt_open_fee: Decimal.from_float(1.15),
-      stock_close_fee: Decimal.from_float(0.00),
-      stock_open_fee: Decimal.from_float(0.00),
-      type: :tasty_works,
-      user_id: user.id
-    }
-    |> Repo.insert!()
+{rh, tw} =
+  if user.accounts == [] do
+    rh =
+      %Account{
+        id: 1,
+        broker_name: nil,
+        cash: Decimal.from_float(2_000.00),
+        exercise_fee: Decimal.from_float(0.00),
+        name: "Robinhood",
+        opt_close_fee: Decimal.from_float(0.00),
+        opt_open_fee: Decimal.from_float(0.00),
+        stock_close_fee: Decimal.from_float(0.00),
+        stock_open_fee: Decimal.from_float(0.00),
+        type: :robinhood,
+        user_id: user.id
+      }
+      |> Repo.insert!()
 
-  {rh, tw}
-else
-  rh = user.accounts |> Enum.find(fn a -> a.name == "Robinhood" end)
-  tw = user.accounts |> Enum.find(fn a -> a.name == "TW Margin" end)
-  {rh, tw}
-end
+    tw =
+      %Account{
+        id: 2,
+        broker_name: nil,
+        cash: Decimal.from_float(4_000.00),
+        exercise_fee: Decimal.from_float(5.00),
+        name: "TW Margin",
+        opt_close_fee: Decimal.from_float(0.14),
+        opt_open_fee: Decimal.from_float(1.15),
+        stock_close_fee: Decimal.from_float(0.00),
+        stock_open_fee: Decimal.from_float(0.00),
+        type: :tasty_works,
+        user_id: user.id
+      }
+      |> Repo.insert!()
+
+    {rh, tw}
+  else
+    rh = user.accounts |> Enum.find(fn a -> a.name == "Robinhood" end)
+    tw = user.accounts |> Enum.find(fn a -> a.name == "TW Margin" end)
+    {rh, tw}
+  end
 
 [
   %Position{

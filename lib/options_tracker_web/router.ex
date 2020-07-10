@@ -41,7 +41,10 @@ defmodule OptionsTrackerWeb.Router do
     live "/accounts/:id/show/edit", AccountLive.Show, :edit
 
     live "/positions", PositionLive.Index, :index
-    live "/positions/accounts/:account_id", PositionLive.Index, :index, as: :position_account_index
+
+    live "/positions/accounts/:account_id", PositionLive.Index, :index,
+      as: :position_account_index
+
     live "/positions/new", PositionLive.Index, :new
     live "/positions/:id/edit", PositionLive.Index, :edit
     live "/positions/:id/close", PositionLive.Index, :close
