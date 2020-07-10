@@ -9,17 +9,20 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   alias OptionsTracker.Search
 
   @impl true
-  def mount(_params, %{"user_token" => user_token} = _session, socket) do
+  def mount(params, %{"user_token" => user_token} = _session, socket) do
     changeset = Accounts.change_position(%Position{})
+    account_id = params["account_id"] || "all"
+    account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
 
     current_user = Users.get_user_by_session_token(user_token)
-    current_account = current_user |> get_account()
+    current_account = if(account_id == :all, do: current_user.accounts, else: get_account(current_user, account_id))
     search_changeset = Search.new(current_account)
 
     {:ok,
      socket
      |> assign(:current_user, current_user)
      |> assign(:current_account, current_account)
+     |> assign(:current_account_id, account_id)
      |> assign(:positions, list_positions(search_changeset))
      |> assign(:changeset, changeset)
      |> assign(:profit_loss, Accounts.profit_loss(current_account))
@@ -97,7 +100,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("delete", %{"delete_params" => %{"id" => id, "return_to" => return_to}}, socket) do
     position = Accounts.get_position!(id)
     {:ok, _} = Accounts.delete_position(position)
 
@@ -105,7 +108,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      socket
      |> assign(:positions, list_positions(socket.assigns.search_changeset))
      |> put_flash(:danger, "Position deleted successfully!")
-     |> push_redirect(to: Routes.position_index_path(socket, :index))}
+     |> push_redirect(to: return_to)}
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
@@ -135,33 +138,18 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   def handle_event("change_account", %{"account_id" => "all"}, socket) do
-    current_account = socket.assigns.current_user.accounts
-    search_changeset = Search.new(current_account)
-
     {:noreply,
      socket
-     |> assign(:current_account, nil)
-     |> assign(:positions, list_positions(search_changeset))
-     |> assign(:current_account, current_account)
-     |> assign(:profit_loss, Accounts.profit_loss(current_account))
-     |> assign(:search_changeset, search_changeset)}
+     |> push_redirect(to: Routes.position_index_path(socket, :index))}
   end
 
   def handle_event("change_account", %{"account_id" => account_id}, socket) do
     {account_id, ""} = Integer.parse(account_id)
 
-    current_account =
-      socket.assigns.current_user.accounts |> Enum.find(&(&1.id == account_id)) ||
-        socket.assigns.current_account
-
-    search_changeset = Search.new(current_account)
-
     {:noreply,
      socket
-     |> assign(:current_account, current_account)
-     |> assign(:positions, list_positions(search_changeset))
-     |> assign(:profit_loss, Accounts.profit_loss(current_account))
-     |> assign(:search_changeset, search_changeset)}
+     |> push_redirect(to: Routes.position_account_index_path(socket, :index, account_id))
+     }
   end
 
   def handle_event("cancel", _, socket) do
@@ -178,7 +166,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   defp save_position(socket, :edit, position_params) do
     case Accounts.update_position(
            socket.assigns.position,
-           position_params |> IO.inspect(label: "position_params"),
+           position_params,
            socket.assigns.current_user
          ) do
       {:ok, _position} ->
@@ -217,12 +205,15 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     end
   end
 
-  defp get_account(%User{accounts: []}) do
+  defp get_account(%User{accounts: []}, _account_id) do
     nil
   end
 
-  defp get_account(%User{accounts: [account | _]}) do
-    account
+  defp get_account(%User{accounts: accounts}, account_id) do
+    accounts
+    |> Enum.find(fn account ->
+      account.id == account_id
+    end)
   end
 
   defp list_positions(search_changeset) do

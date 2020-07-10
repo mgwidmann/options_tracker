@@ -16,7 +16,7 @@
             <% else %>
               <%= form_tag "#", phx_change: "change_account", class: "is-pulled-right" do %>
                 <%= content_tag :select, prompt: "Select an Account", name: :account_id, class: "select" do %>
-                  <%= options_for_select [{"All", "all"} | accounts_select(@current_user.accounts)], @current_account != nil && !match?([_|_], @current_account) && @current_account.id || "all" %>
+                  <%= options_for_select [{"All", "all"} | accounts_select(@current_user.accounts)], @current_account_id %>
                 <% end %>
               <% end %>
             <% end %>
@@ -28,8 +28,8 @@
 </header>
 
 <%= search_form = form_for @search_changeset, "#", id: "search-form", as: :search_form, phx_change: "search" %>
-<div class="columns pb-3">
-  <div class="column is-one-quarter">
+<div class="columns is-multiline pb-3">
+  <div class="column is-half-desktop is-full-tablet">
     <div class="panel">
       <p class="panel-heading">
         Search for a position
@@ -62,7 +62,7 @@
       </div>
     </div>
   </div>
-  <div class="column is-half">
+  <div class="column is-half-desktop is-full-tablet">
     <div class="panel">
       <div class="panel-heading">
         Realized Profit / Loss
@@ -75,25 +75,25 @@
       </div>
       <div class="panel-block py-0">
         <div class="column has-text-centered">
-          <span class="<%= if(@profit_loss.daily >= 0, do: "has-text-success", else: "has-text-danger") %>">
+          <span class="<%= if(Decimal.cmp(@profit_loss.daily, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
             <%= currency_string(@profit_loss.daily) %>
           </span>
         </div>
         <div class="is-divider-vertical"></div>
         <div class="column has-text-centered">
-          <span class="<%= if(@profit_loss.weekly >= 0, do: "has-text-success", else: "has-text-danger") %>">
+          <span class="<%= if(Decimal.cmp(@profit_loss.weekly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
             <%= currency_string(@profit_loss.weekly) %>
           </span>
         </div>
         <div class="is-divider-vertical"></div>
         <div class="column has-text-centered">
-          <span class="<%= if(@profit_loss.monthly >= 0, do: "has-text-success", else: "has-text-danger") %>">
+          <span class="<%= if(Decimal.cmp(@profit_loss.monthly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
             <%= currency_string(@profit_loss.monthly) %>
           </span>
         </div>
         <div class="is-divider-vertical"></div>
         <div class="column has-text-centered">
-          <span class="<%= if(@profit_loss.total >= 0, do: "has-text-success", else: "has-text-danger") %>">
+          <span class="<%= if(Decimal.cmp(@profit_loss.total, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
             <%= currency_string(@profit_loss.total) %>
           </span>
         </div>
@@ -112,7 +112,7 @@
     current_user: @current_user,
     modal_title: "Close Position",
     only_notes: false,
-    return_to: Routes.position_index_path(@socket, :index) %>
+    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
 <% end %>
 
 <%= if @live_action in [:notes] do %>
@@ -124,17 +124,17 @@
     current_user: @current_user,
     modal_title: "Edit Notes",
     only_notes: true,
-    return_to: Routes.position_index_path(@socket, :index) %>
+    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
 <% end %>
 
 <%= if @live_action in [:delete] do %>
-  <%= live_modal(@socket, OptionsTrackerWeb.PositionLive.DeleteModalComponent,
+  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.DeleteModalComponent,
     id: :delete,
     modal_title: "Delete Position",
     title: @page_title,
     action: @live_action,
     position: @position,
-    return_to: Routes.position_index_path(@socket, :index)) %>
+    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
 <% end %>
 
 <%= mobile_f = form_for @changeset, "#",
@@ -144,7 +144,7 @@
 
 <div id="positions-mobile" class="rows is-hidden-desktop">
   <%= if @live_action in [:new] do %>
-    <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+    <%= live_component @socket, OptionsTrackerWeb.PositionLive.FormComponent,
       id: :new_mobile,
       f: mobile_f,
       title: @page_title,
@@ -152,11 +152,11 @@
       position: @position,
       account_id: @current_account.id,
       mobile: true,
-      return_to: Routes.position_index_path(@socket, :index)) %>
+      return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
   <% end %>
   <%= for position <- @positions do %>
     <%= if @live_action in [:edit] && @position.id == position.id do %>
-      <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+      <%= live_component @socket, OptionsTrackerWeb.PositionLive.FormComponent,
         id: :edit_mobile,
         f: mobile_f,
         title: @page_title,
@@ -164,7 +164,7 @@
         position: @position,
         account_id: @current_account.id,
         mobile: true,
-        return_to: Routes.position_index_path(@socket, :index)) %>
+        return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
     <% else %>
       <div class="card mb-3 <%= row_class_for_status(position.status) %>">
         <div class="card-content py-2 px-2">
@@ -286,7 +286,7 @@
   </thead>
   <tbody id="positions">
     <%= if @live_action in [:new] do %>
-      <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+      <%= live_component @socket, OptionsTrackerWeb.PositionLive.FormComponent,
         id: :new,
         f: f,
         title: @page_title,
@@ -294,11 +294,11 @@
         position: @position,
         account_id: @current_account.id,
         mobile: false,
-        return_to: Routes.position_index_path(@socket, :index)) %>
+        return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
     <% end %>
     <%= for position <- @positions do %>
       <%= if @live_action in [:edit] && @position.id == position.id do %>
-        <%= live_component(@socket, OptionsTrackerWeb.PositionLive.FormComponent,
+        <%= live_component @socket, OptionsTrackerWeb.PositionLive.FormComponent,
           id: :edit,
           f: f,
           title: @page_title,
@@ -306,7 +306,7 @@
           position: @position,
           account_id: @current_account.id,
           mobile: false,
-          return_to: Routes.position_index_path(@socket, :index)) %>
+          return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
       <% else %>
         <tr id="position-<%= position.id %>" class="<%= row_class_for_status(position.status) %>">
           <td>

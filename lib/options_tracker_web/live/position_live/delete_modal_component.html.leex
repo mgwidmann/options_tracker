@@ -6,6 +6,10 @@
 <footer class="modal-card-foot">
     <div class="buttons is-right ml-auto">
         <a href="#" class="button" phx-click="cancel">Cancel</a>
-        <%= link "Delete", to: "#", phx_click: "delete", phx_value_id: @position.id, class: "button is-danger"%>
+        <%= f = form_for :delete_params, "#", phx_submit: :delete %>
+            <%= hidden_input f, :id, value: @position.id %>
+            <%= hidden_input f, :return_to, value: @return_to %>
+            <%= submit "Delete", phx_disable_with: "Deleting...", class: "button is-danger" %>
+        </form>
     </div>
 </footer>

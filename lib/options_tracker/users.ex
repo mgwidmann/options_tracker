@@ -23,7 +23,7 @@ defmodule OptionsTracker.Users do
 
   """
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    Repo.get_by(User, email: email) |> Repo.preload(:accounts)
   end
 
   @doc """
@@ -40,7 +40,7 @@ defmodule OptionsTracker.Users do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+    user = Repo.get_by(User, email: email) |> Repo.preload(:accounts)
     if User.valid_password?(user, password), do: user
   end
 

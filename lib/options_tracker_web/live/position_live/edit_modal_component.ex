@@ -6,8 +6,9 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
 
   @impl true
   def update(%{position: position, action: action} = assigns, socket) do
+    closed_at = if(position.expires_at && Timex.compare(Timex.today(), position.expires_at, :day) in [-1, 0], do: Timex.today(), else: position.expires_at)
     changeset =
-      Accounts.change_position(position, if(action == :close, do: %{status: :closed, closed_at: Timex.today()}, else: %{}))
+      Accounts.change_position(position, if(action == :close, do: %{status: :closed, closed_at: closed_at}, else: %{}))
 
     {:ok,
      socket

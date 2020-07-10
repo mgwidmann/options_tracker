@@ -320,7 +320,7 @@ defmodule OptionsTracker.Accounts do
 
   """
   def update_position(%Position{} = position, attrs, %User{id: user_id}) do
-    changeset = position |> Position.changeset(attrs) |> IO.inspect(label: "changeset")
+    changeset = position |> Position.changeset(attrs)
 
     if changeset.valid? do
       Repo.transaction(fn ->
