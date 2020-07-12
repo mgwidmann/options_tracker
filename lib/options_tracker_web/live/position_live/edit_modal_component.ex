@@ -20,7 +20,14 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     changeset =
       Accounts.change_position(
         position,
-        if(action == :close, do: %{status: :closed, closed_at: closed_at, fees: closing_fees(position, position.account)}, else: %{})
+        if(action == :close,
+          do: %{
+            status: :closed,
+            closed_at: closed_at,
+            fees: closing_fees(position, position.account)
+          },
+          else: %{}
+        )
       )
 
     {:ok,

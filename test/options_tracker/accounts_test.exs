@@ -70,7 +70,9 @@ defmodule OptionsTracker.AccountsTest do
 
     test "create_account/1 with valid data creates a account" do
       user = user_fixture()
+
       assert {:ok, %Account{} = account} = Accounts.create_account(@valid_attrs |> Map.put(:user_id, user.id))
+
       assert account.cash == Decimal.new("120.5")
       assert Decimal.eq?(account.exercise_fee, Decimal.from_float(120.5))
       assert account.name == "some name"
@@ -251,16 +253,14 @@ defmodule OptionsTracker.AccountsTest do
     end
 
     test "create_position/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} =
-               Accounts.create_position(@invalid_attrs, %User{id: 123})
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_position(@invalid_attrs, %User{id: 123})
     end
 
     test "update_position/3 with valid data updates the position" do
       account = account_fixture()
       position = position_fixture()
 
-      assert {:ok, %Position{} = position} =
-               Accounts.update_position(position, @update_attrs, %User{id: account.user_id})
+      assert {:ok, %Position{} = position} = Accounts.update_position(position, @update_attrs, %User{id: account.user_id})
 
       # Basis are always nil on options and cannot be updated
       assert position.basis == nil
@@ -316,8 +316,7 @@ defmodule OptionsTracker.AccountsTest do
       account = account_fixture()
       position = position_fixture()
 
-      assert {:error, %Ecto.Changeset{}} =
-               Accounts.update_position(position, @invalid_attrs, %User{id: account.user_id})
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_position(position, @invalid_attrs, %User{id: account.user_id})
 
       assert position == Accounts.get_position!(position.id)
     end
@@ -339,8 +338,7 @@ defmodule OptionsTracker.AccountsTest do
       account = account_fixture()
       stock = stock_position_fixture(%{account_id: account.id})
 
-      position =
-        position_fixture(%{stock: stock.stock, type: :call, premium: 1.50, account_id: account.id})
+      position = position_fixture(%{stock: stock.stock, type: :call, premium: 1.50, account_id: account.id})
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(
@@ -356,15 +354,18 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.sub(stock.strike, Decimal.from_float(1.45)))
+
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.sub(stock.strike, Decimal.from_float(1.45))
+             )
     end
 
     test "update_position/3 with put on same short stock raises basis on close" do
       account = account_fixture()
       stock = stock_position_fixture(%{short: true, account_id: account.id})
 
-      position =
-        position_fixture(%{stock: stock.stock, type: :put, premium: 1.50, account_id: account.id})
+      position = position_fixture(%{stock: stock.stock, type: :put, premium: 1.50, account_id: account.id})
 
       assert {:ok, %Position{} = position} =
                Accounts.update_position(
@@ -380,7 +381,11 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(stock.strike, Decimal.from_float(1.45)))
+
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(stock.strike, Decimal.from_float(1.45))
+             )
     end
 
     test "update_position/3 with calls on multiple long stock lowers basis on close" do
@@ -417,7 +422,11 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = other_stock.basis
       stock = Accounts.get_position!(other_stock.id)
       assert old_basis != stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.sub(other_stock.strike, Decimal.from_float(1.45)))
+
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.sub(other_stock.strike, Decimal.from_float(1.45))
+             )
     end
 
     test "update_position/3 with puts on multiple short stock raises basis on close" do
@@ -450,13 +459,21 @@ defmodule OptionsTracker.AccountsTest do
       old_basis = stock.basis
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(stock.strike, Decimal.from_float(1.45)))
+
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(stock.strike, Decimal.from_float(1.45))
+             )
 
       # 400 other shares are updated
       old_basis = other_stock.basis
       stock = Accounts.get_position!(other_stock.id)
       assert old_basis != stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(other_stock.strike, Decimal.from_float(1.45)))
+
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(other_stock.strike, Decimal.from_float(1.45))
+             )
     end
 
     test "update_position/3 with calls on more long stock than available lowers basis on close" do
@@ -496,7 +513,10 @@ defmodule OptionsTracker.AccountsTest do
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
 
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.sub(stock.strike, Decimal.from_float(0.72)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.sub(stock.strike, Decimal.from_float(0.72))
+             )
 
       # 600 other shares are not updated
       stock = Accounts.get_position!(other_stock.id)
@@ -542,7 +562,10 @@ defmodule OptionsTracker.AccountsTest do
       assert old_basis != stock.basis
 
       # Basis is raised by half of 1.45 (profit), rounded to 73 due to rounding of stock.basis below
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(stock.strike, Decimal.from_float(0.73)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(stock.strike, Decimal.from_float(0.73))
+             )
 
       # 600 other shares are not updated
       stock = Accounts.get_position!(other_stock.id)
@@ -578,7 +601,10 @@ defmodule OptionsTracker.AccountsTest do
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 10 additional shares
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.sub(stock.strike, Decimal.from_float(1.32)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.sub(stock.strike, Decimal.from_float(1.32))
+             )
     end
 
     test "update_position/3 with put on uneven amount of short stock raises basis average on close" do
@@ -611,7 +637,10 @@ defmodule OptionsTracker.AccountsTest do
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 10 additional shares
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(stock.strike, Decimal.from_float(1.32)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(stock.strike, Decimal.from_float(1.32))
+             )
     end
 
     test "update_position/3 with call on less than available long stock lowers basis average on close" do
@@ -643,7 +672,10 @@ defmodule OptionsTracker.AccountsTest do
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 500 additional shares
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.sub(stock.strike, Decimal.from_float(0.72)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.sub(stock.strike, Decimal.from_float(0.72))
+             )
     end
 
     test "update_position/3 with put on less than available short stock raises basis average on close" do
@@ -676,7 +708,10 @@ defmodule OptionsTracker.AccountsTest do
       stock = Accounts.get_position!(stock.id)
       assert old_basis != stock.basis
       # 1.45 spread across 500 additional shares, raises by 0.73 due to rounding of stock.basis
-      assert Decimal.eq?(Decimal.round(stock.basis, 2), Decimal.add(stock.strike, Decimal.from_float(0.73)))
+      assert Decimal.eq?(
+               Decimal.round(stock.basis, 2),
+               Decimal.add(stock.strike, Decimal.from_float(0.73))
+             )
     end
 
     ################# HANDLING EXERCISE ####################
@@ -785,8 +820,7 @@ defmodule OptionsTracker.AccountsTest do
       # Count lowered
       assert stock.count == 300
 
-      new_position =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      new_position = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert new_position.status == :closed
       assert new_position.count == 300
@@ -838,8 +872,7 @@ defmodule OptionsTracker.AccountsTest do
       # Count lowered
       assert stock.count == 300
 
-      new_position =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      new_position = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert new_position.status == :closed
       assert new_position.count == 300
@@ -953,8 +986,7 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.count == 10
       assert stock.status == :open
 
-      closed_stock =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      closed_stock = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert closed_stock.status == :closed
       assert closed_stock.count == 100
@@ -991,8 +1023,7 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.count == 10
       assert stock.status == :open
 
-      closed_stock =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      closed_stock = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert closed_stock.status == :closed
       assert closed_stock.count == 100
@@ -1030,8 +1061,7 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.status == :closed
       assert stock.profit_loss == Decimal.from_float(250.00)
 
-      open_shares =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      open_shares = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert open_shares.status == :open
       assert open_shares.count == 250
@@ -1069,8 +1099,7 @@ defmodule OptionsTracker.AccountsTest do
       assert stock.status == :closed
       assert stock.profit_loss == Decimal.from_float(250.00)
 
-      open_shares =
-        Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
+      open_shares = Accounts.list_positions(account.id) |> Enum.sort_by(fn p -> p.id end) |> List.last()
 
       assert open_shares.status == :open
       assert open_shares.count == 250

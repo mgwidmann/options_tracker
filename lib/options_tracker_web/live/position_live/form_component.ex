@@ -10,8 +10,7 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
           Phoenix.LiveView.Socket.t()
         ) :: {:ok, Phoenix.LiveView.Socket.t()}
   def update(%{position: position, account_id: account_id} = assigns, socket) do
-    current_account =
-      Map.get_lazy(socket.assigns, :current_account, fn -> Accounts.get_account!(account_id) end)
+    current_account = Map.get_lazy(socket.assigns, :current_account, fn -> Accounts.get_account!(account_id) end)
 
     changeset = Accounts.change_position(position)
 

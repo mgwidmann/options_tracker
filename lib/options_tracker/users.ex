@@ -60,6 +60,11 @@ defmodule OptionsTracker.Users do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @spec count :: non_neg_integer()
+  def count() do
+    Repo.aggregate(from(u in User), :count, :id)
+  end
+
   ## User registration
 
   @doc """

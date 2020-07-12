@@ -20,26 +20,37 @@ defmodule OptionsTrackerWeb.Telemetry do
   def metrics do
     [
       # Phoenix Metrics
-      summary("phoenix.endpoint.stop.duration",
-        unit: {:native, :millisecond}
-      ),
-      summary("phoenix.router_dispatch.stop.duration",
-        tags: [:route],
-        unit: {:native, :millisecond}
-      ),
+      summary("phoenix.endpoint.stop.duration", unit: {:native, :millisecond}),
+      summary("phoenix.router_dispatch.stop.duration", tags: [:route], unit: {:native, :millisecond}),
+      summary("phoenix.live_view.mount.start", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.mount.stop", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.mount.exception"),
+      summary("phoenix.live_view.handle_params.start", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_params.stop", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_params.exception"),
+      summary("phoenix.live_view.handle_event.start", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_event.stop", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_event.exception"),
+      summary("phoenix.live_component.handle_event.start", unit: {:native, :millisecond}),
+      summary("phoenix.live_component.handle_event.stop", unit: {:native, :millisecond}),
+      summary("phoenix.live_component.handle_event.exception"),
 
       # Database Metrics
-      summary("options_tracker.repo.query.total_time", unit: {:native, :millisecond}),
-      summary("options_tracker.repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("options_tracker.repo.query.query_time", unit: {:native, :millisecond}),
-      summary("options_tracker.repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("options_tracker.repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("db.repo.query.total_time", unit: {:native, :millisecond}),
+      summary("db.repo.query.decode_time", unit: {:native, :millisecond}),
+      summary("db.repo.query.query_time", unit: {:native, :millisecond}),
+      summary("db.repo.query.queue_time", unit: {:native, :millisecond}),
+      summary("db.repo.query.idle_time", unit: {:native, :millisecond}),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.total_run_queue_lengths.io"),
+
+      # OptionsTracker Metrics
+      last_value("options_tracker.users.count"),
+      last_value("options_tracker.positions.count")
     ]
   end
 
@@ -47,7 +58,8 @@ defmodule OptionsTrackerWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {OptionsTrackerWeb, :count_users, []}
+      {OptionsTrackerWeb.Metrics, :count_users, []},
+      {OptionsTrackerWeb.Metrics, :count_positions, []}
     ]
   end
 end

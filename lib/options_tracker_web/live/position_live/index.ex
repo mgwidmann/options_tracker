@@ -66,8 +66,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
       fees: socket.assigns.current_account.opt_open_fee,
       opened_at: DateTime.utc_now() |> DateTime.to_date(),
       count: 1,
-      expires_at:
-        DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
+      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
       short: true,
       type: :put
     }
@@ -152,7 +151,11 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
-    account = if(match?([_|_], socket.assigns.current_account), do: socket.assigns.position, else: socket.assigns.current_account)
+    account =
+      if(match?([_ | _], socket.assigns.current_account),
+        do: socket.assigns.position,
+        else: socket.assigns.current_account
+      )
 
     changeset =
       (socket.assigns.position || %Position{})
@@ -258,12 +261,28 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     Search.search(search_changeset)
   end
 
-  defp position_params_fees(%Ecto.Changeset{changes: %{count: count}} = changeset, %Ecto.Changeset{changes: %{count: count}}, _position, _account) do
-    changeset # Don't change anything when count does not change
+  defp position_params_fees(
+         %Ecto.Changeset{changes: %{count: count}} = changeset,
+         %Ecto.Changeset{changes: %{count: count}},
+         _position,
+         _account
+       ) do
+    # Don't change anything when count does not change
+    changeset
   end
 
-  defp position_params_fees(%Ecto.Changeset{changes: %{count: count}} = changeset, %Ecto.Changeset{changes: %{count: _other_count}}, position, account) do
-    fee_per = if(Position.TransType.stock?(position.type), do: account.stock_open_fee, else: account.opt_open_fee)
+  defp position_params_fees(
+         %Ecto.Changeset{changes: %{count: count}} = changeset,
+         %Ecto.Changeset{changes: %{count: _other_count}},
+         position,
+         account
+       ) do
+    fee_per =
+      if(Position.TransType.stock?(position.type),
+        do: account.stock_open_fee,
+        else: account.opt_open_fee
+      )
+
     changeset
     |> Ecto.Changeset.put_change(:fees, Decimal.mult(fee_per, count))
   end

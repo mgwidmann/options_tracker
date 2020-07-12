@@ -91,8 +91,7 @@ defmodule OptionsTracker.UsersTest do
     test "returns the user if the email and password are valid" do
       %{id: id} = user = user_fixture()
 
-      assert %User{id: ^id} =
-               Users.get_user_by_email_and_password(user.email, valid_user_password())
+      assert %User{id: ^id} = Users.get_user_by_email_and_password(user.email, valid_user_password())
     end
   end
 
@@ -180,8 +179,7 @@ defmodule OptionsTracker.UsersTest do
     end
 
     test "validates email", %{user: user} do
-      {:error, changeset} =
-        Users.apply_user_email(user, valid_user_password(), %{email: "not valid"})
+      {:error, changeset} = Users.apply_user_email(user, valid_user_password(), %{email: "not valid"})
 
       assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
     end
@@ -189,8 +187,7 @@ defmodule OptionsTracker.UsersTest do
     test "validates maximum value for e-mail for security", %{user: user} do
       too_long = String.duplicate("db", 100)
 
-      {:error, changeset} =
-        Users.apply_user_email(user, valid_user_password(), %{email: too_long})
+      {:error, changeset} = Users.apply_user_email(user, valid_user_password(), %{email: too_long})
 
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
@@ -307,15 +304,13 @@ defmodule OptionsTracker.UsersTest do
     test "validates maximum values for password for security", %{user: user} do
       too_long = String.duplicate("db", 100)
 
-      {:error, changeset} =
-        Users.update_user_password(user, valid_user_password(), %{password: too_long})
+      {:error, changeset} = Users.update_user_password(user, valid_user_password(), %{password: too_long})
 
       assert "should be at most 80 character(s)" in errors_on(changeset).password
     end
 
     test "validates current password", %{user: user} do
-      {:error, changeset} =
-        Users.update_user_password(user, "invalid", %{password: valid_user_password()})
+      {:error, changeset} = Users.update_user_password(user, "invalid", %{password: valid_user_password()})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end

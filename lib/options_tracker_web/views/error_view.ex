@@ -20,8 +20,7 @@ defmodule OptionsTrackerWeb.ErrorView do
   def render("404.html", assigns) do
     template = Map.get(assigns, :template, "404")
 
-    message =
-      Map.get(assigns, :message, Phoenix.Controller.status_message_from_template("404.html"))
+    message = Map.get(assigns, :message, Phoenix.Controller.status_message_from_template("404.html"))
 
     ~E"""
     <div class="section has-text-centered">

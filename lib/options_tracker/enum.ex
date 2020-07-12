@@ -5,16 +5,27 @@ defmodule OptionsTracker.Enum do
     end
   end
 
-  defmacro defenum({:__aliases__, _, [name]}, enum_list, [do: block]) do
+  defmacro defenum({:__aliases__, _, [name]}, enum_list, do: block) do
     name = Module.concat(__CALLER__.module, name)
-    helper_methods = quote unquote: false do
-      for {type, value} <- @enum do
-        def unquote(:"#{type}")(), do: unquote(value)
-        def unquote(:"#{type}_key")(), do: unquote(type)
-        def unquote(:"#{type}?")(val) when val in [unquote(type), unquote(to_string(type)), unquote(value), unquote(to_string(value))], do: true
-        def unquote(:"#{type}?")(_val), do: false
+
+    helper_methods =
+      quote unquote: false do
+        for {type, value} <- @enum do
+          def unquote(:"#{type}")(), do: unquote(value)
+          def unquote(:"#{type}_key")(), do: unquote(type)
+
+          def unquote(:"#{type}?")(val)
+              when val in [
+                     unquote(type),
+                     unquote(to_string(type)),
+                     unquote(value),
+                     unquote(to_string(value))
+                   ],
+              do: true
+
+          def unquote(:"#{type}?")(_val), do: false
+        end
       end
-    end
 
     quote do
       defmodule unquote(name) do
@@ -25,6 +36,7 @@ defmodule OptionsTracker.Enum do
 
         unquote(block)
       end
+
       alias unquote(name)
     end
   end

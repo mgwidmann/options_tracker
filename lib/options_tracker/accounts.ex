@@ -45,7 +45,8 @@ defmodule OptionsTracker.Accounts do
   """
   def get_account!(id), do: Repo.get!(Account, id)
 
-  @spec create_account(%{optional(binary) => binary | number}) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_account(%{optional(binary) => binary | number}) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Creates a account.
 
@@ -64,7 +65,8 @@ defmodule OptionsTracker.Accounts do
     |> Repo.insert()
   end
 
-  @spec update_account(OptionsTracker.Accounts.Account.t(), %{optional(binary) => binary | number}) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_account(OptionsTracker.Accounts.Account.t(), %{optional(binary) => binary | number}) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Updates a account.
 
@@ -83,7 +85,8 @@ defmodule OptionsTracker.Accounts do
     |> Repo.update()
   end
 
-  @spec delete_account(OptionsTracker.Accounts.Account.t()) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_account(OptionsTracker.Accounts.Account.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Deletes a account.
 
@@ -171,14 +174,11 @@ defmodule OptionsTracker.Accounts do
 
     positions_stream = Stream.filter(positions, & &1.closed_at)
 
-    day_positions =
-      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, day_date, :day) == 0))
+    day_positions = positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, day_date, :day) == 0))
 
-    week_positions =
-      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, week_date, :day) >= 0))
+    week_positions = positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, week_date, :day) >= 0))
 
-    month_positions =
-      positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, month_date, :day) >= 0))
+    month_positions = positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, month_date, :day) >= 0))
 
     zero = Decimal.from_float(0.0)
 
@@ -193,6 +193,11 @@ defmodule OptionsTracker.Accounts do
   alias OptionsTracker.Accounts.Position
   alias OptionsTracker.Users.User
   alias OptionsTracker.Audits
+
+  @spec count_positions :: non_neg_integer()
+  def count_positions() do
+    Repo.aggregate(from(p in Position), :count, :id)
+  end
 
   @doc """
   Returns the list of positions.
@@ -296,8 +301,7 @@ defmodule OptionsTracker.Accounts do
     Repo.transaction(fn ->
       case %Position{} |> Position.open_changeset(attrs) |> Repo.insert() do
         {:ok, position} ->
-          {:ok, _audit} =
-            Audits.position_audit_changeset(:insert, user_id, position) |> Repo.insert()
+          {:ok, _audit} = Audits.position_audit_changeset(:insert, user_id, position) |> Repo.insert()
 
           position
 
@@ -353,10 +357,7 @@ defmodule OptionsTracker.Accounts do
   @spec update_basis!(OptionsTracker.Accounts.Position.t()) :: [
           OptionsTracker.Accounts.Position.t()
         ]
-  defp update_basis!(
-         %Position{status: :closed, count: count, type: call_or_put, profit_loss: profit_loss} =
-           position
-       )
+  defp update_basis!(%Position{status: :closed, count: count, type: call_or_put, profit_loss: profit_loss} = position)
        when call_or_put in ~w[call put]a do
     # Long stock for call, short stock for put
     short_long = if(call_or_put == :call, do: false, else: true)
@@ -379,9 +380,7 @@ defmodule OptionsTracker.Accounts do
     |> elem(1)
     |> Enum.map(fn
       %Ecto.Changeset{} = changeset ->
-        Repo.insert!(
-          Audits.position_audit_changeset(:update, @system_action_user_id, changeset.data)
-        )
+        Repo.insert!(Audits.position_audit_changeset(:update, @system_action_user_id, changeset.data))
 
         {:ok, position} = Repo.update(changeset)
         position
@@ -437,15 +436,11 @@ defmodule OptionsTracker.Accounts do
       %Ecto.Changeset{} = changeset ->
         {:ok, position} =
           if changeset.data.id do
-            Repo.insert!(
-              Audits.position_audit_changeset(:update, @system_action_user_id, position)
-            )
+            Repo.insert!(Audits.position_audit_changeset(:update, @system_action_user_id, position))
 
             Repo.update(changeset)
           else
-            Repo.insert!(
-              Audits.position_audit_changeset(:insert, @system_action_user_id, position)
-            )
+            Repo.insert!(Audits.position_audit_changeset(:insert, @system_action_user_id, position))
 
             Repo.insert(changeset)
           end
@@ -511,11 +506,9 @@ defmodule OptionsTracker.Accounts do
 
       # All positions have been closed out and a new one must be created
       shares_uncovered > 0 && match?(%Ecto.Changeset{}, last_stock) ->
-        new_position_attrs =
-          Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
+        new_position_attrs = Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
 
-        {:ok, new_position} =
-          create_position(new_position_attrs, %User{id: @system_action_user_id})
+        {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})
 
         [new_position, last_stock | stocks]
 
@@ -542,8 +535,7 @@ defmodule OptionsTracker.Accounts do
             basis: Decimal.sub(position.strike, basis_delta)
           })
 
-        {:ok, new_position} =
-          create_position(new_position_attrs, %User{id: @system_action_user_id})
+        {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})
 
         [new_position | stocks]
 
@@ -632,10 +624,10 @@ defmodule OptionsTracker.Accounts do
   end
 
   def position_with_account(%Position{account: %Account{}} = position), do: position
+
   def position_with_account(%Position{account: _} = position) do
     Repo.preload(position, :account)
   end
-
 
   for {status, value} <- Position.StatusType.__enum_map__() do
     def unquote(:"position_status_#{status}")(), do: unquote(value)

@@ -7,7 +7,11 @@ defmodule OptionsTracker.Search do
     open: :boolean,
     account_ids: {:array, :integer}
   }
-  @type t :: %{optional(:search) => String.t(), optional(:open) => boolean, optional(:account_ids) => list(non_neg_integer)}
+  @type t :: %{
+          optional(:search) => String.t(),
+          optional(:open) => boolean,
+          optional(:account_ids) => list(non_neg_integer)
+        }
 
   @spec new(nil | list(Account.t()) | Account.t(), t()) :: map
   def new(account, params \\ %{})
