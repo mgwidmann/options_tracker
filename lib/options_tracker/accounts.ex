@@ -438,13 +438,13 @@ defmodule OptionsTracker.Accounts do
         {:ok, position} =
           if changeset.data.id do
             Repo.insert!(
-              Audits.position_audit_changeset(:update, @system_action_user_id, changeset.data)
+              Audits.position_audit_changeset(:update, @system_action_user_id, position)
             )
 
             Repo.update(changeset)
           else
             Repo.insert!(
-              Audits.position_audit_changeset(:insert, @system_action_user_id, changeset.data)
+              Audits.position_audit_changeset(:insert, @system_action_user_id, position)
             )
 
             Repo.insert(changeset)

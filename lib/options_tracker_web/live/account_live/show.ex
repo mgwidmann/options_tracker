@@ -13,10 +13,15 @@ defmodule OptionsTrackerWeb.AccountLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
+    account = Accounts.get_account!(id)
+    unless socket.assigns.current_user.id == account.user_id do
+      raise "Unauthorized show of account id #{id} by user #{inspect socket.assigns.current_user}"
+    end
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:account, Accounts.get_account!(id))}
+     |> assign(:account, account)}
   end
 
   defp page_title(:show), do: "Show Account"

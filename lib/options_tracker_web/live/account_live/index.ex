@@ -23,9 +23,14 @@ defmodule OptionsTrackerWeb.AccountLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    account = Accounts.get_account!(id)
+    unless socket.assigns.current_user.id == account.user_id do
+      raise "Unauthorized edit of Account #{id} by user #{inspect socket.assigns.current_user}"
+    end
+
     socket
     |> assign(:page_title, "Edit Account")
-    |> assign(:account, Accounts.get_account!(id))
+    |> assign(:account, account)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -43,7 +48,9 @@ defmodule OptionsTrackerWeb.AccountLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     account = Accounts.get_account!(id)
-    {:ok, _} = Accounts.delete_account(account)
+    if socket.assigns.current_user.id == account.user_id do
+      {:ok, _} = Accounts.delete_account(account)
+    end
 
     {:noreply, assign(socket, :accounts, list_accounts(socket.assigns.current_user))}
   end
