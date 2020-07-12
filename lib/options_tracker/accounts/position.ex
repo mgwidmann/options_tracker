@@ -4,11 +4,13 @@ defmodule OptionsTracker.Accounts.Position do
   import OptionsTracker.Utilities.Maps
   use OptionsTracker.Enum
 
-  defenum TransType, stock: 0, call: 1, put: 2 do
-    @spec name_for(:call | :put | :stock) :: String.t()
+  defenum TransType, stock: 0, call: 1, put: 2, call_spread: 3, put_spread: 4 do
+    @spec name_for(:call | :put | :stock | :call_spread | :put_spread) :: String.t()
     def name_for(:stock), do: "Stock"
     def name_for(:call), do: "Call"
     def name_for(:put), do: "Put"
+    def name_for(:call_spread), do: "Call Spread"
+    def name_for(:put_spread), do: "Put Spread"
   end
 
   defenum StatusType, open: 0, closed: 1, rolled: 2, exercised: 3 do

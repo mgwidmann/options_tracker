@@ -600,12 +600,12 @@ defmodule OptionsTracker.Accounts do
     Position.changeset(position, attrs)
   end
 
-  @spec list_position_types :: [{:call, 1} | {:put, 2} | {:stock, 0}, ...]
+  @spec list_position_types :: [stock: 0, call: 1, put: 2, call_spread: 3, put_spread: 4]
   def list_position_types() do
     Position.TransType.__enum_map__()
   end
 
-  @spec name_for_position_type(:call | :put | :stock) :: <<_::24, _::_*8>>
+  @spec name_for_position_type(:call | :put | :stock | :call_spread | :put_spread) :: <<_::24, _::_*8>>
   def name_for_position_type(type) do
     Position.TransType.name_for(type)
   end
@@ -615,6 +615,11 @@ defmodule OptionsTracker.Accounts do
           ...
         ]
   def list_position_statuses(stock_type) when stock_type in [1, :stock] do
+    Position.StatusType.__enum_map__()
+    |> Enum.reject(fn {status, _value} -> status in [:exercised, :rolled] end)
+  end
+
+  def list_position_statuses(spread_type) when spread_type in [3, :call_spread, 4, :put_spread] do
     Position.StatusType.__enum_map__()
     |> Enum.reject(fn {status, _value} -> status in [:exercised, :rolled] end)
   end

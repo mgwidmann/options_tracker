@@ -10,10 +10,14 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
 
   def type_display(%Position{type: :call}), do: "Call"
   def type_display(%Position{type: :put}), do: "Put"
+  def type_display(%Position{type: :call_spread}), do: "Call Spread"
+  def type_display(%Position{type: :put_spread}), do: "Put Spread"
 
   def type_display_class(%Position{type: :stock}), do: "is-info"
   def type_display_class(%Position{type: :call}), do: "is-success"
+  def type_display_class(%Position{type: :call_spread}), do: "is-success is-light"
   def type_display_class(%Position{type: :put}), do: "is-danger"
+  def type_display_class(%Position{type: :put_spread}), do: "is-danger is-light"
 
   def count_type(%Position{type: :stock, count: 1}), do: "share"
   def count_type(%Position{type: :stock, count: c}) when c > 1, do: "shares"
@@ -137,6 +141,29 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   @spec is_open?(OptionsTracker.Accounts.Position.t()) :: boolean
   def is_open?(%Position{status: status}) do
     status == Accounts.position_status_open() || status == Accounts.position_status_open_key()
+  end
+
+  @spec is_spread?(
+          %{
+            data: OptionsTracker.Accounts.Position.t() | map,
+            params: nil | maybe_improper_list | map
+          }
+          | OptionsTracker.Accounts.Position.t()
+        ) :: boolean
+  def is_spread?(%Phoenix.HTML.Form{params: params, data: %Position{} = position}) do
+    type = params["type"] || position.type
+
+    OptionsTracker.Accounts.Position.TransType.call_spread?(type) ||
+      OptionsTracker.Accounts.Position.TransType.put_spread?(type)
+  end
+
+  def is_spread?(%Phoenix.HTML.Form{data: %{}}) do
+    false
+  end
+
+  def is_spread?(%Position{type: type}) do
+    OptionsTracker.Accounts.Position.TransType.call_spread?(type) ||
+      OptionsTracker.Accounts.Position.TransType.put_spread?(type)
   end
 
   def return_to_path(socket, :all) do
