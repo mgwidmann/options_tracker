@@ -2,24 +2,16 @@ defmodule OptionsTracker.Accounts.Position do
   use Ecto.Schema
   import Ecto.Changeset
   import OptionsTracker.Utilities.Maps
+  use OptionsTracker.Enum
 
-  defmodule TransType do
-    @enum [stock: 0, call: 1, put: 2]
-    use EctoEnum, @enum
+  defenum TransType, stock: 0, call: 1, put: 2 do
     @spec name_for(:call | :put | :stock) :: String.t()
     def name_for(:stock), do: "Stock"
     def name_for(:call), do: "Call"
     def name_for(:put), do: "Put"
-
-    for {type, value} <- @enum do
-      def unquote(:"#{type}")(), do: unquote(value)
-      def unquote(:"#{type}_key")(), do: unquote(type)
-    end
   end
 
-  defmodule StatusType do
-    @enum [open: 0, closed: 1, rolled: 2, exercised: 3]
-    use EctoEnum, @enum
+  defenum StatusType, open: 0, closed: 1, rolled: 2, exercised: 3 do
     @spec name_for(:closed | :open | :rolled, boolean) :: String.t()
     def name_for(status, past_tense)
     def name_for(:open, false), do: "Open"
@@ -30,11 +22,6 @@ defmodule OptionsTracker.Accounts.Position do
     def name_for(:rolled, true), do: "Rolled"
     def name_for(:exercised, false), do: "Exercise"
     def name_for(:exercised, true), do: "Exercised"
-
-    for {type, value} <- @enum do
-      def unquote(:"#{type}")(), do: unquote(value)
-      def unquote(:"#{type}_key")(), do: unquote(type)
-    end
   end
 
   @derive {Jason.Encoder, except: [:account, :__meta__]}
@@ -49,7 +36,7 @@ defmodule OptionsTracker.Accounts.Position do
     field :expires_at, OptionsTracker.Fields.Date
     field :fees, :decimal, default: Decimal.from_float(0.00)
     field :spread_width, :decimal
-    field :count, :integer, default: 1
+    field :count, :integer
 
     # Updated later
     field :basis, :decimal
@@ -270,7 +257,7 @@ defmodule OptionsTracker.Accounts.Position do
 
     if status != :open && exit_price && count do
       profit_loss =
-        if type == :stock do
+        if TransType.stock?(type) do
           Decimal.sub(exit_price, strike)
           |> Decimal.mult(if(short, do: -1, else: 1))
           |> Decimal.mult(count)

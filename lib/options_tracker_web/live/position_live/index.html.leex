@@ -6,7 +6,7 @@
         <div class="is-pulled-right">
           <div class="mh-3">
             <% no_account = @current_account == nil || match?([_|_], @current_account) %>
-            <%= live_patch to: Routes.position_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
+            <%= live_patch to: Routes.position_index_path(@socket, :new, @current_account_id), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
               <i class="fa fa-plus" aria-hidden="true"></i>
             <% end %>
           </div>
@@ -112,7 +112,7 @@
     current_user: @current_user,
     modal_title: "Close Position",
     only_notes: false,
-    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+    return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
 <%= if @live_action in [:notes] do %>
@@ -124,7 +124,7 @@
     current_user: @current_user,
     modal_title: "Edit Notes",
     only_notes: true,
-    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+    return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
 <%= if @live_action in [:delete] do %>
@@ -134,7 +134,7 @@
     title: @page_title,
     action: @live_action,
     position: @position,
-    return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+    return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
 <%= mobile_f = form_for @changeset, "#",
@@ -150,9 +150,9 @@
       title: @page_title,
       action: @live_action,
       position: @position,
-      account_id: @current_account.id,
+      account_id: @current_account_id,
       mobile: true,
-      return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+      return_to: return_to_path(@socket, @current_account_id) %>
   <% end %>
   <%= for position <- @positions do %>
     <%= if @live_action in [:edit] && @position.id == position.id do %>
@@ -162,9 +162,9 @@
         title: @page_title,
         action: @live_action,
         position: @position,
-        account_id: @current_account.id,
+        account_id: @position.account_id,
         mobile: true,
-        return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+        return_to: return_to_path(@socket, @current_account_id) %>
     <% else %>
       <div class="card mb-3 <%= row_class_for_status(position.status) %>">
         <div class="card-content py-2 px-2">
@@ -292,9 +292,9 @@
         title: @page_title,
         action: @live_action,
         position: @position,
-        account_id: @current_account.id,
+        account_id: @current_account_id,
         mobile: false,
-        return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+        return_to: return_to_path(@socket, @current_account_id) %>
     <% end %>
     <%= for position <- @positions do %>
       <%= if @live_action in [:edit] && @position.id == position.id do %>
@@ -304,9 +304,9 @@
           title: @page_title,
           action: @live_action,
           position: @position,
-          account_id: @current_account.id,
+          account_id: @position.account_id,
           mobile: false,
-          return_to: if(@current_account_id == :all, do: Routes.position_index_path(@socket, :index), else: Routes.position_account_index_path(@socket, :index, @current_account_id)) %>
+          return_to: return_to_path(@socket, @current_account_id) %>
       <% else %>
         <tr id="position-<%= position.id %>" class="<%= row_class_for_status(position.status) %>">
           <td>

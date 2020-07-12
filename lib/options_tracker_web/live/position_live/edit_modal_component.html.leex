@@ -19,7 +19,7 @@
           </div>
           <%= error_tag f, :status %>
         </div>
-        <%= if @changeset.data.type == OptionsTracker.Accounts.position_type_stock_key() do %>
+        <%= if stock?(@changeset.data.type) do %>
           <div class="column control has-icons-left">
             <%= label f, :basis, "data-tooltip": "Only edit this manually if you know what you're doing!" %>
             <div class="field">

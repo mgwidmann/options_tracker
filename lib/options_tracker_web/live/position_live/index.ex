@@ -10,7 +10,6 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   @impl true
   def mount(params, %{"user_token" => user_token} = _session, socket) do
-    changeset = Accounts.change_position(%Position{})
     account_id = params["account_id"] || "all"
     account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
 
@@ -21,6 +20,8 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
         do: current_user.accounts,
         else: get_account(current_user, account_id)
       )
+
+    changeset = Accounts.change_position(%Position{})
 
     search_changeset = Search.new(current_account)
 
@@ -62,7 +63,9 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     position_params = %{
       account_id: socket.assigns.current_account.id,
+      fees: socket.assigns.current_account.opt_open_fee,
       opened_at: DateTime.utc_now() |> DateTime.to_date(),
+      count: 1,
       expires_at:
         DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
       short: true,
@@ -149,9 +152,12 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   def handle_event("validate", %{"position" => position_params}, socket) do
+    account = if(match?([_|_], socket.assigns.current_account), do: socket.assigns.position, else: socket.assigns.current_account)
+
     changeset =
       (socket.assigns.position || %Position{})
       |> Accounts.change_position(position_params |> compact())
+      |> position_params_fees(socket.assigns.changeset, socket.assigns.position, account)
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
@@ -189,14 +195,9 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   end
 
   def handle_event("cancel", _, socket) do
-    search_changest = Search.new(socket.assigns.current_account)
-
     {:noreply,
      socket
-     |> assign(:search_changeset, search_changest)
-     |> assign(:live_action, nil)
-     |> assign(:changeset, Accounts.change_position(%Position{}))
-     |> assign(:positions, list_positions(search_changest))}
+     |> push_redirect(to: return_to_path(socket, socket.assigns.current_account_id))}
   end
 
   defp save_position(socket, :edit, position_params) do
@@ -241,6 +242,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     end
   end
 
+  @spec get_account(User.t() | nil, non_neg_integer) :: nil | Account.t()
   defp get_account(%User{accounts: []}, _account_id) do
     nil
   end
@@ -254,5 +256,19 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   defp list_positions(search_changeset) do
     Search.search(search_changeset)
+  end
+
+  defp position_params_fees(%Ecto.Changeset{changes: %{count: count}} = changeset, %Ecto.Changeset{changes: %{count: count}}, _position, _account) do
+    changeset # Don't change anything when count does not change
+  end
+
+  defp position_params_fees(%Ecto.Changeset{changes: %{count: count}} = changeset, %Ecto.Changeset{changes: %{count: _other_count}}, position, account) do
+    fee_per = if(Position.TransType.stock?(position.type), do: account.stock_open_fee, else: account.opt_open_fee)
+    changeset
+    |> Ecto.Changeset.put_change(:fees, Decimal.mult(fee_per, count))
+  end
+
+  defp position_params_fees(changeset, _prior_changeset, _position, _account) do
+    changeset
   end
 end

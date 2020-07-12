@@ -1,10 +1,9 @@
 defmodule OptionsTracker.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
+  use OptionsTracker.Enum
 
-  defmodule TypeEnum do
-    use EctoEnum, tasty_works: 0, robinhood: 1, other: 1000
-
+  defenum TypeEnum, tasty_works: 0, robinhood: 1, other: 1000 do
     @spec name_for(:robinhood | :tasty_works | any) :: String.t() | nil
     def name_for(:tasty_works), do: "TastyWorks"
     def name_for(:robinhood), do: "Robinhood"

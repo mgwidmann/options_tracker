@@ -7,7 +7,9 @@ defmodule OptionsTracker.Search do
     open: :boolean,
     account_ids: {:array, :integer}
   }
+  @type t :: %{optional(:search) => String.t(), optional(:open) => boolean, optional(:account_ids) => list(non_neg_integer)}
 
+  @spec new(nil | list(Account.t()) | Account.t(), t()) :: map
   def new(account, params \\ %{})
   def new(%Account{} = account, params), do: new([account], params)
 
@@ -22,6 +24,7 @@ defmodule OptionsTracker.Search do
     put_in(changeset.changes, Map.merge(%{}, changeset.changes))
   end
 
+  @spec search(Ecto.Changeset.t()) :: [Accounts.Position.t()]
   def search(%Ecto.Changeset{changes: params, valid?: true}) do
     Accounts.search_positions(params)
   end

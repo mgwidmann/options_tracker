@@ -3,6 +3,8 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   import OptionsTrackerWeb.PositionLive.Helpers
 
   alias OptionsTracker.Accounts
+  alias OptionsTracker.Accounts.Position
+  import OptionsTracker.Accounts.Position.TransType, only: [stock?: 1]
 
   @impl true
   def update(%{position: position, action: action} = assigns, socket) do
@@ -13,10 +15,12 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
         else: position.expires_at
       )
 
+    position = Accounts.position_with_account(position)
+
     changeset =
       Accounts.change_position(
         position,
-        if(action == :close, do: %{status: :closed, closed_at: closed_at}, else: %{})
+        if(action == :close, do: %{status: :closed, closed_at: closed_at, fees: closing_fees(position, position.account)}, else: %{})
       )
 
     {:ok,
@@ -74,5 +78,13 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
     end
+  end
+
+  defp closing_fees(%Position{type: :stock, count: count, fees: fees}, account) do
+    Decimal.add(fees, Decimal.mult(account.stock_close_fee, count))
+  end
+
+  defp closing_fees(%Position{count: count, fees: fees}, account) do
+    Decimal.add(fees, Decimal.mult(account.opt_close_fee, count))
   end
 end

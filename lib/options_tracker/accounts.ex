@@ -518,12 +518,10 @@ defmodule OptionsTracker.Accounts do
       shares_uncovered > 0 && last_stock == nil ->
         {short, basis_delta} =
           cond do
-            position.type == Position.TransType.call() ||
-                position.type == Position.TransType.call_key() ->
+            Position.TransType.call?(position.type) ->
               {true, Decimal.mult(position.premium, -1)}
 
-            position.type == Position.TransType.put() ||
-                position.type == Position.TransType.put_key() ->
+            Position.TransType.put?(position.type) ->
               {false, position.premium}
 
             true ->
@@ -584,10 +582,8 @@ defmodule OptionsTracker.Accounts do
     end
   end
 
-  @spec change_position(
-          OptionsTracker.Accounts.Position.t(),
-          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
-        ) :: Ecto.Changeset.t()
+  @spec change_position(OptionsTracker.Accounts.Position.t(), :invalid | map) ::
+          Ecto.Changeset.t()
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking position changes.
 
@@ -629,6 +625,12 @@ defmodule OptionsTracker.Accounts do
   def list_position_statuses(_other) do
     Position.StatusType.__enum_map__()
   end
+
+  def position_with_account(%Position{account: %Account{}} = position), do: position
+  def position_with_account(%Position{account: _} = position) do
+    Repo.preload(position, :account)
+  end
+
 
   for {status, value} <- Position.StatusType.__enum_map__() do
     def unquote(:"position_status_#{status}")(), do: unquote(value)

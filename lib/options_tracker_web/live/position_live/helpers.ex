@@ -2,6 +2,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   alias OptionsTracker.Accounts
   alias OptionsTracker.Accounts.Account
   alias OptionsTracker.Accounts.Position
+  alias OptionsTrackerWeb.Router.Helpers, as: Routes
 
   @spec type_display(Position.t()) :: String.t()
   def type_display(%Position{type: :stock, basis: basis}),
@@ -136,6 +137,14 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   @spec is_open?(OptionsTracker.Accounts.Position.t()) :: boolean
   def is_open?(%Position{status: status}) do
     status == Accounts.position_status_open() || status == Accounts.position_status_open_key()
+  end
+
+  def return_to_path(socket, :all) do
+    Routes.position_index_path(socket, :index)
+  end
+
+  def return_to_path(socket, current_account_id) do
+    Routes.position_account_index_path(socket, :index, current_account_id)
   end
 
   @spec row_class_for_status(:closed | :exercised | :open | :rolled) :: binary
