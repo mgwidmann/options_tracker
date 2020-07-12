@@ -5,8 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
     <%= csrf_meta_tag() %>
-    <%= live_title_tag assigns[:page_title] || "OptionsTracker", suffix: " · Phoenix Framework" %>
+    <%= live_title_tag assigns[:page_title] || "OptionsTracker", suffix: " · Options Tracker" %>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -28,14 +32,10 @@
       <%= if @current_user do %>
         <div class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item" href="/positions">
-              Positions
-            </a>
+            <%= link "Positions", to: Routes.position_index_path(@conn, :index), class: "navbar-item" %>
 
             <%= if @current_user.admin? do %>
-              <a class="navbar-item" href="/dashboard">
-                Dashboard
-              </a>
+              <%= link "Admin", to: Routes.live_dashboard_path(@conn, :home), class: "navbar-item" %>
             <% end %>
           </div>
           <div class="navbar-end">
@@ -44,13 +44,9 @@
                 Settings
               </a>
               <div class="navbar-dropdown is-right">
-                <a class="navbar-item" href="/accounts">
-                  Accounts
-                </a>
+                <%= link "Accounts", to: Routes.account_index_path(@conn, :index), class: "navbar-item" %>
                 <hr class="navbar-divider">
-                <a class="navbar-item" href="<%= Routes.user_settings_path(@conn, :edit) %>">
-                  Settings
-                </a>
+                <%= link "Positions", to: Routes.user_settings_path(@conn, :edit), class: "navbar-item" %>
               </div>
             </div>
             <div class="navbar-item">
@@ -61,7 +57,6 @@
           </div>
         </div>
       <% end %>
-      <%#= render "_user_menu.html", assigns %>
     </nav>
     <section class="section">
       <%= @inner_content %>
