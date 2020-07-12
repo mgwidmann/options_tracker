@@ -11,14 +11,14 @@ defmodule OptionsTrackerWeb.UserSessionControllerTest do
     test "renders log in page", %{conn: conn} do
       conn = get(conn, Routes.user_session_path(conn, :new))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
-      assert response =~ "Log in</a>"
+      assert response =~ "Log in</h1>"
+      assert response =~ "Log in</button>"
       assert response =~ "Register</a>"
     end
 
     test "redirects if already logged in", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> get(Routes.user_session_path(conn, :new))
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == "/positions"
     end
   end
 
@@ -35,9 +35,7 @@ defmodule OptionsTrackerWeb.UserSessionControllerTest do
       # Now do a logged in request and assert on the menu
       conn = get(conn, "/")
       response = html_response(conn, 200)
-      assert response =~ user.email
-      assert response =~ "Settings</a>"
-      assert response =~ "Log out</a>"
+      assert response =~ "Positions"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
@@ -51,7 +49,7 @@ defmodule OptionsTrackerWeb.UserSessionControllerTest do
         })
 
       assert conn.resp_cookies["user_remember_me"]
-      assert redirected_to(conn) =~ "/"
+      assert redirected_to(conn) =~ "/positions"
     end
 
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
@@ -61,7 +59,7 @@ defmodule OptionsTrackerWeb.UserSessionControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
+      assert response =~ "Log in</h1>"
       assert response =~ "Invalid e-mail or password"
     end
   end
