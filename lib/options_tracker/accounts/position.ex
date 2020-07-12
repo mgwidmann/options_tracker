@@ -58,8 +58,9 @@ defmodule OptionsTracker.Accounts.Position do
   @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status count account_id]a
   @not_allowed_stock_fields ~w[expires_at premium spread_width]a
   @not_allowed_option_fields ~w[basis]a
-  @optional_open_fields ~w[spread_width basis notes exit_strategy]a
+  @optional_open_fields ~w[basis notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
+  @required_spread_fields ~w[spread_width]a
   @spec open_changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
@@ -72,23 +73,35 @@ defmodule OptionsTracker.Accounts.Position do
       |> Map.put("status", :open)
       |> prepare_attrs()
 
-    if attrs["type"] in [:stock, "stock", 0] do
-      # Set the basis to the stock price if its not filled in
-      attrs = Map.put(attrs, "basis", Map.get(attrs, "basis", attrs["strike"]))
+    cond do
+      TransType.stock?(attrs["type"]) ->
+        # Set the basis to the stock price if its not filled in
+        attrs = Map.put(attrs, "basis", Map.get(attrs, "basis", attrs["strike"]))
 
-      position
-      |> cast(attrs, @open_fields -- @not_allowed_stock_fields)
-      |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
-      |> validate_position_open()
-      |> standard_validations()
-    else
-      position
-      |> cast(prepare_attrs(attrs), @open_fields -- @not_allowed_option_fields)
-      |> validate_required(@required_open_fields -- @not_allowed_option_fields)
-      |> reverse_sign_for(:premium)
-      |> reverse_sign_for(:exit_price)
-      |> validate_position_open()
-      |> standard_validations()
+        position
+        |> cast(attrs, @open_fields -- @not_allowed_stock_fields)
+        |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
+        |> validate_position_open()
+        |> standard_validations()
+
+      TransType.call_spread?(attrs["type"]) || TransType.put_spread?(attrs["type"]) ->
+        position
+        |> cast(prepare_attrs(attrs), (@open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
+        |> validate_required((@required_open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
+        |> reverse_sign_for(:premium)
+        |> reverse_sign_for(:exit_price)
+        |> validate_position_open()
+        |> standard_validations()
+
+      # Regular options, calls and puts
+      true ->
+        position
+        |> cast(prepare_attrs(attrs), @open_fields -- @not_allowed_option_fields)
+        |> validate_required(@required_open_fields -- @not_allowed_option_fields)
+        |> reverse_sign_for(:premium)
+        |> reverse_sign_for(:exit_price)
+        |> validate_position_open()
+        |> standard_validations()
     end
   end
 
@@ -141,21 +154,33 @@ defmodule OptionsTracker.Accounts.Position do
       |> stringify_keys()
       |> prepare_attrs()
 
-    if position.type in [:stock, "stock", 0] do
-      position
-      |> cast(attrs, @fields -- @not_allowed_stock_fields)
-      |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
-      |> standard_validations()
-      |> validate_number(:basis, greater_than: 0.0)
-      |> calculate_profit_loss()
-    else
-      position
-      |> cast(attrs, @fields -- @not_allowed_option_fields)
-      |> validate_required(@required_open_fields -- @not_allowed_option_fields)
-      |> standard_validations()
-      |> reverse_sign_for(:premium)
-      |> reverse_sign_for(:exit_price)
-      |> calculate_profit_loss()
+    cond do
+      TransType.stock?(attrs["type"]) ->
+        position
+        |> cast(attrs, @fields -- @not_allowed_stock_fields)
+        |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
+        |> standard_validations()
+        |> validate_number(:basis, greater_than: 0.0)
+        |> calculate_profit_loss()
+
+      TransType.call_spread?(attrs["type"]) || TransType.put_spread?(attrs["type"]) ->
+        position
+        |> cast(attrs, (@fields -- @not_allowed_option_fields) ++ @required_spread_fields)
+        |> validate_required((@required_open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
+        |> standard_validations()
+        |> reverse_sign_for(:premium)
+        |> reverse_sign_for(:exit_price)
+        |> calculate_profit_loss()
+
+      # Calls and puts
+      true ->
+        position
+        |> cast(attrs, @fields -- @not_allowed_option_fields)
+        |> validate_required(@required_open_fields -- @not_allowed_option_fields)
+        |> standard_validations()
+        |> reverse_sign_for(:premium)
+        |> reverse_sign_for(:exit_price)
+        |> calculate_profit_loss()
     end
   end
 
@@ -241,7 +266,7 @@ defmodule OptionsTracker.Accounts.Position do
     |> validate_length(:stock, min: 1)
     |> upcase_stock()
     |> validate_number(:premium, [])
-    |> validate_number(:strike, greater_than: 0.0)
+    |> validate_number(:strike, greater_than_or_equal_to: 0.0)
     |> validate_number(:fees, greater_than_or_equal_to: 0.0)
     |> validate_number(:exit_price, [])
     |> validate_length(:notes, max: 10_000)

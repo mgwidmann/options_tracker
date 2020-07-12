@@ -39,13 +39,13 @@
               <span class="tag short is-danger ml-auto <%= if(is_short?(@f), do: "", else: "is-light") %>">
                 <%= label @f, :short_true, class: "radio" do %>
                   <%= radio_button @f, :short, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Short
+                  Sell
                 <% end %>
               </span>
               <span class="tag long is-success mr-auto <%= if(is_short?(@f), do: "is-light", else: "") %>">
                 <%= label @f, :short_false, class: "radio" do %>
                   <%= radio_button @f, :short, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Long
+                  Buy
                 <% end %>
               </span>
               <%= error_tag @f, :short %>
@@ -168,13 +168,13 @@
         <span class="tag short is-danger <%= if(is_short?(@f), do: "", else: "is-light") %>">
           <%= label @f, :short_true, class: "radio" do %>
             <%= radio_button @f, :short, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
-            Short
+            Sell
           <% end %>
         </span>
         <span class="tag long is-success <%= if(is_short?(@f), do: "is-light", else: "") %>">
           <%= label @f, :short_false, class: "radio" do %>
             <%= radio_button @f, :short, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
-            Long
+            Buy
           <% end %>
         </span>
         <%= error_tag @f, :short %>
@@ -189,22 +189,26 @@
               <i class="fa fa-usd"></i>
             </span>
             <%= error_tag @f, :strike %>
-            <span>
-              <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
-            </span>
-            <%= error_tag @f, :type %>
-          </p>
-          <p class="control has-icons-left">
-            <%= if is_spread?(@f) do %>
-              <%= number_input @f, :spread_width, step: "0.50", class: "input is-small", placeholder: "Width" %>
-              <span class="icon is-small is-left">
-                <i class="fa fa-usd"></i>
-              </span>
-              <%= error_tag @f, :spread_width %>
-            <% end %>
           </p>
         </div>
       </div>
+    </td>
+    <td>
+      <p class="control">
+        <span>
+          <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
+        </span>
+        <%= error_tag @f, :type %>
+      </p>
+      <%= if is_spread?(@f) do %>
+        <p class="control has-icons-left mt-1">
+          <%= number_input @f, :spread_width, step: "0.50", class: "input is-small", placeholder: "Width" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-usd"></i>
+          </span>
+          <%= error_tag @f, :spread_width %>
+        </p>
+      <% end %>
     </td>
     <td>
       <div class="control">

@@ -54,12 +54,19 @@ defmodule OptionsTrackerWeb.Telemetry do
     ]
   end
 
-  defp periodic_measurements do
-    [
-      # A module, function and arguments to be invoked periodically.
-      # This function must call :telemetry.execute/3 and a metric must be added above.
-      {OptionsTrackerWeb.Metrics, :count_users, []},
-      {OptionsTrackerWeb.Metrics, :count_positions, []}
-    ]
+  if Mix.env() == :prod do
+    defp periodic_measurements do
+      [
+        # A module, function and arguments to be invoked periodically.
+        # This function must call :telemetry.execute/3 and a metric must be added above.
+        {OptionsTrackerWeb.Metrics, :count_users, []},
+        {OptionsTrackerWeb.Metrics, :count_positions, []}
+      ]
+    end
+  else
+    # Dev and test is too noisy to have this running
+    defp periodic_measurements do
+      []
+    end
   end
 end

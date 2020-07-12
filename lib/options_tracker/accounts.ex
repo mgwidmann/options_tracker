@@ -306,6 +306,7 @@ defmodule OptionsTracker.Accounts do
           position
 
         {:error, changeset} ->
+          IO.inspect(changeset)
           Repo.rollback(changeset)
       end
     end)

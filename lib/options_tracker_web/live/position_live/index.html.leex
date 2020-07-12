@@ -186,9 +186,14 @@
                   <span class="tag is-small ml-2 <%= type_display_class(position) %>">
                     <%= type_display(position) %>
                   </span>
+                  <%= if is_spread?(position) do %>
+                    <span class="tag is-small is-info">
+                      <%= currency_string(position.spread_width) %> width
+                    </span>
+                  <% end %>
                 </div>
                 <div class="">
-                  <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span>
+                  <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Sell", else: "Buy") %></span>
                 </div>
               </div>
               <div class="column is-one-quarter">
@@ -274,8 +279,9 @@
       <th>Opened</th>
       <th>Count</th>
       <th>Stock</th>
-      <th>Long / Short</th>
-      <th>Strike / Type</th>
+      <th>Buy / Sell</th>
+      <th>Strike</th>
+      <th>Type</th>
       <th>Expires on</th>
       <th>Premium</th>
       <th>Status</th>
@@ -314,13 +320,20 @@
           </td>
           <td><%= position.count %>&nbsp;<%= count_type(position) %></td>
           <td><span class="tag is-rounded"><%= position.stock %></span></td>
-          <td><span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Short", else: "Long") %></span></td>
+          <td><span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Sell", else: "Buy") %></span></td>
+          <td>
+            <%= currency_string(position.strike) %>
+          </td>
           <td>
             <div class="tags">
-              <%= currency_string(position.strike) %>
-              <span class="tag is-small ml-2 <%= type_display_class(position) %>">
+              <span class="tag is-small <%= type_display_class(position) %>">
                 <%= type_display(position) %>
               </span>
+              <%= if is_spread?(position) do %>
+                <span class="tag is-small is-info">
+                  <%= currency_string(position.spread_width) %> width
+                </span>
+              <% end %>
             </div>
           </td>
           <td>
