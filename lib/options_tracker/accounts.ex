@@ -10,6 +10,7 @@ defmodule OptionsTracker.Accounts do
 
   @system_action_user_id -1
 
+  @spec list_accounts(non_neg_integer | String.t()) :: [Account.t()]
   @doc """
   Returns the list of accounts.
 
@@ -27,6 +28,7 @@ defmodule OptionsTracker.Accounts do
     |> Repo.all()
   end
 
+  @spec get_account!(non_neg_integer | String.t()) :: Account.t()
   @doc """
   Gets a single account.
 
@@ -43,6 +45,7 @@ defmodule OptionsTracker.Accounts do
   """
   def get_account!(id), do: Repo.get!(Account, id)
 
+  @spec create_account(%{optional(binary) => binary | number}) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Creates a account.
 
@@ -61,6 +64,7 @@ defmodule OptionsTracker.Accounts do
     |> Repo.insert()
   end
 
+  @spec update_account(OptionsTracker.Accounts.Account.t(), %{optional(binary) => binary | number}) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Updates a account.
 
@@ -79,6 +83,7 @@ defmodule OptionsTracker.Accounts do
     |> Repo.update()
   end
 
+  @spec delete_account(OptionsTracker.Accounts.Account.t()) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Deletes a account.
 
