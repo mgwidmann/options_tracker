@@ -1,6 +1,7 @@
 <%= if @mobile do %>
   <div class="card">
     <%= hidden_input @f, :account_id, value: @account_id %>
+    <%= hidden_input @f, :return_to, value: @return_to, name: "return_to" %>
     <div class="card-content">
       <div class="media">
         <div class="media-left">
@@ -139,6 +140,7 @@
   <tr id="position-<%= @position.id %>">
     <td>
       <%= hidden_input @f, :account_id, value: @account_id %>
+      <%= hidden_input @f, :return_to, value: @return_to, name: "return_to" %>
       <div class="control">
         <%= text_input @f, :opened_at, type: :date, class: "input is-small date" %>
         <%= error_tag @f, :opened_at %>

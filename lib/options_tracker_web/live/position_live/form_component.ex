@@ -18,7 +18,8 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign(:current_account, current_account)
-     |> assign(:changeset, changeset)}
+     |> assign(:changeset, changeset)
+     |> assign(:return_to, Routes.position_account_index_path(socket, :index, current_account))}
   end
 
   @impl true
