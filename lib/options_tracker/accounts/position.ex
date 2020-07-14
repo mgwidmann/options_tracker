@@ -155,7 +155,7 @@ defmodule OptionsTracker.Accounts.Position do
       |> prepare_attrs()
 
     cond do
-      TransType.stock?(attrs["type"]) ->
+      TransType.stock?(position.type) ->
         position
         |> cast(attrs, @fields -- @not_allowed_stock_fields)
         |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
@@ -163,7 +163,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> validate_number(:basis, greater_than: 0.0)
         |> calculate_profit_loss()
 
-      TransType.call_spread?(attrs["type"]) || TransType.put_spread?(attrs["type"]) ->
+      TransType.call_spread?(position.type) || TransType.put_spread?(position.type) ->
         position
         |> cast(attrs, (@fields -- @not_allowed_option_fields) ++ @required_spread_fields)
         |> validate_required((@required_open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
