@@ -160,7 +160,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> cast(attrs, @fields -- @not_allowed_stock_fields)
         |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
         |> standard_validations()
-        |> validate_number(:basis, greater_than: 0.0)
+        |> validate_number(:basis, [])
         |> calculate_profit_loss()
 
       TransType.call_spread?(position.type) || TransType.put_spread?(position.type) ->
