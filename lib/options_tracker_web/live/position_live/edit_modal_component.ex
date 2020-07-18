@@ -12,7 +12,7 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
       if(
         position.expires_at && Timex.compare(Timex.today(), position.expires_at, :day) in [-1, 0],
         do: Timex.today(),
-        else: position.expires_at
+        else: position.expires_at || Timex.today()
       )
 
     position = Accounts.position_with_account(position)

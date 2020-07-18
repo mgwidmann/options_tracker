@@ -78,18 +78,20 @@
         </div>
       </div>
     <% end %>
-    <div class="columns">
-      <div class="column control">
-        <%= label f, :notes %>
-        <%= textarea f, :notes, class: "textarea" %>
-        <%= error_tag f, :notes %>
+    <%= if @show_notes do %>
+      <div class="columns">
+        <div class="column control">
+          <%= label f, :notes %>
+          <%= textarea f, :notes, class: "textarea" %>
+          <%= error_tag f, :notes %>
+        </div>
+        <div class="column control">
+          <%= label f, :exit_strategy %>
+          <%= textarea f, :exit_strategy, class: "textarea" %>
+          <%= error_tag f, :exit_strategy %>
+        </div>
       </div>
-      <div class="column control">
-        <%= label f, :exit_strategy %>
-        <%= textarea f, :exit_strategy, class: "textarea" %>
-        <%= error_tag f, :exit_strategy %>
-      </div>
-    </div>
+    <% end %>
   </section>
   <footer class="modal-card-foot">
     <div class="control is-grouped is-pulled-right ml-auto">

@@ -112,6 +112,7 @@
     current_user: @current_user,
     modal_title: "Close Position",
     only_notes: false,
+    show_notes: false,
     return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
@@ -124,6 +125,7 @@
     current_user: @current_user,
     modal_title: "Edit Notes",
     only_notes: true,
+    show_notes: true,
     return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
