@@ -1,10 +1,14 @@
 defmodule OptionsTracker.Search do
   alias OptionsTracker.Accounts
   alias OptionsTracker.Accounts.Account
+  import OptionsTracker.Enum
+
+  defenum StatusType, open: 0, closed: 1, all: 99 do
+  end
 
   @schema %{
     search: :string,
-    open: :boolean,
+    status: StatusType,
     account_ids: {:array, :integer}
   }
   @type t :: %{
@@ -21,7 +25,9 @@ defmodule OptionsTracker.Search do
     changeset =
       {%{}, @schema}
       |> Ecto.Changeset.cast(
-        params |> Map.put("account_ids", for(a <- accounts || [], do: a.id)),
+        params
+        |> Map.put("account_ids", for(a <- accounts || [], do: a.id))
+        |> Map.put("status", params["status"] || to_string(StatusType.open_key())),
         Map.keys(@schema)
       )
 

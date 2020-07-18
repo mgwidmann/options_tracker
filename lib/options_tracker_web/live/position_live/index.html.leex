@@ -37,15 +37,21 @@
       <div class="panel-block">
         <div class="column">
           <div class="control mb-0 tags has-addons">
-            <span class="tag long is-success <%= if(@search_changeset.changes[:open] in [true, nil], do: "", else: "is-light") %>">
-              <%= label search_form, :open_true, class: "radio" do %>
-                <%= radio_button search_form, :open, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
+            <span class="tag long is-success <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.open_key(), do: "", else: "is-light") %>">
+              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.open_key()}", class: "radio" do %>
+                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.open_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
                 Open
               <% end %>
             </span>
-            <span class="tag short is-danger <%= if(@search_changeset.changes[:open] == false, do: "", else: "is-light") %>">
-              <%= label search_form, :open_false, class: "radio" do %>
-                <%= radio_button search_form, :open, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
+            <span class="tag short is-info <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.all_key(), do: "", else: "is-light") %>">
+              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.all_key()}", class: "radio" do %>
+                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.all_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                All
+              <% end %>
+            </span>
+            <span class="tag short is-danger <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.closed_key(), do: "", else: "is-light") %>">
+              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.closed_key()}", class: "radio" do %>
+                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.closed_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
                 Closed
               <% end %>
             </span>

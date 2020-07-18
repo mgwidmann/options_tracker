@@ -227,13 +227,13 @@ defmodule OptionsTracker.Accounts do
   Parameters:
     * :account_ids - The account IDs to search.
     * :search - The ticker to search.
-    * :open - Boolean to indicate to look for open or closed positions.
+    * :status - Indicates the status to look for, values `:open`, `:closed` or `:all` positions.
   """
   def search_positions(params) when is_map(params) do
     account_ids = Map.get(params, :account_ids)
     search = Map.get(params, :search)
     search = if(search, do: "%#{String.upcase(search)}%")
-    open = Map.get(params, :open, true)
+    status = Map.get(params, :status, :open)
 
     query =
       from(p in Position,
@@ -250,10 +250,15 @@ defmodule OptionsTracker.Accounts do
     open_val = Position.StatusType.open()
 
     query =
-      if open do
-        where(query, [p], p.status in ^[open_val])
-      else
-        where(query, [p], p.status not in ^[open_val])
+      case status do
+        :open ->
+          where(query, [p], p.status in ^[open_val])
+
+        :closed ->
+          where(query, [p], p.status not in ^[open_val])
+
+        :all ->
+          query
       end
 
     query = order_by(query, [p], asc_nulls_first: p.expires_at, asc: p.opened_at)
