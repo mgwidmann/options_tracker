@@ -253,9 +253,18 @@
               <% end %>
             </div>
             <div class="column is-half has-text-right">
-              <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-                <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price || 0.0)} exit)", else: nil) %>
-              </span>
+              <%= if position.profit_loss do %>
+                <span class="<%= if(Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+                  <%= credit_debit_display(position.profit_loss) %> (<%= currency_string(position.exit_price || 0.0) %> exit)
+                </span>
+              <% else %>
+                <% potential_profit = max_profit(position) %>
+                <div class="tags">
+                  <span class="tag is-small ">
+                    <%= currency_string(potential_profit) %> max profit
+                  </span>
+                </div>
+              <% end %>
             </div>
             <div class="column is-one-quarter">
               <%= live_patch to: Routes.position_index_path(@socket, :delete, position), class: "button is-danger mr-1 mt-4 is-pulled-right is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Delete" do %>
@@ -348,9 +357,18 @@
           </td>
           <td><%= position_status_display(position.type, position.status, true) %></td>
           <td>
-            <span class="<%= if(position.profit_loss && Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-              <%= if(position.profit_loss, do: "#{credit_debit_display(position.profit_loss)} (#{currency_string(position.exit_price || 0.0)} exit)", else: nil) %>
-            </span>
+            <%= if position.profit_loss do %>
+              <span class="<%= if(Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+                <%= credit_debit_display(position.profit_loss) %> (<%= currency_string(position.exit_price || 0.0) %> exit)
+              </span>
+            <% else %>
+              <% potential_profit = max_profit(position) %>
+              <div class="tags">
+                <span class="tag is-small ">
+                  <%= currency_string(potential_profit) %> max profit
+                </span>
+              </div>
+            <% end %>
           </td>
           <td>
             <%= currency_string(position.fees) %>

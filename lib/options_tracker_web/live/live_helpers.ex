@@ -39,11 +39,15 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   end
 
   def currency_string(%Decimal{} = decimal, prepend_unit) do
-    decimal
-    |> Decimal.mult(100)
-    |> Decimal.to_integer()
-    |> Money.new()
-    |> Money.to_string(symbol: prepend_unit)
+    if Decimal.inf?(decimal) do
+      "Infinity"
+    else
+      decimal
+      |> Decimal.mult(100)
+      |> Decimal.to_integer()
+      |> Money.new()
+      |> Money.to_string(symbol: prepend_unit)
+    end
   end
 
   @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil

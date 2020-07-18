@@ -78,6 +78,11 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     end)
   end
 
+  @spec max_profit(OptionsTracker.Accounts.Position.t()) :: Decimal.t()
+  def max_profit(%Position{} = position) do
+    Accounts.calculate_max_profit(position)
+  end
+
   @spec credit_debit_display(Decimal.t()) :: String.t()
   def credit_debit_display(%Decimal{} = value) do
     value_string =

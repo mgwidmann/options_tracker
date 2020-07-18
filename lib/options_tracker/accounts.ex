@@ -579,6 +579,43 @@ defmodule OptionsTracker.Accounts do
     end
   end
 
+  # Internal representation of Decimal for infinity
+  @infinity %Decimal{coef: :inf}
+
+  @spec calculate_max_profit(OptionsTracker.Accounts.Position.t()) :: Decimal.t()
+  def calculate_max_profit(%Position{type: :stock, short: true, strike: price, count: count}) do
+    price
+    |> Decimal.mult(100)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_profit(%Position{type: :stock, short: false}) do
+    @infinity
+  end
+
+  def calculate_max_profit(%Position{type: spread, short: false, spread_width: width, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
+    width
+    |> Decimal.sub(premium)
+    |> Decimal.mult(100)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_profit(%Position{type: spread, short: true, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
+    premium
+    |> Decimal.mult(100)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_profit(%Position{type: option, short: false}) when option in ~w[call put]a do
+    @infinity
+  end
+
+  def calculate_max_profit(%Position{type: option, short: true, premium: premium, count: count}) when option in ~w[call put]a do
+    premium
+    |> Decimal.mult(100)
+    |> Decimal.mult(count)
+  end
+
   @spec change_position(OptionsTracker.Accounts.Position.t(), :invalid | map) ::
           Ecto.Changeset.t()
   @doc """
