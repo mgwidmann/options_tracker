@@ -1,0 +1,9 @@
+Statistics
+<%= currency_string(Decimal.from_float(4392.10)) %>
+<%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+id: :accounts_dropdown,
+current_user: @current_user,
+current_account_id: @current_account_id,
+all_path_fun: &Routes.statistics_index_path/2,
+account_path_fun: &Routes.statistics_account_index_path/3
+} %>

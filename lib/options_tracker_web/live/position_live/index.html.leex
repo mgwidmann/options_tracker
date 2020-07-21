@@ -10,17 +10,13 @@
               <i class="fa fa-plus" aria-hidden="true"></i>
             <% end %>
           </div>
-          <div class="">
-            <%= if @current_user.accounts == [] do %>
-              <%= live_patch "Create your first Account", to: Routes.account_index_path(@socket, :new), class: "is-pulled-right" %>
-            <% else %>
-              <%= form_tag "#", phx_change: "change_account", class: "is-pulled-right" do %>
-                <%= content_tag :select, prompt: "Select an Account", name: :account_id, class: "select" do %>
-                  <%= options_for_select [{"All", "all"} | accounts_select(@current_user.accounts)], @current_account_id %>
-                <% end %>
-              <% end %>
-            <% end %>
-          </div>
+          <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+            id: :accounts_dropdown,
+            current_user: @current_user,
+            current_account_id: @current_account_id,
+            all_path_fun: &Routes.position_index_path/2,
+            account_path_fun: &Routes.position_account_index_path/3
+          } %>
         </div>
       </div>
     </div>

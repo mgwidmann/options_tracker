@@ -1,0 +1,11 @@
+<div class="">
+  <%= if @current_user.accounts == [] do %>
+    <%= live_patch "Create your first Account", to: Routes.account_index_path(@socket, :new), class: "is-pulled-right" %>
+  <% else %>
+    <%= form_tag "#", phx_change: "change_account", class: "is-pulled-right", phx_target: @myself do %>
+      <%= content_tag :select, prompt: "Select an Account", name: :account_id, class: "select" do %>
+        <%= options_for_select [{"All", "all"} | accounts_select(@current_user.accounts)], @current_account_id %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

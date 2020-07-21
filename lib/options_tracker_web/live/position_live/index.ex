@@ -183,20 +183,6 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     save_position(socket, socket.assigns.live_action, position_params, Map.get(params, "return_to", Routes.position_index_path(socket, :index)))
   end
 
-  def handle_event("change_account", %{"account_id" => "all"}, socket) do
-    {:noreply,
-     socket
-     |> push_redirect(to: Routes.position_index_path(socket, :index))}
-  end
-
-  def handle_event("change_account", %{"account_id" => account_id}, socket) do
-    {account_id, ""} = Integer.parse(account_id)
-
-    {:noreply,
-     socket
-     |> push_redirect(to: Routes.position_account_index_path(socket, :index, account_id))}
-  end
-
   def handle_event("cancel", _, socket) do
     {:noreply,
      socket

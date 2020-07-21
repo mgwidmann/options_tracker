@@ -28,21 +28,21 @@ defmodule OptionsTrackerWeb.Router do
   scope "/", OptionsTrackerWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    # Users
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings/update_password", UserSettingsController, :update_password
     put "/users/settings/update_email", UserSettingsController, :update_email
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
+    # Accounts
     live "/accounts", AccountLive.Index, :index
     live "/accounts/new", AccountLive.Index, :new
     live "/accounts/:id/edit", AccountLive.Index, :edit
-
     live "/accounts/:id", AccountLive.Show, :show
 
+    # Positions
     live "/positions", PositionLive.Index, :index
-
     live "/positions/accounts/:account_id", PositionLive.Index, :index, as: :position_account_index
-
     live "/positions/accounts/:account_id/new", PositionLive.Index, :new
     live "/positions/:id/edit", PositionLive.Index, :edit
     live "/positions/:id/close", PositionLive.Index, :close
@@ -50,6 +50,10 @@ defmodule OptionsTrackerWeb.Router do
     live "/positions/:id/reopen", PositionLive.Index, :reopen
     live "/positions/:id/delete", PositionLive.Index, :delete
     live "/positions/:id/notes", PositionLive.Index, :notes
+
+    # Statistics
+    live "/statistics", StatisticsLive.Index, :index
+    live "/statistics/accounts/:account_id", StatisticsLive.Index, :index, as: :statistics_account_index
   end
 
   # Other scopes may use custom stacks.
