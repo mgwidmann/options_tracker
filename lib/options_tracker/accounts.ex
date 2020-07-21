@@ -165,8 +165,8 @@ defmodule OptionsTracker.Accounts do
   """
   def profit_loss(%Account{} = account), do: profit_loss([account])
 
-  def profit_loss(accounts) when is_list(accounts) or is_nil(accounts) do
-    positions = list_positions(for(a <- accounts || [], do: a.id))
+  def profit_loss(accounts) when is_list(accounts) do
+    positions = list_positions(for(a <- accounts, do: a.id))
 
     day_date = Timex.today()
     week_date = Timex.beginning_of_week(day_date, :sun)
@@ -188,6 +188,36 @@ defmodule OptionsTracker.Accounts do
       monthly: month_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2))
     }
+  end
+
+  def profit_loss(%Account{} = account, dive_into), do: profit_loss([account], dive_into)
+
+  def profit_loss(accounts, :daily) when is_list(accounts) do
+    for(a <- accounts, do: a.id)
+    |> list_positions()
+    |> Stream.filter(& &1.closed_at)
+    |> Enum.group_by(& &1.closed_at)
+  end
+
+  def profit_loss(accounts, :weekly) when is_list(accounts) do
+    for(a <- accounts, do: a.id)
+    |> list_positions()
+    |> Stream.filter(& &1.closed_at)
+    |> Enum.group_by(&Timex.beginning_of_week(&1.closed_at, :sun))
+  end
+
+  def profit_loss(accounts, :monthly) when is_list(accounts) do
+    for(a <- accounts, do: a.id)
+    |> list_positions()
+    |> Stream.filter(& &1.closed_at)
+    |> Enum.group_by(&Timex.beginning_of_month(&1.closed_at))
+  end
+
+  def profit_loss(accounts, :yearly) when is_list(accounts) do
+    for(a <- accounts, do: a.id)
+    |> list_positions()
+    |> Stream.filter(& &1.closed_at)
+    |> Enum.group_by(&Timex.beginning_of_year(&1.closed_at))
   end
 
   alias OptionsTracker.Accounts.Position

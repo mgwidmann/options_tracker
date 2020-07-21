@@ -1,9 +1,75 @@
-Statistics
-<%= currency_string(Decimal.from_float(4392.10)) %>
-<%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
-id: :accounts_dropdown,
-current_user: @current_user,
-current_account_id: @current_account_id,
-all_path_fun: &Routes.statistics_index_path/2,
-account_path_fun: &Routes.statistics_account_index_path/3
-} %>
+<header class="header">
+  <section class="section">
+    <div class="columns">
+      <div class="column is-12 mh-5">
+        <h1 class="title mb-0 is-pulled-left">Statistics</h1>
+        <div class="is-pulled-right">
+          <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+            id: :accounts_dropdown,
+            current_user: @current_user,
+            current_account_id: @current_account_id,
+            all_path_fun: &Routes.statistics_index_path/3,
+            account_path_fun: &Routes.statistics_account_index_path/4,
+            path_params: []
+          } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</header>
+
+<section class="section">
+  <div class="tabs is-centered is-large is-toggle is-toggle-rounded is-fullwidth">
+    <ul>
+      <li class="<%= if(@current_tab == :daily, do: "is-active", else: nil) %>">
+        <%= live_patch "Daily", to: "#{@current_uri.path}?tab=daily" %>
+      </li>
+      <li class="<%= if(@current_tab == :weekly, do: "is-active", else: nil) %>">
+        <%= live_patch "Weekly", to: "#{@current_uri.path}?tab=weekly" %>
+      </li>
+      <li class="<%= if(@current_tab == :monthly, do: "is-active", else: nil) %>">
+        <%= live_patch "Monthly", to: "#{@current_uri.path}?tab=monthly" %>
+      </li>
+      <li class="<%= if(@current_tab == :yearly, do: "is-active", else: nil) %>">
+        <%= live_patch "Yearly", to: "#{@current_uri.path}?tab=yearly" %>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <table id="statistics-table" class="table is-striped is-narrow is-hoverable is-fullwidth">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Profit / Loss</th>
+        <th>Trades</th>
+        <th>Largest Loss</th>
+        <th>Largest Win</th>
+      </tr>
+    </thead>
+    <tbody id="statistics">
+      <%= for date <- @profit_loss_range do %>
+        <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) |> IO.inspect %>
+        <tr>
+          <td>
+            <%= Timex.format!(date, "{0M}/{D}/{YYYY}") %>
+          </td>
+          <% pl = profit_loss(profit_loss_list) %>
+          <td class="<%= profit_loss_class(pl) %>">
+            <%= pl && currency_string(pl) %>
+          </td>
+          <td>
+            <%= profit_loss_list && length(profit_loss_list) %>
+          </td>
+          <td class="has-text-danger">
+            <%= largest_loss(profit_loss_list) %>
+          </td>
+          <td class="has-text-success">
+            <%= largest_win(profit_loss_list) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>
