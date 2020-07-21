@@ -70,10 +70,34 @@
         Realized Profit / Loss
       </div>
       <div class="panel-block py-0 px-0">
-        <div class="column has-text-centered is-size-7 py-1">Daily</div>
-        <div class="column has-text-centered is-size-7 py-1">Weekly</div>
-        <div class="column has-text-centered is-size-7 py-1">Monthly</div>
-        <div class="column has-text-centered is-size-7 py-1">Total</div>
+        <div class="column has-text-centered is-size-7 py-1">
+          <%= if @current_account_id == :all do %>
+            <%= live_redirect "Daily", to: Routes.statistics_index_path(@socket, :index, tab: :daily) %>
+          <% else %>
+            <%= live_redirect "Daily", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :daily) %>
+          <% end %>
+        </div>
+        <div class="column has-text-centered is-size-7 py-1">
+          <%= if @current_account_id == :all do %>
+            <%= live_redirect "Weekly", to: Routes.statistics_index_path(@socket, :index, tab: :weekly) %>
+          <% else %>
+            <%= live_redirect "Weekly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :weekly) %>
+          <% end %>
+        </div>
+        <div class="column has-text-centered is-size-7 py-1">
+          <%= if @current_account_id == :all do %>
+            <%= live_redirect "Monthly", to: Routes.statistics_index_path(@socket, :index, tab: :monthly) %>
+          <% else %>
+            <%= live_redirect "Monthly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :monthly) %>
+          <% end %>
+        </div>
+        <div class="column has-text-centered is-size-7 py-1">
+          <%= if @current_account_id == :all do %>
+            <%= live_redirect "Total", to: Routes.statistics_index_path(@socket, :index, tab: :yearly) %>
+          <% else %>
+            <%= live_redirect "Total", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :yearly) %>
+          <% end %>
+        </div>
       </div>
       <div class="panel-block py-0">
         <div class="column has-text-centered">
