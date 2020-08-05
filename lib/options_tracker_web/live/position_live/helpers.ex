@@ -70,14 +70,6 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     |> Accounts.name_for_position_status(past_tense)
   end
 
-  @spec accounts_select([Account.t()]) :: Keyword.t()
-  def accounts_select(accounts) do
-    accounts
-    |> Enum.map(fn %Account{id: id, name: name, broker_name: broker_name, type: type} ->
-      {"#{name} (#{Accounts.name_for_type(type) || broker_name})", id}
-    end)
-  end
-
   @spec max_profit(OptionsTracker.Accounts.Position.t()) :: Decimal.t()
   def max_profit(%Position{} = position) do
     Accounts.calculate_max_profit(position)
