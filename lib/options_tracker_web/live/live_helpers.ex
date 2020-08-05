@@ -63,4 +63,16 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   def format_currency(nil, _field) do
     nil
   end
+
+  def track(current_user) do
+    OptionsTrackerWeb.Presence.track(
+      self(),
+      "users",
+      current_user.id,
+      %{
+        email: current_user.email,
+        user_id: current_user.id
+      }
+    )
+  end
 end

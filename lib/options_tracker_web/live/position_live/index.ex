@@ -14,6 +14,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
 
     current_user = Users.get_user_by_session_token(user_token)
+    track(current_user)
 
     current_account =
       if(account_id == :all,

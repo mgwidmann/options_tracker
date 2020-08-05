@@ -13,6 +13,7 @@ defmodule OptionsTracker.Application do
       OptionsTrackerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: OptionsTracker.PubSub},
+      OptionsTrackerWeb.Presence,
       # Start the Endpoint (http/https)
       OptionsTrackerWeb.Endpoint
       # Start a worker by calling: OptionsTracker.Worker.start_link(arg)

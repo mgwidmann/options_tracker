@@ -10,6 +10,7 @@ defmodule OptionsTrackerWeb.AccountLive.Index do
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
     current_user = Users.get_user_by_session_token(user_token)
+    track(current_user)
 
     {:ok,
      socket

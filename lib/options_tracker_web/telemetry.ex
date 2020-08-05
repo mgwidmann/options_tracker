@@ -50,6 +50,7 @@ defmodule OptionsTrackerWeb.Telemetry do
 
       # OptionsTracker Metrics
       last_value("options_tracker.users.count"),
+      last_value("options_tracker.users.online.count"),
       last_value("options_tracker.positions.count")
     ]
   end
@@ -60,6 +61,7 @@ defmodule OptionsTrackerWeb.Telemetry do
         # A module, function and arguments to be invoked periodically.
         # This function must call :telemetry.execute/3 and a metric must be added above.
         {OptionsTrackerWeb.Metrics, :count_users, []},
+        {OptionsTrackerWeb.Metrics, :count_online_users, []},
         {OptionsTrackerWeb.Metrics, :count_positions, []}
       ]
     end
