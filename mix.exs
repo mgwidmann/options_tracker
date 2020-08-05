@@ -55,7 +55,8 @@ defmodule OptionsTracker.MixProject do
       {:phx_gen_auth, "~> 0.4.0", only: [:dev], runtime: false},
       {:date_time_parser, "~> 1.0"},
       {:money, "~> 1.7.0"},
-      {:timex, "~> 3.6"}
+      {:timex, "~> 3.6"},
+      {:flames, "~> 0.4.1"}
     ]
   end
 

@@ -26,6 +26,14 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :flames,
+  repo: OptionsTracker.Repo,
+  endpoint: OptionsTrackerWeb.Endpoint,
+  table: "errors"
+
+config :logger,
+  backends: [:console, Flames.Logger]
+
 config :money,
   # this allows you to do Money.new(100)
   default_currency: :USD,

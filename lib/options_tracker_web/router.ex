@@ -8,9 +8,12 @@ defmodule OptionsTrackerWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root}
-    plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+  end
+
+  pipeline :csrf do
+    plug :protect_from_forgery
   end
 
   pipeline :full_width do
@@ -26,7 +29,7 @@ defmodule OptionsTrackerWeb.Router do
   end
 
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :csrf, :require_authenticated_user]
 
     # Users
     get "/users/settings", UserSettingsController, :edit
@@ -73,12 +76,13 @@ defmodule OptionsTrackerWeb.Router do
   scope "/admin" do
     pipe_through [:browser, :admin]
     live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
+    forward "/errors", Flames.Web
   end
 
   ## Authentication routes
 
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through [:browser, :csrf, :redirect_if_user_is_authenticated]
 
     get "/users/register", UserRegistrationController, :new
     post "/users/register", UserRegistrationController, :create
@@ -91,7 +95,7 @@ defmodule OptionsTrackerWeb.Router do
   end
 
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :csrf]
 
     scope "/" do
       pipe_through :full_width
