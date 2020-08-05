@@ -50,7 +50,7 @@
     </thead>
     <tbody id="statistics">
       <%= for date <- @profit_loss_range do %>
-        <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) |> IO.inspect %>
+        <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) %>
         <tr>
           <td>
             <%= Timex.format!(date, "{0M}/{D}/{YYYY}") %>

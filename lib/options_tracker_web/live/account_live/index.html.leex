@@ -1,4 +1,4 @@
-<header class="header">
+<header class="header mb-6">
   <section class="section columns">
     <h1 class="title column is-pulled-left">Accounts</h1>
     <div class="column rows">
@@ -23,16 +23,72 @@
     return_to: Routes.account_index_path(@socket, :index) %>
 <% end %>
 
-<table class="table is-striped is-narrow is-hoverable is-fullwidth">
+<div class="rows is-hidden-desktop">
+  <%= for account <- @accounts do %>
+    <div class="card mt-6">
+      <div class="card-content py-2 px-2">
+        <div class="mb-2">
+          <div class="columns is-mobile is-gapless">
+            <div class="column is-one-half">
+              <%= account.name %>
+              <br/>
+              <span class="tag is-size-7 is-rounded">
+                <%= account_type_display(account.type, account.broker_name) %>
+              </span>
+            </div>
+            <div class="column is-one-half is-size-4 has-text-right">
+              <%= currency_string(account.cash) %>
+            </div>
+          </div>
+          <div class="columns is-mobile">
+            <div class="column">
+              Options
+              <br/>
+              <%= currency_string(account.opt_open_fee) %> Open
+              <br/>
+              <%= currency_string(account.opt_close_fee) %> Close
+            </div>
+            <div class="column">
+              Stocks
+              <br/>
+              <%= currency_string(account.stock_open_fee) %> Open
+              <br/>
+              <%= currency_string(account.stock_close_fee) %> Close
+            </div>
+          </div>
+        </div>
+        <div class="columns is-mobile is-gapless">
+          <div class="column is-one-half">
+            <%= currency_string(account.exercise_fee) %> Exercise
+          </div>
+          <div class="column is-one-half has-text-right">
+            <span class="px-2">
+              <%= live_patch to: Routes.account_index_path(@socket, :edit, account), class: "button is-size-7" do %>
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              <% end %>
+            </span>
+            <span class="px-2">
+              <%= link to: "#", phx_click: "delete", phx_value_id: account.id, class: "button is-danger is-size-7", data: [confirm: "Are you sure? This will delete all your positions as well!"] do %>
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              <% end %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<table class="table is-striped is-narrow is-hoverable is-fullwidth is-hidden-touch">
   <thead>
     <tr>
       <th>Name</th>
-      <th>Type</th>
-      <th>Opt open fee</th>
-      <th>Opt close fee</th>
-      <th>Stock open fee</th>
-      <th>Stock close fee</th>
-      <th>Exercise fee</th>
+      <th>Broker</th>
+      <th>Option Open fee</th>
+      <th>Option Close fee</th>
+      <th>Stock Open fee</th>
+      <th>Stock Close fee</th>
+      <th>Assignment/Exercise fee</th>
       <th>Cash</th>
 
       <th></th>

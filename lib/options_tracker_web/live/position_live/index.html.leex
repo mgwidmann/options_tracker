@@ -6,8 +6,14 @@
         <div class="is-pulled-right">
           <div class="mh-3">
             <% no_account = @current_account == nil || match?([_|_], @current_account) %>
-            <%= live_patch to: Routes.position_index_path(@socket, :new, @current_account_id), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
-              <i class="fa fa-plus" aria-hidden="true"></i>
+            <%= if no_account do %>
+              <a href="javascript:void(0);" class="button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left" data-tooltip="You must select an account first!" disabled="true">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+              </a>
+            <% else %>
+              <%= live_patch to: Routes.position_index_path(@socket, :new, @current_account_id), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
+                <i class="fa fa-plus" aria-hidden="true"></i>
+              <% end %>
             <% end %>
           </div>
           <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{

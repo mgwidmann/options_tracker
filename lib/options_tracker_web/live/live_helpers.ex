@@ -30,23 +30,24 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   end
 
   @spec currency_string(float | Decimal.t(), boolean) :: String.t()
-  def currency_string(float_or_decimal, prepend_unit \\ true)
+  def currency_string(float_or_decimal, prepend_unit \\ true, is_input \\ false)
 
-  def currency_string(float, prepend_unit) when is_float(float) do
+  def currency_string(float, prepend_unit, is_input) when is_float(float) do
     float
     |> Decimal.from_float()
-    |> currency_string(prepend_unit)
+    |> currency_string(prepend_unit, is_input)
   end
 
-  def currency_string(%Decimal{} = decimal, prepend_unit) do
+  def currency_string(%Decimal{} = decimal, prepend_unit, is_input) do
     if Decimal.inf?(decimal) do
       "Infinity"
     else
       decimal
       |> Decimal.mult(100)
+      |> Decimal.round()
       |> Decimal.to_integer()
       |> Money.new()
-      |> Money.to_string(symbol: prepend_unit)
+      |> Money.to_string(symbol: prepend_unit, separator: if(is_input, do: "", else: ","))
     end
   end
 
@@ -55,7 +56,7 @@ defmodule OptionsTrackerWeb.LiveHelpers do
     value = changeset.changes[field] || Map.get(changeset.data, field)
 
     if value do
-      currency_string(value, false)
+      currency_string(value, false, true)
     end
   end
 

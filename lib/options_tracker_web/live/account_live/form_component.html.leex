@@ -9,23 +9,43 @@
   <section class="modal-card-body">
     <div class="columns">
       <div class="column control">
-        <%= label f, :type %>
+        <%= label f, :type do %>
+          Broker
+          <span class="has-tooltip-arrow has-tooltip-multiline has-tooltip-right" data-tooltip="Choose one of the pre-setup brokers or define your own.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <%= select f, :type, account_type_map(), prompt: "Select a broker", class: "input" %>
         <%= error_tag f, :type %>
       </div>
       <div class="column control">
-        <%= label f, :broker_name %>
+        <%= label f, :broker_name do %>
+          Broker Name
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The name of the brokerage. Used with the 'Other' broker.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <% disabled = @changeset.changes[:type] != :other && @changeset.data.type != :other %>
         <%= text_input f, :broker_name, class: "input #{if(disabled, do: "disabled")}", disabled: disabled %>
         <%= error_tag f, :broker_name %>
       </div>
       <div class="column control">
-        <%= label f, :name %>
+        <%= label f, :name do %>
+          Name
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The name you'd like to give this account.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <%= text_input f, :name, class: "input" %>
         <%= error_tag f, :name %>
       </div>
       <div class="column control">
-        <%= label f, :cash, "Starting Cash" %>
+        <%= label f, :cash do %>
+          Starting Cash
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The amount of cash you have put into the account.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :cash, step: "0.01", class: "input", value: format_currency(@changeset, :cash) %>
@@ -39,7 +59,12 @@
     </div>
     <div class="columns">
       <div class="column control">
-        <%= label f, :opt_open_fee %>
+        <%= label f, :opt_open_fee do %>
+          Stock Open Fee
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The cost to open an option position per contract.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :opt_open_fee, step: "0.01", class: "input", value: format_currency(@changeset, :opt_open_fee) %>
@@ -51,7 +76,12 @@
         <%= error_tag f, :opt_open_fee %>
       </div>
       <div class="column control">
-        <%= label f, :opt_close_fee %>
+        <%= label f, :opt_close_fee do %>
+          Option Close Fee
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The cost to close an option position per contract.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :opt_close_fee, step: "0.01", class: "input", value: format_currency(@changeset, :opt_close_fee) %>
@@ -63,7 +93,12 @@
         <%= error_tag f, :opt_close_fee %>
       </div>
       <div class="column control">
-        <%= label f, :stock_open_fee %>
+        <%= label f, :stock_open_fee do %>
+          Stock Open Fee
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The cost to open a stock position per share.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :stock_open_fee, step: "0.01", class: "input", value: format_currency(@changeset, :stock_open_fee) %>
@@ -75,7 +110,12 @@
         <%= error_tag f, :stock_open_fee %>
       </div>
       <div class="column control">
-        <%= label f, :stock_close_fee %>
+        <%= label f, :stock_close_fee do %>
+          Stock Close Fee
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The cost to close a stock position per share.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :stock_close_fee, step: "0.01", class: "input", value: format_currency(@changeset, :stock_close_fee) %>
@@ -87,7 +127,12 @@
         <%= error_tag f, :stock_close_fee %>
       </div>
       <div class="column control">
-        <%= label f, :exercise_fee %>
+        <%= label f, :exercise_fee do %>
+          Assignment / Exercise Fee
+          <span class="has-tooltip-arrow has-tooltip-multiline" data-tooltip="The cost to exercise or to get assigned on an option position.">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </span>
+        <% end %>
         <div class="field">
           <p class="control has-icons-left">
             <%= number_input f, :exercise_fee, step: "0.01", class: "input", value: format_currency(@changeset, :exercise_fee) %>

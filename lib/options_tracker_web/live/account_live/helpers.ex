@@ -5,7 +5,7 @@ defmodule OptionsTrackerWeb.AccountLive.Helpers do
   @spec account_type_map :: Keyword.t()
   def account_type_map() do
     Accounts.list_account_types()
-    |> Enum.map(fn {type, value} -> {account_type_display(type, "Other"), value} end)
+    |> Enum.map(fn {type, value} -> {account_type_display(type, "Other"), type} end)
   end
 
   @spec account_type_display(atom, String.t()) :: nil | String.t()

@@ -160,6 +160,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> cast(attrs, @fields -- @not_allowed_stock_fields)
         |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
         |> standard_validations()
+        |> closing_validations()
         |> validate_number(:basis, [])
         |> calculate_profit_loss()
 
@@ -168,6 +169,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> cast(attrs, (@fields -- @not_allowed_option_fields) ++ @required_spread_fields)
         |> validate_required((@required_open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
         |> standard_validations()
+        |> closing_validations()
         |> reverse_sign_for(:premium)
         |> reverse_sign_for(:exit_price)
         |> calculate_profit_loss()
@@ -178,6 +180,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> cast(attrs, @fields -- @not_allowed_option_fields)
         |> validate_required(@required_open_fields -- @not_allowed_option_fields)
         |> standard_validations()
+        |> closing_validations()
         |> reverse_sign_for(:premium)
         |> reverse_sign_for(:exit_price)
         |> calculate_profit_loss()
@@ -271,6 +274,16 @@ defmodule OptionsTracker.Accounts.Position do
     |> validate_number(:exit_price, [])
     |> validate_length(:notes, max: 10_000)
     |> validate_length(:exit_strategy, max: 10_000)
+  end
+
+  defp closing_validations(changeset) do
+    status = get_change(changeset, :status)
+
+    if status == :closed do
+      validate_required(changeset, ~w[exit_price]a)
+    else
+      changeset
+    end
   end
 
   defp calculate_profit_loss(changeset) do

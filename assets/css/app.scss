@@ -35,20 +35,22 @@ $green: #48C700;
   }
 }
 
-@include until(mobile) {
+@media (max-width: $tablet) {
   .navbar-link {
     color: black;
   }
-}
 
-body {
-    overflow-x: hidden;
-    width: 100%;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-}
+  .navbar-burger:hover {
+    background-color: $primary
+  }
 
+  .modal-card {
+    overflow-y: scroll !important;
+  }
+  .modal-card-body {
+    overflow-x: hidden !important;
+  }
+}
 
 .navbar-item img {
   max-height: 3rem;
@@ -83,6 +85,10 @@ a.navbar-item:hover, a.navbar-link:hover, a.navbar-item:focus, a.navbar-link:foc
 }
 .phx-disconnected *{
   pointer-events: none;
+}
+
+html {
+  overflow-x: scroll !important;
 }
 
 .phx-modal {

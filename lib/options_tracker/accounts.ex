@@ -172,7 +172,7 @@ defmodule OptionsTracker.Accounts do
     week_date = Timex.beginning_of_week(day_date, :sun)
     month_date = Timex.beginning_of_month(day_date)
 
-    positions_stream = Stream.filter(positions, & &1.closed_at)
+    positions_stream = Stream.filter(positions, &(&1.closed_at && &1.profit_loss))
 
     day_positions = positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, day_date, :day) == 0))
 
