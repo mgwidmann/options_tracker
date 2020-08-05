@@ -52,6 +52,7 @@ defmodule OptionsTrackerWeb.Telemetry do
       last_value("options_tracker.users.count"),
       last_value("options_tracker.users.online.count"),
       last_value("options_tracker.positions.count")
+      last_value("options_tracker.errors.count")
     ]
   end
 
@@ -63,6 +64,7 @@ defmodule OptionsTrackerWeb.Telemetry do
         {OptionsTrackerWeb.Metrics, :count_users, []},
         {OptionsTrackerWeb.Metrics, :count_online_users, []},
         {OptionsTrackerWeb.Metrics, :count_positions, []}
+        {OptionsTrackerWeb.Metrics, :count_errors, []}
       ]
     end
   else

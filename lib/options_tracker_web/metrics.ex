@@ -13,4 +13,12 @@ defmodule OptionsTrackerWeb.Metrics do
       count: OptionsTracker.Accounts.count_positions()
     })
   end
+
+  def count_errors() do
+    import Ecto.Query
+    query = from e in Flames.Error, select: count(e.id)
+    errors = OptionsTracker.Repo.one(query)
+
+    :telemetry.execute([:options_tracker, :errors], %{count: errors})
+  end
 end
