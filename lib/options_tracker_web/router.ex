@@ -75,7 +75,13 @@ defmodule OptionsTrackerWeb.Router do
 
   scope "/admin" do
     pipe_through [:browser, :admin]
-    live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
+
+    scope "/" do
+      pipe_through [:csrf]
+      live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
+    end
+
+    # Cannot have csrf token or it will break
     forward "/errors", Flames.Web
   end
 
