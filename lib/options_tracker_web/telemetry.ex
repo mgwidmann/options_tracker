@@ -22,18 +22,20 @@ defmodule OptionsTrackerWeb.Telemetry do
       # Phoenix Metrics
       summary("phoenix.endpoint.stop.duration", unit: {:native, :millisecond}),
       summary("phoenix.router_dispatch.stop.duration", tags: [:route], unit: {:native, :millisecond}),
-      summary("phoenix.live_view.mount.start", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.mount.stop", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.mount.exception"),
-      summary("phoenix.live_view.handle_params.start", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.handle_params.stop", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.handle_params.exception"),
-      summary("phoenix.live_view.handle_event.start", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.handle_event.stop", unit: {:native, :millisecond}),
-      summary("phoenix.live_view.handle_event.exception"),
-      summary("phoenix.live_component.handle_event.start", unit: {:native, :millisecond}),
-      summary("phoenix.live_component.handle_event.stop", unit: {:native, :millisecond}),
-      summary("phoenix.live_component.handle_event.exception"),
+
+      # summary("phoenix.live_view.mount.start.system_time", unit: {:native, :millisecond}),
+      # summary("phoenix.live_view.handle_params.start.system_time", unit: {:native, :millisecond}),
+      # summary("phoenix.live_view.handle_event.start.system_time", unit: {:native, :millisecond}),
+      # summary("phoenix.live_component.handle_event.start.system_time", unit: {:native, :millisecond}),
+
+      summary("phoenix.live_view.mount.stop.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_params.stop.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_event.stop.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_component.handle_event.stop.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.mount.exception.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_params.exception.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_view.handle_event.exception.duration", unit: {:native, :millisecond}),
+      summary("phoenix.live_component.handle_event.exception.duration", unit: {:native, :millisecond}),
 
       # Database Metrics
       summary("db.repo.query.total_time", unit: {:native, :millisecond}),

@@ -6,7 +6,7 @@ config :options_tracker, OptionsTracker.Repo,
   password: "postgres",
   database: "options_tracker_dev",
   hostname: "localhost",
-  telemetry_prefix: [:db, :repo, :query],
+  telemetry_prefix: [:db, :repo],
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

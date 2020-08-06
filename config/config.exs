@@ -34,6 +34,11 @@ config :flames,
 config :logger,
   backends: [:console, Flames.Logger]
 
+config :live_dashboard_history, LiveDashboardHistory,
+  router: OptionsTrackerWeb.Router,
+  metrics: OptionsTrackerWeb.Telemetry,
+  buffer_size: 1000
+
 config :money,
   # this allows you to do Money.new(100)
   default_currency: :USD,

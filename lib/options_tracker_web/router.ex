@@ -78,7 +78,7 @@ defmodule OptionsTrackerWeb.Router do
 
     scope "/" do
       pipe_through [:csrf]
-      live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry
+      live_dashboard "/dashboard", metrics: OptionsTrackerWeb.Telemetry, metrics_history: {LiveDashboardHistory, :metrics_history, [__MODULE__]}
     end
 
     # Cannot have csrf token or it will break
