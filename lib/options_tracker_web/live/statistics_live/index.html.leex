@@ -22,16 +22,16 @@
   <div class="tabs is-centered is-large is-toggle is-toggle-rounded is-fullwidth">
     <ul>
       <li class="<%= if(@current_tab == :daily, do: "is-active", else: nil) %>">
-        <%= live_patch "Daily", to: "#{@current_uri.path}?tab=daily" %>
+        <%= live_patch "Daily", to: "#{@url.path}?tab=daily" %>
       </li>
       <li class="<%= if(@current_tab == :weekly, do: "is-active", else: nil) %>">
-        <%= live_patch "Weekly", to: "#{@current_uri.path}?tab=weekly" %>
+        <%= live_patch "Weekly", to: "#{@url.path}?tab=weekly" %>
       </li>
       <li class="<%= if(@current_tab == :monthly, do: "is-active", else: nil) %>">
-        <%= live_patch "Monthly", to: "#{@current_uri.path}?tab=monthly" %>
+        <%= live_patch "Monthly", to: "#{@url.path}?tab=monthly" %>
       </li>
       <li class="<%= if(@current_tab == :yearly, do: "is-active", else: nil) %>">
-        <%= live_patch "Yearly", to: "#{@current_uri.path}?tab=yearly" %>
+        <%= live_patch "Yearly", to: "#{@url.path}?tab=yearly" %>
       </li>
     </ul>
   </div>
@@ -73,3 +73,9 @@
     </tbody>
   </table>
 </section>
+
+<%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+  id: :feedback,
+  path: @url.path,
+  current_user: @current_user
+} %>

@@ -365,4 +365,31 @@ defmodule OptionsTracker.Users do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  alias OptionsTracker.Users.Feedback
+
+  def change_feedback(feedback, params) do
+    Feedback.changeset(feedback, params)
+  end
+
+  def create_feedback(params) do
+    %Feedback{}
+    |> Feedback.changeset(params)
+    |> Repo.insert()
+  end
+
+  @spec list_feedbacks() :: [Feedback.t()]
+  def list_feedbacks() do
+    Feedback
+    |> Repo.all()
+    |> Repo.preload(:user)
+  end
+
+  def get_feedback!(id) do
+    Repo.get!(Feedback, id)
+  end
+
+  def delete_feedback(feedback) do
+    Repo.delete(feedback)
+  end
 end

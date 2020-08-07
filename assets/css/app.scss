@@ -11,9 +11,14 @@ $green: #48C700;
 
 
 @import "./position.scss";
+@import "./feedback.scss";
 
 .modal-card.wide {
   width: 80vw;
+}
+
+.has-pointer {
+  cursor: pointer;
 }
 
 .ml-auto {
@@ -158,4 +163,14 @@ html {
 
 .main {
   min-height: 90vh;
+}
+
+.feedback-container {
+  position: fixed;
+  top: 4.5rem;
+  right: 0.5rem;
+  text-align: left;
+  background: white;
+  box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+  border-radius: 0.5rem;
 }

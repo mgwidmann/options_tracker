@@ -122,3 +122,9 @@
     <% end %>
   </tbody>
 </table>
+
+<%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+  id: :feedback,
+  path: @url.path,
+  current_user: @current_user
+} %>

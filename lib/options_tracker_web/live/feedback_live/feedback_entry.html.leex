@@ -1,0 +1,20 @@
+<div>
+  <div class="feedback-container">
+    <a phx-click="open" phx-target="<%= @myself %>" class="button has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Click here to leave some feedback for the author of this application!">
+      [+] Feedback
+    </a>
+  </div>
+  <%= if @changeset do %>
+    <%= live_modal @socket, OptionsTrackerWeb.FeedbackLive.FormComponent,
+      id: :feedback_form,
+      title: "Enter Feedback",
+      action: :edit,
+      modal_title: "Feedback",
+      changeset: @changeset,
+      return_to: @path,
+      on_close: fn ->
+        send_update(OptionsTrackerWeb.FeedbackLive.FeedbackEntry, id: :feedback, changeset: nil)
+      end
+    %>
+  <% end %>
+<div>

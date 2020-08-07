@@ -57,7 +57,9 @@ defmodule OptionsTracker.MixProject do
       {:money, "~> 1.7.0"},
       {:timex, "~> 3.6"},
       {:flames, "~> 0.4.1"},
-      {:live_dashboard_history, "~> 0.1.0"}
+      {:live_dashboard_history, "~> 0.1.0"},
+      {:earmark, "~> 1.4"},
+      {:phoenix_html_sanitizer, "~> 1.1"}
     ]
   end
 

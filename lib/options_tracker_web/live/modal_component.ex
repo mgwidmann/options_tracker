@@ -13,7 +13,7 @@ defmodule OptionsTrackerWeb.ModalComponent do
             <%= live_patch raw("&times;"), to: @return_to, "aria-hidden": true %>
           </button>
         </header>
-          <%= live_component @socket, @component, @opts %>
+        <%= live_component @socket, @component, @opts %>
       </div>
     </div>
     """
@@ -21,6 +21,12 @@ defmodule OptionsTrackerWeb.ModalComponent do
 
   @impl true
   def handle_event("close", _, socket) do
-    {:noreply, push_patch(socket, to: socket.assigns.return_to)}
+    if socket.assigns[:on_close] do
+      socket.assigns.on_close.()
+    end
+
+    {:noreply,
+     socket
+     |> push_patch(to: socket.assigns.return_to)}
   end
 end

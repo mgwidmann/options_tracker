@@ -1,0 +1,52 @@
+<%= f = form_for @changeset, "#",
+  id: "feedback-form",
+  phx_target: @myself,
+  phx_change: "validate",
+  phx_submit: "save" %>
+
+  <%= hidden_input f, :user_id %>
+  <%= hidden_input f, :path %>
+
+  <section class="modal-card-body">
+    <div class="row">
+      <div class="columns is-centered pt-4">
+        <div class="column is-half">
+          <div id="rating" class="columns is-centered">
+            <div class="column">
+              <div class="mb-3 row columns is-centered">
+                <%= label f, :rating, "Rating", class: "rating label" %>
+              </div>
+              <div class="mt-3 row columns is-centered">
+                <%= for i <- 1..5 do %>
+                  <%= label f, :"rating_#{i}", class: "radio star mx-auto" do %>
+                    <%= radio_button f, :rating, i, class: "radio", style: "opacity:0;width:0;height:0;" %>
+                    <i class="fa fa-star-o <%= if rating_colored?(f, i), do: "star-colored" %>"></i>
+                    <i class="fa fa-star <%= if rating_colored?(f, i), do: "star-colored" %>"></i>
+                  <% end %>
+                <% end %>
+              </div>
+              <div class="columns is-centered">
+                <%= error_tag f, :rating %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column is-full-width">
+          <%= label f, :text, class: "label" do %>
+            Feedback
+            <span class="is-size-7 has-text-weight-normal">Feel free to use <a target="_blank" href="https://daringfireball.net/projects/markdown/syntax">markdown syntax</a>.</span>
+          <% end %>
+          <%= error_tag f, :text %>
+          <%= textarea f, :text, class: "textarea" %>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="modal-card-foot">
+    <div class="control is-grouped is-pulled-right ml-auto">
+      <%= submit "Send Feedback", phx_disable_with: "Saving...", class: "button is-success" %>
+    </div>
+  </footer>
+</form>

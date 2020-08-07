@@ -1,11 +1,15 @@
 <main role="main" class="">
-  <p class="alert alert-info" role="alert"
-    phx-click="lv:clear-flash"
-    phx-value-key="info"><%= live_flash(@flash, :info) %></p>
+  <div class="columns is-centered ml-auto">
+    <% info = live_flash(@flash, :info) %>
+    <% error = live_flash(@flash, :error) %>
+    <p class="alert alert-info has-text-centered" role="alert"
+      phx-click="lv:clear-flash"
+      phx-value-key="info"><%= info %><%= if(info, do: {:safe, ~s(<span class="mx-3 has-pointer">&times;</span>)}) %></p>
 
-  <p class="alert alert-danger" role="alert"
-    phx-click="lv:clear-flash"
-    phx-value-key="error"><%= live_flash(@flash, :error) %></p>
+    <p class="alert alert-danger" role="alert"
+      phx-click="lv:clear-flash"
+      phx-value-key="error"><%= error %><%= if(error, do: {:safe, ~s(<span class="mx-3 has-pointer">&times;</span>")}) %></p>
+  </div>
 
   <%= @inner_content %>
 </main>

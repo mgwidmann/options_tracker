@@ -1,0 +1,74 @@
+<header class="header mb-6">
+  <section class="section columns">
+    <h1 class="title column is-pulled-left">Feedback</h1>
+  </section>
+</header>
+
+<div class="rows is-hidden-desktop">
+  <%= for feedback <- @feedbacks do %>
+    <div class="card mt-6">
+      <div class="card-content py-2 px-2">
+        <div class="mb-2">
+          <div class="columns is-mobile is-gapless">
+            <div class="column">
+              <%= feedback.user.email %> (<%= feedback.user.id %>)
+            </div>
+            <div class="column has-text-centered">
+              <%= feedback.path %>
+            </div>
+            <div class="column has-text-right">
+              <%= feedback.rating %> stars
+            </div>
+          </div>
+        </div>
+        <div class="">
+          <div class="columns is-mobile is-gapless feedback">
+            <div class="column">
+              <%= feedback.text |> Earmark.as_html!() |> sanitize() %>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-mobile is-gapless">
+          <div class="column is-one-half has-text-right">
+            <span class="px-2">
+              <%= link to: "#", phx_click: "delete", phx_value_id: feedback.id, class: "button is-danger is-size-7", data: [confirm: "Are you sure?"] do %>
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              <% end %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<table class="table is-striped is-narrow is-hoverable is-fullwidth is-hidden-touch">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Page</th>
+      <th>Rating</th>
+      <th>Feedback</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="feedback">
+    <%= for feedback <- @feedbacks do %>
+      <tr id="feedback-<%= feedback.id %>">
+        <td><%= feedback.user.email %> (<%= feedback.user.id %>)</td>
+        <td><%= feedback.path %></td>
+        <td><%= feedback.rating %> stars</td>
+        <td class="feedback"><%= feedback.text |> Earmark.as_html!() |> sanitize() %></td>
+
+        <td>
+          <span class="px-2">
+            <%= link to: "#", phx_click: "delete", phx_value_id: feedback.id, class: "button is-danger is-size-7", data: [confirm: "Are you sure?"] do %>
+              <i class="fa fa-trash" aria-hidden="true"></i>
+            <% end %>
+          </span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

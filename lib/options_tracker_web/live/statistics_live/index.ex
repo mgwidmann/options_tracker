@@ -29,7 +29,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
   end
 
   @impl true
-  def handle_params(params, uri, socket) do
+  def handle_params(params, url, socket) do
     tab = tab_to_atom(params["tab"] || "daily")
 
     profit_loss = Accounts.profit_loss(socket.assigns.current_account, tab)
@@ -57,7 +57,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
      |> assign(:profit_loss, profit_loss)
      |> assign(:profit_loss_range, range)
      |> assign(:current_tab, tab)
-     |> assign(:current_uri, URI.parse(uri))}
+     |> assign(:url, URI.parse(url))}
   end
 
   defp tab_to_atom("daily"), do: :daily

@@ -1,0 +1,110 @@
+$star: #FFCA33;
+
+#rating:hover .star {
+  color: $star;
+
+  .fa-star-o {
+    display: none;
+  }
+  .fa-star {
+    display: inline;
+  }
+}
+#rating {
+  .star-colored:not(:hover) {
+    color: $star;
+  }
+
+  .star {
+    // .fa-star-o:not(.star-colored) {
+    //   display: inline;
+    // }
+    // .fa-star:not(.star-colored) {
+    //   display: none;
+    // }
+    .fa-star-o {
+      display: inline;
+    }
+    .fa-star {
+      display: none;
+    }
+    .fa-star-o.star-colored {
+      display: none;
+    }
+    .fa-star.star-colored {
+      display: inline;
+    }
+  }
+  .star:hover {
+    color: $star !important;
+  }
+  // .star:hover {
+  //   .fa-star {
+  //     display: inline;
+  //   }
+  //   .fa-star-o {
+  //     display: none;
+  //   }
+  // }
+  .star:hover, .star:hover ~ .star {
+    color: black;
+  }
+}
+
+.feedback {
+  h1 {
+    font-size: 3rem;
+    font-weight: bolder;
+    margin-bottom: 0.5rem;
+    text-decoration: underline;
+  }
+  h2 {
+    font-size: 2rem;
+    font-weight: bolder;
+    margin-bottom: 0.3rem;
+  }
+  h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.1rem;
+  }
+  h4 {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  h5 {
+    font-size: 1.1rem;
+    text-decoration: underline;
+  }
+  h6 {
+    font-size: 1.0rem;
+    text-decoration: underline;
+  }
+  p {
+    padding: 0.1rem 0;
+  }
+  blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    quotes: "\201C""\201D""\2018""\2019";
+  }
+  blockquote:before {
+    color: #ccc;
+    font-size: 4em;
+    line-height: 0.1em;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+  }
+  blockquote p {
+    display: inline;
+  }
+  ol {
+    margin-left: 1.5rem;
+  }
+  ul {
+    margin-left: 1.5rem;
+    list-style: circle;
+  }
+}
