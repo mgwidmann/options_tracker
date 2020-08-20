@@ -76,5 +76,7 @@ defmodule OptionsTrackerWeb.LiveHelpers do
         user_id: current_user.id
       }
     )
+
+    current_user
   end
 end

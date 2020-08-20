@@ -33,6 +33,8 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:current_account_id, account_id)
      |> assign(:positions, list_positions(search_changeset))
      |> assign(:changeset, changeset)
+     |> assign(:share_mode, false)
+     |> assign(:shares, %{})
      |> assign(:profit_loss, Accounts.profit_loss(current_account))
      |> assign(:search_changeset, search_changeset)}
   end
@@ -191,6 +193,49 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     {:noreply,
      socket
      |> push_redirect(to: return_to_path(socket, socket.assigns.current_account_id))}
+  end
+
+  def handle_event("share", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:shares, %{})
+     |> assign(:share_mode, !socket.assigns.share_mode)}
+  end
+
+  def handle_event("add_share", %{"id" => position_id}, socket) do
+    position_id = String.to_integer(position_id)
+
+    {:noreply,
+     socket
+     |> assign(:shares, Map.put(socket.assigns.shares, position_id, true))}
+  end
+
+  def handle_event("add_all", _, socket) do
+    all_positions = for p <- socket.assigns.positions, into: %{}, do: {p.id, true}
+
+    {:noreply,
+     socket
+     |> assign(:shares, Map.merge(socket.assigns.shares, all_positions))}
+  end
+
+  def handle_event("remove_share", %{"id" => position_id}, socket) do
+    position_id = String.to_integer(position_id)
+
+    {:noreply,
+     socket
+     |> assign(:shares, Map.drop(socket.assigns.shares, [position_id]))}
+  end
+
+  def handle_event("save_share", _, socket) do
+    position_ids = Map.keys(socket.assigns.shares)
+
+    {:ok, share} = Users.create_share(socket.assigns.current_user, position_ids)
+
+    {:noreply,
+     socket
+     |> assign(:share_mode, false)
+     |> assign(:shares, %{})
+     |> push_redirect(to: Routes.share_show_path(socket, :show, id: share.hash))}
   end
 
   defp save_position(socket, :edit, position_params, return_to) do

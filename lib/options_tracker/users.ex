@@ -392,4 +392,67 @@ defmodule OptionsTracker.Users do
   def delete_feedback(feedback) do
     Repo.delete(feedback)
   end
+
+  alias OptionsTracker.Users.Share
+
+  @doc """
+  Gets a single share.
+
+  Raises `Ecto.NoResultsError` if the Share does not exist.
+
+  ## Examples
+
+      iex> get_share!("$2b$12$6N.RCzp.npCGXTDdin0Wg.pNaSg3a9YrQW79dYfTTYb7BfF9Phl2m")
+      %Share{}
+
+      iex> get_share!("1234")
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_share(hash) do
+    share = Repo.get_by(Share, hash: hash)
+
+    if share do
+      share
+      |> Repo.preload(:positions)
+      |> Repo.preload(:user)
+    end
+  end
+
+  @doc """
+  Creates a share.
+
+  ## Examples
+
+      iex> create_share(%User{id: 123}, [1, 2, 3])
+      {:ok, %Share{hash: ""}}
+
+      iex> create_share(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_share(user, position_ids) do
+    positions = Repo.all(from(p in OptionsTracker.Accounts.Position, where: p.id in ^position_ids))
+
+    %Share{}
+    |> Share.changeset(%{user: user, position_ids: position_ids})
+    |> Repo.insert!()
+    |> Repo.preload(:positions)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:positions, positions)
+    |> IO.inspect(label: "share changeset")
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a share.
+
+  ## Examples
+
+      iex> delete_share!(share)
+      {:ok, %Share{}}
+  """
+  def delete_share!(%Share{} = share) do
+    Repo.delete!(share)
+  end
 end

@@ -471,4 +471,41 @@ defmodule OptionsTracker.UsersTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "shares" do
+    alias OptionsTracker.Users.Share
+
+    @valid_attrs %{hash: "some hash"}
+    @update_attrs %{hash: "some updated hash"}
+    @invalid_attrs %{hash: nil}
+
+    def share_fixture(attrs \\ %{}) do
+      {:ok, share} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Users.create_share()
+
+      share
+    end
+
+    test "get_share!/1 returns the share with given id" do
+      share = share_fixture()
+      assert Users.get_share!(share.id) == share
+    end
+
+    test "create_share/1 with valid data creates a share" do
+      assert {:ok, %Share{} = share} = Users.create_share(@valid_attrs)
+      assert share.hash == "some hash"
+    end
+
+    test "create_share/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Users.create_share(@invalid_attrs)
+    end
+
+    test "delete_share/1 deletes the share" do
+      share = share_fixture()
+      assert {:ok, %Share{}} = Users.delete_share(share)
+      assert_raise Ecto.NoResultsError, fn -> Users.get_share!(share.id) end
+    end
+  end
 end

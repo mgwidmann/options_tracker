@@ -22,5 +22,8 @@ config :options_tracker, OptionsTrackerWeb.Endpoint,
   http: [port: 4002],
   server: false
 
+config :options_tracker,
+  share_salt: "$2b$12$txHVZq/AWN2Yo1K9FRpO7u"
+
 # Print only warnings and errors during test
 config :logger, level: :warn

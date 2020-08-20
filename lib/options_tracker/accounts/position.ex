@@ -3,6 +3,7 @@ defmodule OptionsTracker.Accounts.Position do
   import Ecto.Changeset
   import OptionsTracker.Utilities.Maps
   use OptionsTracker.Enum
+  alias OptionsTracker.Users.Share
 
   defenum TransType, stock: 0, call: 1, put: 2, call_spread: 3, put_spread: 4 do
     @spec name_for(:call | :put | :stock | :call_spread | :put_spread) :: String.t()
@@ -26,7 +27,7 @@ defmodule OptionsTracker.Accounts.Position do
     def name_for(:exercised, true), do: "Exercised"
   end
 
-  @derive {Jason.Encoder, except: [:account, :__meta__]}
+  @derive {Jason.Encoder, except: [:account, :shares, :__meta__]}
   schema "positions" do
     # Require info on open
     field :stock, :string
@@ -51,6 +52,8 @@ defmodule OptionsTracker.Accounts.Position do
     field :exit_strategy, :string
 
     belongs_to :account, OptionsTracker.Accounts.Account
+
+    many_to_many :shares, Share, join_through: "positions_shares", on_replace: :delete
 
     timestamps()
   end

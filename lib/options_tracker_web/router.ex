@@ -28,6 +28,7 @@ defmodule OptionsTrackerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Authenticated routes
   scope "/", OptionsTrackerWeb do
     pipe_through [:browser, :csrf, :require_authenticated_user]
 
@@ -57,6 +58,13 @@ defmodule OptionsTrackerWeb.Router do
     # Statistics
     live "/statistics", StatisticsLive.Index, :index
     live "/statistics/accounts/:account_id", StatisticsLive.Index, :index, as: :statistics_account_index
+  end
+
+  # Public routes
+  scope "/", OptionsTrackerWeb do
+    pipe_through [:browser, :csrf]
+
+    live "/shares", ShareLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
