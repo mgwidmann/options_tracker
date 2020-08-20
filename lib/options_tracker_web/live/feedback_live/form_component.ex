@@ -5,7 +5,7 @@ defmodule OptionsTrackerWeb.FeedbackLive.FormComponent do
 
   @impl true
 
-  @spec update(%{}, Phoenix.LiveView.Socket.t()) :: {:ok, Phoenix.LiveView.Socket.t()}
+  @spec update(%{changeset: any}, Phoenix.LiveView.Socket.t()) :: {:ok, Phoenix.LiveView.Socket.t()}
   def update(%{changeset: changeset}, socket) do
     {:ok,
      socket
@@ -13,6 +13,7 @@ defmodule OptionsTrackerWeb.FeedbackLive.FormComponent do
   end
 
   @impl true
+  @spec handle_event(<<_::32, _::_*32>>, map, Phoenix.LiveView.Socket.t()) :: {:noreply, Phoenix.LiveView.Socket.t()}
   def handle_event("validate", %{"feedback" => params}, socket) do
     changeset = Users.change_feedback(%Feedback{}, params)
 

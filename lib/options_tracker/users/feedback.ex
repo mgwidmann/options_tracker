@@ -17,8 +17,7 @@ defmodule OptionsTracker.Users.Feedback do
 
   @fields ~w[rating text path read response user_id]a
   @required ~w[rating text path user_id]a
-  @spec changeset(Feedback.t(), %{optional(String.t()) => String.t() | number}) ::
-          Ecto.Changeset.t()
+  @spec changeset({map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any}, :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}) :: Ecto.Changeset.t()
   @doc false
   def changeset(feedback, attrs) do
     feedback

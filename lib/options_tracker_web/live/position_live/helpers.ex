@@ -1,6 +1,5 @@
 defmodule OptionsTrackerWeb.PositionLive.Helpers do
   alias OptionsTracker.Accounts
-  alias OptionsTracker.Accounts.Account
   alias OptionsTracker.Accounts.Position
   alias OptionsTrackerWeb.Router.Helpers, as: Routes
 
