@@ -440,7 +440,6 @@ defmodule OptionsTracker.Users do
     |> Repo.preload(:positions)
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.put_assoc(:positions, positions)
-    |> IO.inspect(label: "share changeset")
     |> Repo.update()
   end
 

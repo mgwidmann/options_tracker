@@ -1,5 +1,5 @@
-<header class="header">
-  <section class="section">
+<header class="header mt-6">
+  <section>
     <div class="columns">
       <div class="column is-12 mh-5">
         <h1 class="title mb-0 is-pulled-left">Statistics</h1>
@@ -18,8 +18,17 @@
   </section>
 </header>
 
+<div class="rows">
+  <div class="is-size-7">
+    This page displays the daily/weekly/monthly and total breakdowns of your trading activity. It shows your trend breakdown at different time intervals
+    in order to better understand your risk profile with respect to the trades you've placed.
+  </div>
+</div>
+
+<canvas id="chart" phx-hook="StatisticsChart" data-profit-loss='<%= profit_loss_json(@profit_loss, @profit_loss_range) %>' data-roi='<%= roi_json(@profit_loss, @profit_loss_range) %>'></canvas>
+
 <section class="section">
-  <div class="tabs is-centered is-large is-toggle is-toggle-rounded is-fullwidth">
+  <div class="tabs is-centered is-toggle is-toggle-rounded">
     <ul>
       <li class="<%= if(@current_tab == :daily, do: "is-active", else: nil) %>">
         <%= live_patch "Daily", to: "#{@url.path}?tab=daily" %>
@@ -37,8 +46,8 @@
   </div>
 </section>
 
-<section class="section">
-  <table id="statistics-table" class="table is-striped is-narrow is-hoverable is-fullwidth">
+<section>
+  <table id="statistics-table" class="table is-striped is-narrow is-hoverable is-fullwidth is-size-7-touch">
     <thead>
       <tr>
         <th>Date</th>
@@ -46,14 +55,18 @@
         <th>Trades</th>
         <th>Largest Loss</th>
         <th>Largest Win</th>
+        <th class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Return On Investment. Actual Profit/Loss divided by max loss. Undefined/infinite risk scenarios have been removed and may cause 0.0% ROI to be displayed.">
+          ROI
+          <i class="fa fa-question-circle"></i>
+        </th>
       </tr>
     </thead>
     <tbody id="statistics">
       <%= for date <- @profit_loss_range do %>
         <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) %>
         <tr>
-          <td>
-            <%= Timex.format!(date, "{0M}/{D}/{YYYY}") %>
+          <td data-tooltip="<%= Timex.format!(date, "{0M}/{D}/{YYYY}") %>">
+            <%= Timex.format!(date, "{0M}/{D}") %>
           </td>
           <% pl = profit_loss(profit_loss_list) %>
           <td class="<%= profit_loss_class(pl) %>">
@@ -67,6 +80,10 @@
           </td>
           <td class="has-text-success">
             <%= largest_win(profit_loss_list) %>
+          </td>
+          <% r = if(@profit_loss[date], do: max_loss(@profit_loss[date]), else: nil) %>
+          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= currency_string(r || Decimal.from_float(0.0)) %> Risked">
+            <%= pl && r && (roi(pl, r) |> percentage_string()) %>
           </td>
         </tr>
       <% end %>

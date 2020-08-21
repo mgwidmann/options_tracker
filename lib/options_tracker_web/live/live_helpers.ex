@@ -53,6 +53,24 @@ defmodule OptionsTrackerWeb.LiveHelpers do
     end
   end
 
+  def percentage_string(float) when is_float(float) do
+    float
+    |> Decimal.from_float()
+    |> percentage_string()
+  end
+
+  def percentage_string(%Decimal{} = decimal) do
+    if Decimal.inf?(decimal) do
+      "Undefined"
+    else
+      decimal
+      |> Decimal.mult(100)
+      |> Decimal.round(2)
+      |> Decimal.to_string()
+      |> Kernel.<>("%")
+    end
+  end
+
   @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil
   def format_currency(%Ecto.Changeset{} = changeset, field) do
     value = changeset.changes[field] || Map.get(changeset.data, field)

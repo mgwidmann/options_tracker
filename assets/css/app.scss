@@ -34,9 +34,9 @@ $green: #48C700;
   }
 }
 
-@for $i from 1 through 7 {
-  .mw-#{$i} {
-    min-width: #{$i}rem !important;
+@for $i from 1 through 9 {
+  .mw-#{$i * 10}p {
+    min-width: #{$i * 10%} !important;
   }
 }
 

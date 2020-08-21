@@ -129,6 +129,14 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
     true
   end
 
+  def calculate_roi(%Decimal{} = max_profit, %Decimal{} = max_loss) do
+    if Decimal.cmp(max_loss, 0) == :eq do
+      Decimal.from_float(0.0)
+    else
+      Decimal.div(max_profit, max_loss)
+    end
+  end
+
   @spec is_closed?(OptionsTracker.Accounts.Position.t()) :: boolean
   def is_closed?(%Position{status: status}) do
     status != Accounts.position_status_open() && status != Accounts.position_status_open_key()

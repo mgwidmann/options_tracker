@@ -157,7 +157,7 @@ defmodule OptionsTracker.Accounts do
   end
 
   defmodule ProfitLoss do
-    defstruct daily: 0, weekly: 0, monthly: 0, total: 0
+    defstruct daily: 0, weekly: 0, monthly: 0, total: 0, max_profit: 0, max_loss: 0
   end
 
   @doc """
@@ -173,6 +173,7 @@ defmodule OptionsTracker.Accounts do
     month_date = Timex.beginning_of_month(day_date)
 
     positions_stream = Stream.filter(positions, &(&1.closed_at && &1.profit_loss))
+    open_positions = Stream.reject(positions, & &1.closed_at)
 
     day_positions = positions_stream |> Stream.filter(&(Timex.compare(&1.closed_at, day_date, :day) == 0))
 
@@ -186,7 +187,31 @@ defmodule OptionsTracker.Accounts do
       daily: day_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       weekly: week_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       monthly: month_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
-      total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2))
+      total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
+      max_profit:
+        open_positions
+        |> Enum.reduce(zero, fn position, sum ->
+          profit = calculate_max_profit(position)
+
+          if Decimal.inf?(profit) do
+            # Skip infinities
+            sum
+          else
+            Decimal.add(profit, sum)
+          end
+        end),
+      max_loss:
+        open_positions
+        |> Enum.reduce(zero, fn position, sum ->
+          loss = calculate_max_loss(position)
+
+          if Decimal.inf?(loss) do
+            # Skip infinities
+            sum
+          else
+            Decimal.add(loss, sum)
+          end
+        end)
     }
   end
 
@@ -616,11 +641,14 @@ defmodule OptionsTracker.Accounts do
 
   # Internal representation of Decimal for infinity
   @infinity %Decimal{coef: :inf}
+  @contract_size 100
 
+  @doc """
+  Calculates the maximum possible profit from the position. Long stock and long calls will always return the `Decimal` equivalent of `Infinity`.
+  """
   @spec calculate_max_profit(OptionsTracker.Accounts.Position.t()) :: Decimal.t()
   def calculate_max_profit(%Position{type: :stock, short: true, strike: price, count: count}) do
     price
-    |> Decimal.mult(100)
     |> Decimal.mult(count)
   end
 
@@ -630,25 +658,95 @@ defmodule OptionsTracker.Accounts do
 
   def calculate_max_profit(%Position{type: spread, short: false, spread_width: width, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
     width
-    |> Decimal.sub(premium)
-    |> Decimal.mult(100)
+    |> Decimal.sub(Decimal.abs(premium))
+    |> Decimal.mult(@contract_size)
     |> Decimal.mult(count)
   end
 
   def calculate_max_profit(%Position{type: spread, short: true, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
     premium
-    |> Decimal.mult(100)
+    |> Decimal.abs()
+    |> Decimal.mult(@contract_size)
     |> Decimal.mult(count)
   end
 
-  def calculate_max_profit(%Position{type: option, short: false}) when option in ~w[call put]a do
+  def calculate_max_profit(%Position{type: option, short: false}) when option in ~w[call]a do
     @infinity
+  end
+
+  def calculate_max_profit(%Position{type: option, short: false, premium: premium, strike: price, count: count}) when option in ~w[put]a do
+    cost =
+      premium
+      |> Decimal.abs()
+      |> Decimal.mult(@contract_size)
+      |> Decimal.mult(count)
+
+    price =
+      price
+      |> Decimal.mult(@contract_size)
+      |> Decimal.mult(count)
+
+    Decimal.sub(price, cost)
   end
 
   def calculate_max_profit(%Position{type: option, short: true, premium: premium, count: count}) when option in ~w[call put]a do
     premium
-    |> Decimal.mult(100)
+    |> Decimal.abs()
+    |> Decimal.mult(@contract_size)
     |> Decimal.mult(count)
+  end
+
+  @doc """
+  Calculates the maximum possible loss from the position. Short stock and short puts will always return the `Decimal` equivalent of `Infinity`.
+  """
+  @spec calculate_max_loss(OptionsTracker.Accounts.Position.t()) :: Decimal.t()
+  def calculate_max_loss(%Position{type: :stock, short: true}) do
+    @infinity
+  end
+
+  def calculate_max_loss(%Position{type: :stock, short: false, strike: price, count: count}) do
+    price
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_loss(%Position{type: spread, short: false, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
+    premium
+    |> Decimal.abs()
+    |> Decimal.mult(@contract_size)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_loss(%Position{type: spread, short: true, spread_width: width, premium: premium, count: count}) when spread in ~w[call_spread put_spread]a do
+    width
+    |> Decimal.sub(Decimal.abs(premium))
+    |> Decimal.mult(@contract_size)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_loss(%Position{type: option, short: false, premium: premium, count: count}) when option in ~w[call put]a do
+    premium
+    |> Decimal.abs()
+    |> Decimal.mult(@contract_size)
+    |> Decimal.mult(count)
+  end
+
+  def calculate_max_loss(%Position{type: option, short: true}) when option in ~w[call]a do
+    @infinity
+  end
+
+  def calculate_max_loss(%Position{type: option, short: true, premium: premium, strike: price, count: count}) when option in ~w[put]a do
+    credit =
+      premium
+      |> Decimal.abs()
+      |> Decimal.mult(@contract_size)
+      |> Decimal.mult(count)
+
+    price =
+      price
+      |> Decimal.mult(@contract_size)
+      |> Decimal.mult(count)
+
+    Decimal.sub(price, credit)
   end
 
   @spec change_position(OptionsTracker.Accounts.Position.t(), :invalid | map) ::

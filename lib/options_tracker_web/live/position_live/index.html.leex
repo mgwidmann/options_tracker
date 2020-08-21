@@ -2,7 +2,31 @@
   <section class="section">
     <div class="columns">
       <div class="column is-12 mh-5">
-        <h1 class="title mb-0 is-pulled-left">Positions</h1>
+        <div class="is-pulled-left mw-50p">
+          <div class="row">
+            <h1 class="title mb-0">Positions</h1>
+          </div>
+          <div class="columns is-gapless is-hidden-touch">
+            <div class="column">
+              <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
+                <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span><br/><small>Notional Risk</small>
+                <i class="fa fa-question-circle"></i>
+              </h6>
+            </div>
+            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
+              <h6 class="is-6">
+                <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span><br/><small>Potential Profit</small>
+                <i class="fa fa-question-circle"></i>
+              </h6>
+            </div>
+            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Return On Investment. The amount of gain you could receive for the risk you are taking. High percentages suggest high risk profiles while low percentages suggest an inefficient use of capital.">
+              <h6 class="is-6">
+                <span class="is-family-code has-text-info"><%= percentage_string(calculate_roi(@profit_loss.max_profit, @profit_loss.max_loss)) %></span><br/><small>ROI</small>
+                <i class="fa fa-question-circle"></i>
+              </h6>
+            </div>
+          </div>
+        </div>
         <div class="is-pulled-right">
           <div class="mh-3">
             <% no_account = @current_account == nil || match?([_|_], @current_account) %>
@@ -24,6 +48,26 @@
             account_path_fun: &Routes.position_account_index_path/4
           } %>
         </div>
+      </div>
+    </div>
+    <div class="columns is-gapless is-hidden-desktop mt-5">
+      <div class="column">
+        <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
+          <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span>&nbsp;<small>Notional Risk</small>
+          <i class="fa fa-question-circle"></i>
+        </h6>
+      </div>
+      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
+        <h6 class="is-6">
+          <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span>&nbsp;<small>Potential Profit</small>
+          <i class="fa fa-question-circle"></i>
+        </h6>
+      </div>
+      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Return On Investment. The amount of gain you could receive for the risk you are taking. High percentages suggest high risk profiles while low percentages suggest an inefficient use of capital.">
+        <h6 class="is-6">
+          <span class="is-family-code has-text-info"><%= percentage_string(calculate_roi(@profit_loss.max_profit, @profit_loss.max_loss)) %></span>&nbsp;<small>ROI</small>
+          <i class="fa fa-question-circle"></i>
+        </h6>
       </div>
     </div>
   </section>

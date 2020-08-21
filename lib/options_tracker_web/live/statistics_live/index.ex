@@ -107,6 +107,23 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     |> Enum.reduce(Decimal.new(0), &Decimal.add(&1, &2))
   end
 
+  def max_loss(nil), do: nil
+
+  def max_loss(positions) do
+    positions
+    |> Enum.map(&Accounts.calculate_max_loss(&1))
+    |> Enum.reject(&Decimal.inf?(&1))
+    |> Enum.reduce(Decimal.from_float(0.0), &Decimal.add(&1, &2))
+  end
+
+  def roi(profit_loss, max_risk) do
+    if Decimal.cmp(max_risk, Decimal.from_float(0.0)) == :eq do
+      max_risk
+    else
+      Decimal.div(profit_loss, max_risk)
+    end
+  end
+
   def profit_loss_class(nil), do: nil
 
   def profit_loss_class(profit_loss) do
@@ -115,5 +132,46 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     else
       "has-text-danger"
     end
+  end
+
+  def profit_loss_json(profit_loss_data, range) do
+    data_points = profit_loss_json_data(profit_loss_data, range)
+
+    Jason.encode!(data_points)
+  end
+
+  def profit_loss_json_data(profit_loss_data, range) do
+    for date <- range do
+      if profit_loss_data[date] do
+        pl = profit_loss_data[date] |> Enum.map(& &1.profit_loss) |> profit_loss()
+
+        if pl do
+          # Make the date always 4pm EST so it does not show the day before
+          %{x: "#{date}T20:00:00.000Z", y: Decimal.to_float(pl)}
+        end
+      end
+    end
+    |> Enum.filter(& &1)
+  end
+
+  def roi_json(profit_loss_data, range) do
+    data_points = roi_json_data(profit_loss_data, range)
+
+    Jason.encode!(data_points)
+  end
+
+  def roi_json_data(profit_loss_data, range) do
+    for date <- range do
+      if profit_loss_data[date] do
+        pl = profit_loss_data[date] |> Enum.map(& &1.profit_loss) |> profit_loss()
+        max_loss = profit_loss_data[date] |> max_loss()
+
+        if pl && max_loss do
+          # Make the date always 4pm EST so it does not show the day before
+          %{x: "#{date}T20:00:00.000Z", y: roi(pl, max_loss) |> Decimal.mult(100) |> Decimal.round(2)}
+        end
+      end
+    end
+    |> Enum.filter(& &1)
   end
 end
