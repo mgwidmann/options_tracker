@@ -48,7 +48,7 @@ Hooks.StatisticsChart = {
             leftAxisColor: "rgb(72, 199, 0)", // #48C700 text-success
             rightAxis: 'Return On Investment %',
             rightAxisColor: "rgb(50, 152, 220)", // #3298dc text-info
-            title: 'Profit / Loss vs to Return On Investment',
+            title: 'Profit / Loss vs Return On Investment',
             leftAxisData: pl,
             rightAxisData: roi,
         });
