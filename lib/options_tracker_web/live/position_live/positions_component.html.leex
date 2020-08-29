@@ -238,6 +238,11 @@
           <td><span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Sell", else: "Buy") %></span></td>
           <td>
             <%= currency_string(position.strike) %>
+            <%= if is_option?(position) do %>
+              <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven">
+                <i class="fa fa-info-circle"></i>
+              </span>
+            <% end %>
           </td>
           <td>
             <div class="tags">

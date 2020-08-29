@@ -18,6 +18,14 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def type_display_class(%Position{type: :put}), do: "is-danger"
   def type_display_class(%Position{type: :put_spread}), do: "is-danger is-light"
 
+  def break_even(%Position{type: call, strike: price, premium: premium}) when call in [:call, :call_spread] do
+    Decimal.add(price, Decimal.abs(premium))
+  end
+
+  def break_even(%Position{type: put, strike: price, premium: premium}) when put in [:put, :put_spread] do
+    Decimal.sub(price, Decimal.abs(premium))
+  end
+
   def count_type(%Position{type: :stock, count: 1}), do: "share"
   def count_type(%Position{type: :stock, count: c}) when c > 1, do: "shares"
   def count_type(_position), do: "lot"
