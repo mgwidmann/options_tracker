@@ -39,15 +39,14 @@ defmodule OptionsTracker.Accounts.Account do
     |> validate_required(@required_fields)
   end
 
-  @update_fields @fields -- ~w[user_id]a
   @spec changeset(Account.t(), %{optional(String.t()) => String.t() | number}) ::
           Ecto.Changeset.t()
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(prepare_attrs(attrs), @update_fields)
+    |> cast(prepare_attrs(attrs), @fields)
     |> cast_broker_name(attrs)
-    |> validate_required(@update_fields)
+    |> validate_required(@required_fields)
   end
 
   defp prepare_attrs(%{"type" => "" <> _ = type} = attrs) do

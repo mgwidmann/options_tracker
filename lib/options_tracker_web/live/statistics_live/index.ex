@@ -104,7 +104,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
 
   def profit_loss(profit_loss_list) do
     profit_loss_list
-    |> Enum.reduce(Decimal.new(0), &Decimal.add(&1, &2))
+    |> Enum.reduce(Decimal.new(0), &Decimal.add(&1 || Decimal.new(0), &2 || Decimal.new(0)))
   end
 
   def max_loss(nil), do: nil

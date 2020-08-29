@@ -22,8 +22,9 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   def handle_event("validate", %{"account" => account_params}, socket) do
     changeset =
       socket.assigns.account
-      |> Accounts.change_account(account_params |> compact() |> defaults_for_type())
+      |> Accounts.change_account(account_params |> compact() |> defaults_for_type() |> IO.inspect())
       |> Map.put(:action, :validate)
+      |> IO.inspect()
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
@@ -59,7 +60,7 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   end
 
   for {t, value} <- Accounts.list_account_types() do
-    defp defaults_for_type(%{"type" => unquote(to_string(value))} = params) do
+    defp defaults_for_type(%{"type" => v} = params) when v in [unquote(to_string(value)), unquote(value), unquote(to_string(t)), unquote(t)] do
       Accounts.defaults_for_type(unquote(t))
       |> stringify_keys()
       |> Map.merge(params)

@@ -1,4 +1,4 @@
-<%= mobile_f = unless(@share_mode || @read_only, do: form_for(@changeset, "#",
+<%= mobile_f = unless(@share_mode || @read_only || @live_action not in [:edit, :new], do: form_for(@changeset, "#",
   id: "position-form-mobile",
   phx_change: "validate",
   phx_submit: "save")) %>
@@ -85,9 +85,36 @@
                         <% end %>
                       <% end %>
                       <%= if is_open?(position) do %>
-                        <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Close" do %>
-                          <i class="fa fa-times" aria-hidden="true"></i>
-                        <% end %>
+                        <div class="dropdown is-hoverable">
+                          <div class="dropdown-trigger">
+                            <%= if is_option?(position) do %>
+                              <button class="button is-small mr-1 has-tooltip-arrow has-tooltip-top" data-tooltip="Close" aria-haspopup="true" aria-controls="close-menu">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              </button>
+                            <% else %>
+                              <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top" do %>
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              <% end %>
+                            <% end %>
+                          </div>
+                          <%= if is_option?(position) do %>
+                            <div class="dropdown-menu" id="close-menu" role="menu">
+                              <div class="dropdown-content">
+                                <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "dropdown-item" do %>
+                                  <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close
+                                <% end %>
+                                <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item" do %>
+                                  <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
+                                <% end %>
+                                <%= if is_naked?(position) do %>
+                                  <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item" do %>
+                                    <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
+                                  <% end %>
+                                <% end %>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
                       <% end %>
                     <% end %>
                   </div>
@@ -273,9 +300,30 @@
                   <% end %>
                 <% end %>
                 <%= if is_open?(position) do %>
-                  <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Close" do %>
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                  <% end %>
+                  <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger">
+                      <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Close", aria_haspopup: true, aria_controls: "close-menu" do %>
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                      <% end %>
+                    </div>
+                    <%= if is_option?(position) do %>
+                      <div class="dropdown-menu" id="close-menu" role="menu">
+                        <div class="dropdown-content">
+                          <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Custom exit price and closing date." do %>
+                            <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close
+                          <% end %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Expire using expiration date for close date and $0 for close price." do %>
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
+                          <% end %>
+                          <%= if is_naked?(position) do %>
+                            <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Option has been exercised using expiration date for close date and $0 for close price." do %>
+                              <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
                 <% end %>
                 <%= live_patch to: Routes.position_index_path(@socket, :notes, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Notes" do %>
                   <i class="fa fa-paperclip" aria-hidden="true"></i>

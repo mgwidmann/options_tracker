@@ -25,7 +25,10 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   @spec position_type_map :: Keyword.t()
   def position_type_map() do
     Accounts.list_position_types()
-    |> Enum.map(fn {type, _value} -> {Accounts.name_for_position_type(type), type} end)
+    |> Keyword.keys()
+    # [:call, :call_spread, :put, :put_spread, :stock] This order makes hitting `c` or `p` takes you to call and put first and then the spread
+    |> Enum.sort(:asc)
+    |> Enum.map(fn type -> {Accounts.name_for_position_type(type), type} end)
   end
 
   @spec position_type_map(atom) :: non_neg_integer
@@ -110,6 +113,10 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def is_option?(%Position{type: type}) do
     type != OptionsTracker.Accounts.Position.TransType.stock_key()
   end
+
+  @spec is_naked?(OptionsTracker.Accounts.Position.t()) :: boolean
+  def is_naked?(%Position{type: type}) when type in [:call, :put], do: true
+  def is_naked?(_position), do: false
 
   @spec is_short?(%{
           data: OptionsTracker.Accounts.Position.t() | map,

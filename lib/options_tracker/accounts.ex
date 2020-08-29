@@ -43,6 +43,7 @@ defmodule OptionsTracker.Accounts do
       ** (Ecto.NoResultsError)
 
   """
+  def get_account!(%OptionsTracker.Accounts.Position{account_id: id}), do: Repo.get!(Account, id)
   def get_account!(id), do: Repo.get!(Account, id)
 
   @spec create_account(%{optional(binary) => binary | number}) ::
@@ -252,6 +253,11 @@ defmodule OptionsTracker.Accounts do
   @spec count_positions :: non_neg_integer()
   def count_positions() do
     Repo.aggregate(from(p in Position), :count, :id)
+  end
+
+  def with_account(%Position{} = position) do
+    position
+    |> Repo.preload(:account)
   end
 
   @doc """

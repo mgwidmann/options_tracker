@@ -63,6 +63,22 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:position, Accounts.get_position!(id))
   end
 
+  defp apply_action(socket, :expire, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    Accounts.update_position(position, %{status: :closed, exit_price: Decimal.from_float(0.0), closed_at: position.expires_at}, socket.assigns.current_user)
+
+    socket
+    |> push_redirect(to: return_to_path(socket, socket.assigns.current_account_id))
+  end
+
+  defp apply_action(socket, :exercise, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    Accounts.update_position(position, %{status: :exercised, exit_price: Decimal.from_float(0.0), closed_at: position.expires_at}, socket.assigns.current_user)
+
+    socket
+    |> push_redirect(to: return_to_path(socket, socket.assigns.current_account_id))
+  end
+
   @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
     position = %Position{}
@@ -158,10 +174,12 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   def handle_event("validate", %{"position" => position_params}, socket) do
     account =
-      if(match?([_ | _], socket.assigns.current_account),
-        do: socket.assigns.position,
-        else: socket.assigns.current_account
-      )
+      if match?([_ | _], socket.assigns.current_account) do
+        socket.assigns.position
+        |> Accounts.get_account()
+      else
+        socket.assigns.current_account
+      end
 
     changeset =
       (socket.assigns.position || %Position{})
