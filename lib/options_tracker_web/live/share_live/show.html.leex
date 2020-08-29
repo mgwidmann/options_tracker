@@ -35,6 +35,7 @@
   <% end %>
 
   <%= live_component @socket, OptionsTrackerWeb.PositionLive.PositionsComponent, %{
+    id: :positions_component,
     share_mode: false,
     changeset: nil,
     live_action: :index,

@@ -176,7 +176,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     account =
       if match?([_ | _], socket.assigns.current_account) do
         socket.assigns.position
-        |> Accounts.get_account()
+        |> Accounts.get_account!()
       else
         socket.assigns.current_account
       end

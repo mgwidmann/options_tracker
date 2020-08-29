@@ -250,6 +250,7 @@
 </div>
 
 <%= live_component @socket, OptionsTrackerWeb.PositionLive.PositionsComponent, %{
+  id: :positions_component,
   share_mode: @share_mode,
   changeset: @changeset,
   live_action: @live_action,

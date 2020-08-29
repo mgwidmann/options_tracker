@@ -21,6 +21,28 @@
     max-width: 95px;
 }
 
+#positions tr {
+    cursor: pointer;
+
+    &.notes {
+        display: none;
+
+        &.show {
+            display: table-row;
+        }
+    }
+}
+
+#positions-mobile {
+    .notes {
+        display: none;
+
+        &.show {
+            display: block;
+        }
+    }
+}
+
 #positions input.input-super-small, #positions-mobile input.input-super-small {
     width: 60px;
 }

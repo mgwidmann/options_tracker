@@ -29,152 +29,166 @@
     <% else %>
       <div class="card mb-3 <%= if(@shares[position.id], do: "has-background-warning", else: row_class_for_status(position.status)) %>">
         <div class="card-content py-2 px-2">
-          <div class="mb-2">
-            <div class="columns is-mobile is-gapless">
-              <div class="column is-one-quarter">
-                <div class="ticker-container">
-                  <div class="title">
-                    <span class="tag is-size-6 is-rounded"><%= position.stock %></span>
-                  </div>
-                  <div class="subtitle is-size-6">
-                    <%= position.count %> <%= count_type(position) %>
+          <div phx-hook="ShowNotes">
+            <div class="mb-2">
+              <div class="columns is-mobile is-gapless">
+                <div class="column is-one-quarter">
+                  <div class="ticker-container">
+                    <div class="title">
+                      <span class="tag is-size-6 is-rounded"><%= position.stock %></span>
+                    </div>
+                    <div class="subtitle is-size-6">
+                      <%= position.count %> <%= count_type(position) %>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="column is-half">
-                <div class="tags mb-0 is-size-5">
-                  <%= currency_string(position.strike) %>
-                  <span class="tag is-small ml-2 <%= type_display_class(position) %>">
-                    <%= type_display(position) %>
-                  </span>
-                  <%= if is_spread?(position) do %>
-                    <span class="tag is-small is-info">
-                      <%= currency_string(position.spread_width) %> width
+                <div class="column is-half">
+                  <div class="tags mb-0 is-size-5">
+                    <%= currency_string(position.strike) %>
+                    <%= if is_option?(position) do %>
+                      <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven">
+                        <i class="fa fa-info-circle"></i>
+                      </span>
+                    <% end %>
+                    <span class="tag is-small ml-2 <%= type_display_class(position) %>">
+                      <%= type_display(position) %>
                     </span>
-                  <% end %>
+                    <%= if is_spread?(position) do %>
+                      <span class="tag is-small is-info">
+                        <%= currency_string(position.spread_width) %> width
+                      </span>
+                    <% end %>
+                  </div>
+                  <div class="">
+                    <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Sell", else: "Buy") %></span>
+                  </div>
                 </div>
-                <div class="">
-                  <span class="tag <%= if(position.short, do: "is-danger", else: "is-success") %>"><%= if(position.short, do: "Sell", else: "Buy") %></span>
+                <div class="column is-one-quarter">
+                  <div class="has-text-right">
+                    <b><%= position_status_display(position.type, position.status, true) %></b>
+                    <span class="is-size-4 <%= if(position.premium && Decimal.cmp(position.premium, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+                      <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div class="column is-one-quarter">
-                <div class="has-text-right">
-                  <b><%= position_status_display(position.type, position.status, true) %></b>
-                  <span class="is-size-4 <%= if(position.premium && Decimal.cmp(position.premium, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-                    <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
-                  </span>
+              <div class="columns is-mobile">
+                <div class="column is-size-4">
+                  <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Expires on <%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
+                </div>
+
+                <div class="column">
+                  <div class="columns is-multiline is-gapless">
+                    <div class="column is-full mb-1">
+                      <%= unless @share_mode || @read_only do %>
+                        <%= if is_closed?(position) do %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :reopen, position), class: "button is-primary mr-1 mt-1 is-small is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Reopen" do %>
+                            <i class="fa fa-undo" aria-hidden="true"></i>
+                          <% end %>
+                        <% else %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :edit, position), class: "button is-primary mr-1 mt-1 is-small is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Edit" do %>
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                          <% end %>
+                        <% end %>
+                        <%= if is_open?(position) do %>
+                          <div class="dropdown is-hoverable">
+                            <div class="dropdown-trigger">
+                              <%= if is_option?(position) do %>
+                                <button class="button is-small mr-1 has-tooltip-arrow has-tooltip-top" data-tooltip="Close" aria-haspopup="true" aria-controls="close-menu">
+                                  <i class="fa fa-times" aria-hidden="true"></i>
+                                </button>
+                              <% else %>
+                                <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top" do %>
+                                  <i class="fa fa-times" aria-hidden="true"></i>
+                                <% end %>
+                              <% end %>
+                            </div>
+                            <%= if is_option?(position) do %>
+                              <div class="dropdown-menu" id="close-menu" role="menu">
+                                <div class="dropdown-content">
+                                  <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "dropdown-item" do %>
+                                    <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close
+                                  <% end %>
+                                  <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item" do %>
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
+                                  <% end %>
+                                  <%= if is_naked?(position) do %>
+                                    <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item" do %>
+                                      <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
+                                    <% end %>
+                                  <% end %>
+                                </div>
+                              </div>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      <% end %>
+                    </div>
+                    <div class="column is-full mb-1">
+                      <%= unless @share_mode || @read_only do %>
+                        <%= live_patch to: Routes.position_index_path(@socket, :notes, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Notes" do %>
+                          <i class="fa fa-paperclip" aria-hidden="true"></i>
+                        <% end %>
+                        <%= if is_open?(position) && is_option?(position) do %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll (Coming Soon)", disabled: true do %>
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                          <% end %>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="columns is-mobile">
-              <div class="column is-size-4">
-                <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Expires on <%= date_display(position.expires_at, true) %>"><%= date_display(position.expires_at, false) %></span>
+            <div class="columns is-mobile is-gapless">
+              <div class="column is-one-quarter">
+                <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.expires_at, true) %>"><%= date_display(position.opened_at, false) %></span>
+                <br/>
+                <%= if Decimal.cmp(position.fees, Decimal.new(0)) == :gt do %>
+                  <%= currency_string(position.fees) %> fees
+                <% end %>
               </div>
-
-              <div class="column">
-                <div class="columns is-multiline is-gapless">
-                  <div class="column is-full mb-1">
-                    <%= unless @share_mode || @read_only do %>
-                      <%= if is_closed?(position) do %>
-                        <%= live_patch to: Routes.position_index_path(@socket, :reopen, position), class: "button is-primary mr-1 mt-1 is-small is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Reopen" do %>
-                          <i class="fa fa-undo" aria-hidden="true"></i>
-                        <% end %>
-                      <% else %>
-                        <%= live_patch to: Routes.position_index_path(@socket, :edit, position), class: "button is-primary mr-1 mt-1 is-small is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Edit" do %>
-                          <i class="fa fa-pencil" aria-hidden="true"></i>
-                        <% end %>
-                      <% end %>
-                      <%= if is_open?(position) do %>
-                        <div class="dropdown is-hoverable">
-                          <div class="dropdown-trigger">
-                            <%= if is_option?(position) do %>
-                              <button class="button is-small mr-1 has-tooltip-arrow has-tooltip-top" data-tooltip="Close" aria-haspopup="true" aria-controls="close-menu">
-                                <i class="fa fa-times" aria-hidden="true"></i>
-                              </button>
-                            <% else %>
-                              <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top" do %>
-                                <i class="fa fa-times" aria-hidden="true"></i>
-                              <% end %>
-                            <% end %>
-                          </div>
-                          <%= if is_option?(position) do %>
-                            <div class="dropdown-menu" id="close-menu" role="menu">
-                              <div class="dropdown-content">
-                                <%= live_patch to: Routes.position_index_path(@socket, :close, position), class: "dropdown-item" do %>
-                                  <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Close
-                                <% end %>
-                                <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item" do %>
-                                  <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
-                                <% end %>
-                                <%= if is_naked?(position) do %>
-                                  <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item" do %>
-                                    <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
-                                  <% end %>
-                                <% end %>
-                              </div>
-                            </div>
-                          <% end %>
-                        </div>
-                      <% end %>
-                    <% end %>
+              <div class="column is-half has-text-right">
+                <%= if position.profit_loss do %>
+                  <span class="<%= if(Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+                    <%= credit_debit_display(position.profit_loss) %> (<%= currency_string(position.exit_price || 0.0) %> exit)
+                  </span>
+                <% else %>
+                  <% potential_profit = max_profit(position) %>
+                  <div class="tags">
+                    <span class="tag is-small ">
+                      <%= currency_string(potential_profit) %> max profit
+                    </span>
                   </div>
-                  <div class="column is-full mb-1">
-                    <%= unless @share_mode || @read_only do %>
-                      <%= live_patch to: Routes.position_index_path(@socket, :notes, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Notes" do %>
-                        <i class="fa fa-paperclip" aria-hidden="true"></i>
-                      <% end %>
-                      <%= if is_open?(position) && is_option?(position) do %>
-                        <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll (Coming Soon)", disabled: true do %>
-                          <i class="fa fa-clock-o" aria-hidden="true"></i>
-                        <% end %>
-                      <% end %>
+                <% end %>
+              </div>
+              <div class="column is-one-quarter has-text-right">
+                <%= cond do %>
+                  <% @share_mode -> %>
+                    <%= if @shares[position.id] do %>
+                      <button class="button is-small has-tooltip-arrow has-tooltip-left" phx-click="remove_share" phx-value-id="<%= position.id %>" data-tooltip="Remove this trade from your selection to share.">
+                        <i class="fa fa-minus"></i>
+                      </button>
+                    <% else %>
+                      <button class="button is-info is-small has-tooltip-arrow has-tooltip-left" phx-click="add_share" phx-value-id="<%= position.id %>" data-tooltip="Add this trade to your selection to share.">
+                        <i class="fa fa-plus"></i>
+                      </button>
                     <% end %>
-                  </div>
-                </div>
+                  <% !@read_only -> %>
+                    <%= live_patch to: Routes.position_index_path(@socket, :delete, position), class: "button is-danger mr-1 mt-4 is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Delete" do %>
+                      <i class="fa fa-trash" aria-hidden="true"></i>
+                    <% end %>
+                  <% true -> %>
+                <% end %>
               </div>
             </div>
           </div>
-          <div class="columns is-mobile is-gapless">
-            <div class="column is-one-quarter">
-              <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.expires_at, true) %>"><%= date_display(position.opened_at, false) %></span>
-              <br/>
-              <%= if Decimal.cmp(position.fees, Decimal.new(0)) == :gt do %>
-                <%= currency_string(position.fees) %> fees
-              <% end %>
-            </div>
-            <div class="column is-half has-text-right">
-              <%= if position.profit_loss do %>
-                <span class="<%= if(Decimal.cmp(position.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-                  <%= credit_debit_display(position.profit_loss) %> (<%= currency_string(position.exit_price || 0.0) %> exit)
-                </span>
-              <% else %>
-                <% potential_profit = max_profit(position) %>
-                <div class="tags">
-                  <span class="tag is-small ">
-                    <%= currency_string(potential_profit) %> max profit
-                  </span>
-                </div>
-              <% end %>
-            </div>
-            <div class="column is-one-quarter has-text-right">
-              <%= cond do %>
-                <% @share_mode -> %>
-                  <%= if @shares[position.id] do %>
-                    <button class="button is-small has-tooltip-arrow has-tooltip-left" phx-click="remove_share" phx-value-id="<%= position.id %>" data-tooltip="Remove this trade from your selection to share.">
-                      <i class="fa fa-minus"></i>
-                    </button>
-                  <% else %>
-                    <button class="button is-info is-small has-tooltip-arrow has-tooltip-left" phx-click="add_share" phx-value-id="<%= position.id %>" data-tooltip="Add this trade to your selection to share.">
-                      <i class="fa fa-plus"></i>
-                    </button>
-                  <% end %>
-                <% !@read_only -> %>
-                  <%= live_patch to: Routes.position_index_path(@socket, :delete, position), class: "button is-danger mr-1 mt-4 is-small has-tooltip-arrow has-tooltip-top", "data-tooltip": "Delete" do %>
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                  <% end %>
-                <% true -> %>
-              <% end %>
-            </div>
+          <div class="notes">
+            <h1 class="subtitle">Notes:</h1>
+            <%= (position.notes || "_(Nothing)_") |> Earmark.as_html!() |> sanitize() %>
+            <br/>
+            <h1 class="subtitle">Exit Strategy:<h1>
+            <%= (position.exit_strategy || "_(Nothing)_") |> Earmark.as_html!() |> sanitize() %>
           </div>
         </div>
       </div>
@@ -229,7 +243,7 @@
           mobile: false,
           return_to: return_to_path(@socket, @current_account_id) %>
       <% else %>
-        <tr id="position-<%= position.id %>" class="<%= if(@shares[position.id], do: "has-background-warning", else: row_class_for_status(position.status)) %>">
+        <tr id="position-<%= position.id %>" class="<%= if(@shares[position.id], do: "has-background-warning", else: row_class_for_status(position.status)) %>" phx-hook="ShowNotes">
           <td>
             <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.opened_at, true) %>"><%= date_display(position.opened_at, false) %></span>
           </td>
@@ -344,6 +358,16 @@
                 <% end %>
               <% true -> %>
             <% end %>
+          </td>
+        </tr>
+        <tr class="notes">
+          <td colspan="6">
+            <h1 class="subtitle">Notes:</h1>
+            <%= (position.notes || "_(Nothing)_") |> Earmark.as_html!() |> sanitize() %>
+          </td>
+          <td colspan="6">
+            <h1 class="subtitle">Exit Strategy:</h1>
+            <%= (position.exit_strategy || "_(Nothing)_") |> Earmark.as_html!() |> sanitize() %>
           </td>
         </tr>
       <% end %>

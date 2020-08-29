@@ -27,6 +27,16 @@ Hooks.CopyClipboard = {
         input.on('click', copyClipboard);
     }
 }
+Hooks.ShowNotes = {
+    mounted() {
+        $(this.el).next('.notes').add($(this.el)).click((evt) => {
+            if (evt.target.tagName != "A" && evt.target.tagName != "I") {
+                const notes = $(this.el).next('.notes')
+                notes.toggleClass('show');
+            }
+        });
+    }
+}
 Hooks.StatisticsChart = {
     mounted() {
         this.initChart();
