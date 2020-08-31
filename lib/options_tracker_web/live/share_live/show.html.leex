@@ -1,5 +1,5 @@
 <%= if @share do %>
-  <%= if @current_user do %>
+  <%= if @current_user && @current_user.id == @user.id do %>
     <div class="card mb-5">
       <div class="card-content">
         <div class="media">

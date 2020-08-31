@@ -39,7 +39,9 @@ defmodule OptionsTrackerWeb.ShareLive.Show do
 
   @impl true
   def handle_event("unshare", _, socket) do
-    Users.delete_share!(socket.assigns.share)
+    if socket.assigns.share.user.id == socket.assigns.current_user.id do
+      Users.delete_share!(socket.assigns.share)
+    end
 
     {:noreply,
      socket
