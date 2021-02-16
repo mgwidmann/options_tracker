@@ -22,9 +22,8 @@ defmodule OptionsTrackerWeb.AccountLive.FormComponent do
   def handle_event("validate", %{"account" => account_params}, socket) do
     changeset =
       socket.assigns.account
-      |> Accounts.change_account(account_params |> compact() |> defaults_for_type() |> IO.inspect())
+      |> Accounts.change_account(account_params |> compact() |> defaults_for_type())
       |> Map.put(:action, :validate)
-      |> IO.inspect()
 
     {:noreply, assign(socket, :changeset, changeset)}
   end

@@ -190,6 +190,7 @@
     modal_title: "Close Position",
     only_notes: false,
     show_notes: false,
+    roll: false,
     return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 
@@ -203,6 +204,21 @@
     modal_title: "Edit Notes",
     only_notes: true,
     show_notes: true,
+    roll: false,
+    return_to: return_to_path(@socket, @current_account_id) %>
+<% end %>
+
+<%= if @live_action in [:roll] do %>
+  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.EditModalComponent,
+    id: @position.id,
+    title: @page_title,
+    action: @live_action,
+    position: @position,
+    current_user: @current_user,
+    modal_title: "Roll Position",
+    only_notes: false,
+    show_notes: false,
+    roll: true,
     return_to: return_to_path(@socket, @current_account_id) %>
 <% end %>
 

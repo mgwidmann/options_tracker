@@ -27,7 +27,7 @@ defmodule OptionsTracker.Accounts.Position do
     def name_for(:exercised, true), do: "Exercised"
   end
 
-  @derive {Jason.Encoder, except: [:account, :shares, :__meta__]}
+  @derive {Jason.Encoder, except: [:account, :shares, :rolled_position, :__meta__]}
   schema "positions" do
     # Require info on open
     field :stock, :string
@@ -47,6 +47,7 @@ defmodule OptionsTracker.Accounts.Position do
     field :profit_loss, :decimal
     field :status, StatusType
     field :exit_price, :decimal
+    field :accumulated_profit_loss, :decimal
 
     field :notes, :string
     field :exit_strategy, :string
@@ -55,13 +56,21 @@ defmodule OptionsTracker.Accounts.Position do
 
     many_to_many :shares, Share, join_through: "positions_shares", on_replace: :delete
 
+    # Rolling positions
+    field :rolled_strike, :decimal, virtual: true
+    field :rolled_premium, :decimal, virtual: true
+    field :rolled_opened_at, OptionsTracker.Fields.Date, virtual: true
+    field :rolled_expires_at, OptionsTracker.Fields.Date, virtual: true
+    field :rolled_fees, :decimal, default: Decimal.from_float(0.00), virtual: true
+    belongs_to :rolled_position, OptionsTracker.Accounts.Position
+
     timestamps()
   end
 
   @required_open_fields ~w[stock short type strike opened_at expires_at premium fees status count account_id]a
   @not_allowed_stock_fields ~w[expires_at premium spread_width]a
   @not_allowed_option_fields ~w[basis]a
-  @optional_open_fields ~w[basis notes exit_strategy]a
+  @optional_open_fields ~w[basis accumulated_profit_loss rolled_position_id notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
   @required_spread_fields ~w[spread_width]a
   @spec open_changeset(
@@ -157,8 +166,10 @@ defmodule OptionsTracker.Accounts.Position do
       |> stringify_keys()
       |> prepare_attrs()
 
+    type = if(match?(%__MODULE__{}, position), do: position.type, else: position.changes.type)
+
     cond do
-      TransType.stock?(position.type) ->
+      TransType.stock?(type) ->
         position
         |> cast(attrs, @fields -- @not_allowed_stock_fields)
         |> validate_required(@required_open_fields -- @not_allowed_stock_fields)
@@ -167,7 +178,7 @@ defmodule OptionsTracker.Accounts.Position do
         |> validate_number(:basis, [])
         |> calculate_profit_loss()
 
-      TransType.call_spread?(position.type) || TransType.put_spread?(position.type) ->
+      TransType.call_spread?(type) || TransType.put_spread?(type) ->
         position
         |> cast(attrs, (@fields -- @not_allowed_option_fields) ++ @required_spread_fields)
         |> validate_required((@required_open_fields -- @not_allowed_option_fields) ++ @required_spread_fields)
@@ -190,20 +201,45 @@ defmodule OptionsTracker.Accounts.Position do
     end
   end
 
-  def duplicate_changeset(position, attrs) do
-    attrs =
-      attrs
-      |> stringify_keys()
-      |> prepare_attrs()
+  @roll_fields ~w[rolled_strike rolled_opened_at rolled_premium rolled_expires_at rolled_fees]a
+  def roll_changeset(position, attrs) do
+    position
+    |> changeset(attrs)
+    |> cast(attrs, @roll_fields)
+    |> validate_required(@roll_fields)
+  end
 
+  def exercise_changeset(position, attrs) do
     attrs =
       position
       |> to_stock_attrs()
       |> stringify_keys()
       |> Map.merge(attrs)
 
+    duplicate_changeset(position, attrs)
+  end
+
+  def duplicate_changeset(position, attrs) do
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> prepare_attrs()
+
+    dup = %{
+      "stock" => position.stock,
+      "strike" => position.strike,
+      "short" => position.short,
+      "count" => position.count,
+      "type" => position.type,
+      "opened_at" => DateTime.utc_now(),
+      "status" => :open,
+      "account_id" => position.account.id
+    }
+    attrs = Map.merge(dup, attrs)
+
     %__MODULE__{}
     |> cast(attrs, @fields)
+    |> put_assoc(:account, position.account)
     |> standard_validations()
     |> calculate_profit_loss()
   end
@@ -253,7 +289,7 @@ defmodule OptionsTracker.Accounts.Position do
       count: count * 100,
       type: :stock,
       opened_at: DateTime.utc_now(),
-      fees: Decimal.to_float(account.stock_open_fee) * count * 100,
+      fees: stock_opening_fees(account, count * 100),
       status: :open,
       account_id: account.id
     }
@@ -264,6 +300,14 @@ defmodule OptionsTracker.Accounts.Position do
     |> Map.from_struct()
     # Don't need relationship, just account ID
     |> Map.drop(~w[account id]a)
+  end
+
+  def option_opening_fees(account, count) do
+    Decimal.to_float(account.opt_open_fee) * count
+  end
+
+  def stock_opening_fees(account, count) do
+    Decimal.mult(account.stock_open_fee, count)
   end
 
   defp standard_validations(changeset) do

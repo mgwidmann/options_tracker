@@ -10,7 +10,7 @@
               <div class="field">
                 <p class="control is-expanded input-super-small">
                   <%= number_input @f, :count, class: "input is-small input-super-small", placeholder: "1" %>
-                  <%= error_tag @f, :count %>
+                  <%= if(@f, do: error_tag(@f, :count), else: nil) %>
                 </p>
               </div>
               <div class="field">
@@ -19,7 +19,7 @@
                   <span class="icon is-small is-left">
                     <i class="fa fa-line-chart" aria-hidden="true"></i>
                   </span>
-                  <%= error_tag @f, :stock %>
+                  <%= if(@f, do: error_tag(@f, :stock), else: nil) %>
                 </p>
               </div>
             </div>
@@ -32,7 +32,7 @@
               <span class="icon is-small is-left">
                 <i class="fa fa-usd"></i>
               </span>
-              <%= error_tag @f, :strike %>
+              <%= if(@f, do: error_tag(@f, :strike), else: nil) %>
             </div>
           </div>
           <div class="column">
@@ -49,12 +49,12 @@
                   Buy
                 <% end %>
               </span>
-              <%= error_tag @f, :short %>
+              <%= if(@f, do: error_tag(@f, :short), else: nil) %>
             </div>
           </div>
           <div class="column">
             <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
-            <%= error_tag @f, :type %>
+            <%= if(@f, do: error_tag(@f, :type), else: nil) %>
           </div>
           <%= if is_spread?(@f) do %>
             <div class="column">
@@ -63,7 +63,7 @@
                 <span class="icon is-small is-left">
                   <i class="fa fa-usd"></i>
                 </span>
-                <%= error_tag @f, :spread_width %>
+                <%= if(@f, do: error_tag(@f, :spread_width), else: nil) %>
               </div>
             </div>
           <% end %>
@@ -82,7 +82,7 @@
                       <span class="icon is-small is-left">
                         <i class="fa fa-usd"></i>
                       </span>
-                      <%= error_tag @f, :premium %>
+                      <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
                     </p>
                   </div>
                 </div>
@@ -91,7 +91,7 @@
                 <div class="control">
                   <%= label @f, :expires_at, class: "label" %>
                   <%= text_input @f, :expires_at, type: :date, class: "input is-small date", disabled: !is_option?(@f) %>
-                  <%= error_tag @f, :expires_at %>
+                  <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
                 </div>
               </div>
               <div class="column">
@@ -106,7 +106,7 @@
                 <div class="control">
                   <%= label @f, :opened_at, class: "label" %>
                   <%= text_input @f, :opened_at, type: :date, class: "input is-small date" %>
-                  <%= error_tag @f, :opened_at %>
+                  <%= if(@f, do: error_tag(@f, :opened_at), else: nil) %>
                 </div>
               </div>
               <div class="column">
@@ -118,7 +118,7 @@
                       <span class="icon is-small is-left">
                         <i class="fa fa-usd"></i>
                       </span>
-                      <%= error_tag @f, :fees %>
+                      <%= if(@f, do: error_tag(@f, :fees), else: nil) %>
                     </p>
                   </div>
                 </div>
@@ -144,13 +144,13 @@
       <%= hidden_input @f, :return_to, value: @return_to, name: "return_to" %>
       <div class="control">
         <%= text_input @f, :opened_at, type: :date, class: "input is-small date" %>
-        <%= error_tag @f, :opened_at %>
+        <%= if(@f, do: error_tag(@f, :opened_at), else: nil) %>
       </div>
     </td>
     <td>
       <span class="control px-1">
         <%= number_input @f, :count, class: "input is-small input-super-small", placeholder: "1" %>
-        <%= error_tag @f, :count %>
+        <%= if(@f, do: error_tag(@f, :count), else: nil) %>
       </span>
     </td>
     <td>
@@ -161,7 +161,7 @@
             <span class="icon is-small is-left">
               <i class="fa fa-line-chart" aria-hidden="true"></i>
             </span>
-            <%= error_tag @f, :stock %>
+            <%= if(@f, do: error_tag(@f, :stock), else: nil) %>
           </p>
         </div>
       </div>
@@ -180,7 +180,7 @@
             Buy
           <% end %>
         </span>
-        <%= error_tag @f, :short %>
+        <%= if(@f, do: error_tag(@f, :short), else: nil) %>
       </div>
     </td>
     <td>
@@ -191,7 +191,7 @@
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
-            <%= error_tag @f, :strike %>
+            <%= if(@f, do: error_tag(@f, :strike), else: nil) %>
           </p>
         </div>
       </div>
@@ -201,7 +201,7 @@
         <span>
           <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
         </span>
-        <%= error_tag @f, :type %>
+        <%= if(@f, do: error_tag(@f, :type), else: nil) %>
       </p>
       <%= if is_spread?(@f) do %>
         <p class="control has-icons-left mt-1">
@@ -209,14 +209,14 @@
           <span class="icon is-small is-left">
             <i class="fa fa-usd"></i>
           </span>
-          <%= error_tag @f, :spread_width %>
+          <%= if(@f, do: error_tag(@f, :spread_width), else: nil) %>
         </p>
       <% end %>
     </td>
     <td>
       <div class="control">
         <%= text_input @f, :expires_at, type: :date, class: "input is-small date", disabled: !is_option?(@f)  %>
-        <%= error_tag @f, :expires_at %>
+        <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
       </div>
     </td>
     <td>
@@ -227,7 +227,7 @@
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
-            <%= error_tag @f, :premium %>
+            <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
           </p>
         </div>
       </div>
@@ -239,7 +239,7 @@
             <%= position_status_display(Map.get(@f.data, :type), Map.get(@f.data, :status), true) %>
           </p>
         </div>
-        <%= error_tag @f, :status %>
+        <%= if(@f, do: error_tag(@f, :status), else: nil) %>
       </div>
     </td>
     <td></td>
@@ -251,7 +251,7 @@
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
-            <%= error_tag @f, :fees %>
+            <%= if(@f, do: error_tag(@f, :fees), else: nil) %>
           </p>
         </div>
       </div>

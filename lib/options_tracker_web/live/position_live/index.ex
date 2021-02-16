@@ -81,24 +81,31 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
   @seconds_in_a_day 86_400
   defp apply_action(socket, :new, _params) do
-    position = %Position{}
+    # If an account was somehow not selected (even though reproducing attempts have failed), redirect and instruct the user to select an account first
+    if match?([_|_], socket.assigns.current_account) do
+      socket
+      |> put_flash(:error, "You must select an account from the dropdown to add a position to first.")
+      |> push_redirect(to: Routes.position_index_path(socket, :index))
+    else
+      position = %Position{}
 
-    position_params = %{
-      account_id: socket.assigns.current_account.id,
-      fees: socket.assigns.current_account.opt_open_fee,
-      opened_at: DateTime.utc_now() |> DateTime.to_date(),
-      count: 1,
-      expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
-      short: true,
-      type: :put
-    }
+      position_params = %{
+        account_id: socket.assigns.current_account.id,
+        fees: socket.assigns.current_account.opt_open_fee,
+        opened_at: DateTime.utc_now() |> DateTime.to_date(),
+        count: 1,
+        expires_at: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(),
+        short: true,
+        type: :put
+      }
 
-    changeset = Accounts.change_position(position, position_params)
+      changeset = Accounts.change_position(position, position_params)
 
-    socket
-    |> assign(:page_title, "New Position")
-    |> assign(:position, position)
-    |> assign(:changeset, changeset)
+      socket
+      |> assign(:page_title, "New Position")
+      |> assign(:position, position)
+      |> assign(:changeset, changeset)
+    end
   end
 
   defp apply_action(socket, :index, _params) do
@@ -117,6 +124,16 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
     |> assign(:position, position)
     # Clear out
     |> assign(:changeset, nil)
+  end
+
+  defp apply_action(socket, :roll, %{"id" => id}) do
+    position = Accounts.get_position!(id)
+    changeset = Accounts.change_position(position)
+
+    socket
+    |> assign(:page_title, "Roll Position")
+    |> assign(:position, position)
+    |> assign(:changeset, changeset)
   end
 
   defp apply_action(socket, :notes, %{"id" => id}) do

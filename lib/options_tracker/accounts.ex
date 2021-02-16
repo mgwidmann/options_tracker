@@ -396,9 +396,15 @@ defmodule OptionsTracker.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_position(%Position{} = position, attrs, %User{id: user_id}) do
-    changeset = position |> Position.changeset(attrs)
+  def update_position(positin_or_changeset, attrs, user)
 
+  def update_position(%Position{} = position, attrs, user) do
+    position
+    |> Position.changeset(attrs)
+    |> update_position(attrs, user)
+  end
+
+  def update_position(changeset, _attrs, %User{id: user_id}) do
     if changeset.valid? do
       Repo.transaction(fn ->
         case Repo.update(changeset) do
@@ -419,6 +425,24 @@ defmodule OptionsTracker.Accounts do
     else
       {:error, changeset}
     end
+  end
+
+  def update_roll_position(%Position{} = position, attrs, duplicate, %User{} = user) do
+    Repo.transaction(fn ->
+      case update_position(position, attrs, user) do
+        {:ok, position} ->
+          accumulated_profit_loss = Decimal.add(position.accumulated_profit_loss || Decimal.from_float(0.0), position.profit_loss)
+
+          case create_position(Map.put(duplicate.changes, :accumulated_profit_loss, accumulated_profit_loss), user) do
+            {:ok, rolled_position} ->
+              rolled_position
+            {:error, changeset} ->
+              raise "Invalid changeset when rolling: #{inspect changeset}"
+          end
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    end)
   end
 
   ### Updates any long or short stock positions' basis field which were used as collateral for this position.
@@ -560,7 +584,7 @@ defmodule OptionsTracker.Accounts do
       # Last position hasn't been closed out since it is larger than shares_needed
       shares_uncovered > 0 && match?(%Position{}, last_stock) ->
         new_position =
-          Position.duplicate_changeset(last_stock, %{
+          Position.exercise_changeset(last_stock, %{
             count: shares_uncovered,
             status: :closed,
             exit_price: position.strike,
@@ -778,6 +802,14 @@ defmodule OptionsTracker.Accounts do
     Position.changeset(position, attrs)
   end
 
+  def roll_position(%Position{} = position, attrs) do
+    Position.roll_changeset(position, attrs)
+  end
+
+  def duplicate_position(%Position{} = position, attrs) do
+    Position.duplicate_changeset(position, attrs)
+  end
+
   @spec list_position_types :: [stock: 0, call: 1, put: 2, call_spread: 3, put_spread: 4]
   def list_position_types() do
     Position.TransType.__enum_map__()
@@ -804,6 +836,27 @@ defmodule OptionsTracker.Accounts do
 
   def list_position_statuses(_other) do
     Position.StatusType.__enum_map__()
+  end
+
+  def opening_fees(%Position{type: :stock, account: account, count: count}) do
+    Position.stock_opening_fees(account, count)
+  end
+
+  def opening_fees(%Position{type: call_or_put, account: account, count: count}) when call_or_put in ~w[call put]a do
+    Position.option_opening_fees(account, count)
+  end
+
+  # Spreads
+  def opening_fees(%Position{account: account, count: count}) do
+    Position.option_opening_fees(account, count) * 2 # for each leg
+  end
+
+  def closing_fees(%Position{type: :stock, count: count, fees: fees}, account) do
+    Decimal.add(fees, Decimal.mult(account.stock_close_fee, count))
+  end
+
+  def closing_fees(%Position{count: count, fees: fees}, account) do
+    Decimal.add(fees, Decimal.mult(account.opt_close_fee, count))
   end
 
   def position_with_account(%Position{account: %Account{}} = position), do: position
