@@ -46,7 +46,7 @@
                   <div class="tags mb-0 is-size-5">
                     <%= currency_string(position.strike) %>
                     <%= if is_option?(position) do %>
-                      <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven">
+                      <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven (<%= (position.accumulated_profit_loss || Decimal.from_float(0.0)) |> currency_string() %> rolled)">
                         <i class="fa fa-info-circle"></i>
                       </span>
                     <% end %>
@@ -112,6 +112,9 @@
                                   <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item" do %>
                                     <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
                                   <% end %>
+                                  <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "dropdown-item" do %>
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Roll
+                                  <% end %>
                                   <%= if is_naked?(position) do %>
                                     <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item" do %>
                                       <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
@@ -130,7 +133,7 @@
                           <i class="fa fa-paperclip" aria-hidden="true"></i>
                         <% end %>
                         <%= if is_open?(position) && is_option?(position) do %>
-                          <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll (Coming Soon)", disabled: true do %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 mt-1 is-pulled-right has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll" do %>
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
                           <% end %>
                         <% end %>
@@ -253,7 +256,7 @@
           <td>
             <%= currency_string(position.strike) %>
             <%= if is_option?(position) do %>
-              <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven">
+              <span class="has-tooltip-arrow" data-tooltip="<%= break_even(position) |> currency_string() %> breakeven (<%= (position.accumulated_profit_loss || Decimal.from_float(0.0)) |> currency_string() %> rolled)">
                 <i class="fa fa-info-circle"></i>
               </span>
             <% end %>
@@ -334,6 +337,9 @@
                           <%= live_patch to: Routes.position_index_path(@socket, :expire, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Expire using expiration date for close date and $0 for close price." do %>
                             <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Expire
                           <% end %>
+                          <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Add more time to your option by closing and reopening your trade for a further out expiration." do %>
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>&nbsp;Roll
+                          <% end %>
                           <%= if is_naked?(position) do %>
                             <%= live_patch to: Routes.position_index_path(@socket, :exercise, position), class: "dropdown-item has-tooltip-arrow has-tooltip-left has-tooltip-multiline", "data-tooltip": "Option has been exercised using expiration date for close date and $0 for close price." do %>
                               <i class="fa fa-usd" aria-hidden="true"></i>&nbsp;Exercise
@@ -348,7 +354,7 @@
                   <i class="fa fa-paperclip" aria-hidden="true"></i>
                 <% end %>
                 <%= if is_open?(position) && is_option?(position) do %>
-                  <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll (Coming Soon)", disabled: true do %>
+                  <%= live_patch to: Routes.position_index_path(@socket, :roll, position), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "Roll" do %>
                     <i class="fa fa-clock-o" aria-hidden="true"></i>
                   <% end %>
                 <% end %>

@@ -71,6 +71,31 @@ defmodule OptionsTrackerWeb.LiveHelpers do
     end
   end
 
+  def ensure_decimal(""), do: Decimal.from_float(0.0)
+  def ensure_decimal(string) when is_bitstring(string) do
+    case Float.parse(string) do
+      {float, ""} ->
+        Decimal.from_float(float)
+      :error ->
+        raise "Failure to ensure_decimal, decimal (#{inspect string}) could not be parsed."
+    end
+  end
+
+  def ensure_decimal(%Decimal{} = decimal), do: decimal
+
+  def ensure_date(""), do: Date.utc_today()
+  def ensure_date(string) when is_bitstring(string) do
+    case DateTimeParser.parse(string) do
+      {:ok, date} ->
+        date
+
+      {:error, reason} ->
+        raise "Failure to ensure_date, date (#{inspect string}) could not be parsed: #{reason}"
+    end
+  end
+
+  def ensure_date(%Date{} = date), do: date
+
   @spec format_currency(Ecto.Changeset.t(), atom) :: String.t() | nil
   def format_currency(%Ecto.Changeset{} = changeset, field) do
     value = changeset.changes[field] || Map.get(changeset.data, field)

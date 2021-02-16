@@ -18,12 +18,16 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def type_display_class(%Position{type: :put}), do: "is-danger"
   def type_display_class(%Position{type: :put_spread}), do: "is-danger is-light"
 
-  def break_even(%Position{type: call, strike: price, premium: premium}) when call in [:call, :call_spread] do
-    Decimal.add(price, Decimal.abs(premium))
+  def break_even(%Position{type: call, strike: price, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when call in [:call, :call_spread] do
+    accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
+
+    Decimal.add(price, premium) |> Decimal.add(accumulated)
   end
 
-  def break_even(%Position{type: put, strike: price, premium: premium}) when put in [:put, :put_spread] do
-    Decimal.sub(price, Decimal.abs(premium))
+  def break_even(%Position{type: put, strike: price, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when put in [:put, :put_spread] do
+    accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
+
+    Decimal.sub(price, premium) |> Decimal.sub(accumulated)
   end
 
   def count_type(%Position{type: :stock, count: 1}), do: "share"

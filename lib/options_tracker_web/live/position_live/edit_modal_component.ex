@@ -6,6 +6,8 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   alias OptionsTracker.Accounts.Position
   import OptionsTracker.Accounts.Position.TransType, only: [stock?: 1]
 
+  @seconds_in_a_day 86_400
+
   @impl true
   def update(%{position: position, action: action} = assigns, socket) do
     closed_at =
@@ -20,11 +22,16 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     changeset =
       Accounts.change_position(
         position,
-        if(action == :close,
+        if(action == :close || action == :roll,
           do: %{
             status: :closed,
             closed_at: closed_at,
-            fees: closing_fees(position, position.account)
+            fees: Accounts.closing_fees(position, position.account),
+            rolled_fees: if(action == :roll, do: Accounts.opening_fees(position), else: nil),
+            rolled_opened_at: if(action == :roll, do: DateTime.utc_now() |> DateTime.to_date(), else: nil),
+            rolled_strike: if(action == :roll, do: position.strike, else: nil),
+            rolled_premium: if(action == :roll, do: position.premium, else: nil),
+            rolled_expires_at: if(action == :roll, do: DateTime.utc_now() |> DateTime.add(30 * @seconds_in_a_day, :second) |> DateTime.to_date(), else: nil)
           },
           else: %{}
         )
@@ -33,10 +40,20 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(:position, position)
      |> assign(:changeset, changeset)}
   end
 
   @impl true
+  def handle_event("validate", %{"position" => position_params}, %Phoenix.LiveView.Socket{assigns: %{action: :roll}} = socket) do
+    changeset =
+      socket.assigns.position
+      |> Accounts.roll_position(position_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
   def handle_event("validate", %{"position" => position_params}, socket) do
     changeset =
       socket.assigns.position
@@ -87,11 +104,30 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
     end
   end
 
-  defp closing_fees(%Position{type: :stock, count: count, fees: fees}, account) do
-    Decimal.add(fees, Decimal.mult(account.stock_close_fee, count))
-  end
+  defp save_position(socket, :roll, position_params) do
+    duplicate = Accounts.duplicate_position(socket.assigns.position, %{
+      type: socket.assigns.position.type,
+      opened_at: position_params["rolled_opened_at"],
+      fees: position_params["rolled_fees"],
+      strike: position_params["rolled_strike"],
+      premium: position_params["rolled_premium"],
+      expires_at: position_params["rolled_expires_at"],
+      rolled_position_id: socket.assigns.position.id,
+    })
+    case Accounts.update_roll_position(
+           socket.assigns.position,
+           position_params,
+           duplicate,
+           socket.assigns.current_user
+         ) do
+      {:ok, _position} ->
+        {:noreply,
+        socket
+        |> push_redirect(to: socket.assigns.return_to)}
 
-  defp closing_fees(%Position{count: count, fees: fees}, account) do
-    Decimal.add(fees, Decimal.mult(account.opt_close_fee, count))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
   end
 end

@@ -8,7 +8,7 @@
 
     <p class="alert alert-danger" role="alert"
       phx-click="lv:clear-flash"
-      phx-value-key="error"><%= error %><%= if(error, do: {:safe, ~s(<span class="mx-3 has-pointer">&times;</span>")}) %></p>
+      phx-value-key="error"><%= error %><%= if(error, do: {:safe, ~s(<span class="mx-3 has-pointer">&times;</span>)}) %></p>
   </div>
 
   <%= @inner_content %>
