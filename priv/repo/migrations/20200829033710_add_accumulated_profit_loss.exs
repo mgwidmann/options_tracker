@@ -4,7 +4,7 @@ defmodule OptionsTracker.Repo.Migrations.AddAccumulatedProfitLoss do
   def change do
     alter table(:positions) do
       add :accumulated_profit_loss, :decimal
-      add :rolled_position_id, references(:positions, on_delete: :nothing)
+      add :rolled_position_id, references(:positions, on_delete: :nilify_all)
     end
   end
 end

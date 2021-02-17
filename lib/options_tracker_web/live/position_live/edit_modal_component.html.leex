@@ -136,7 +136,7 @@
               </span>
               <div class="mh-2 pt-2 has-text-centered">
                 <%= if f.params["rolled_premium"] && f.source.changes[:exit_price] do %>
-                  <% premium_delta = Decimal.sub(f.params["rolled_premium"] |> ensure_decimal(), f.source.changes.exit_price) %>
+                  <% premium_delta = rolled_cost(f.params["rolled_premium"] |> ensure_decimal(), f.source.changes.exit_price, f.data.short) %>
                   <% positive_value = Decimal.cmp(premium_delta, Decimal.new(0)) in [:eq, :gt] %>
                   <span data-tooltip="Premium Difference" class="has-tooltip-arrow has-tooltip-bottom <%= if(positive_value, do: "has-text-success", else: "has-text-danger") %>">
                     <%= credit_debit_display(premium_delta) %>&nbsp;<%= if(positive_value, do: "received", else: "paid") %>

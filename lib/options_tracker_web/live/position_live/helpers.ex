@@ -18,16 +18,44 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def type_display_class(%Position{type: :put}), do: "is-danger"
   def type_display_class(%Position{type: :put_spread}), do: "is-danger is-light"
 
-  def break_even(%Position{type: call, strike: price, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when call in [:call, :call_spread] do
+  def break_even(%Position{type: call, strike: price, short: short, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when call in [:call, :call_spread] do
     accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
 
-    Decimal.add(price, premium) |> Decimal.add(accumulated)
+    if short do
+      Decimal.add(price, Decimal.abs(premium)) |> Decimal.add(accumulated)
+    else
+      Decimal.add(price, Decimal.abs(premium)) |> Decimal.sub(accumulated)
+    end
   end
 
-  def break_even(%Position{type: put, strike: price, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when put in [:put, :put_spread] do
+  def break_even(%Position{type: put, strike: price, short: short, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when put in [:put, :put_spread] do
     accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
 
-    Decimal.sub(price, premium) |> Decimal.sub(accumulated)
+    if short do
+      Decimal.sub(price, Decimal.abs(premium)) |> Decimal.sub(accumulated)
+    else
+      Decimal.sub(price, Decimal.abs(premium)) |> Decimal.add(accumulated)
+    end
+  end
+
+  def break_even_premium(%Position{short: true, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) do
+    accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
+
+    Decimal.add(Decimal.abs(premium), accumulated)
+  end
+
+  def break_even_premium(%Position{short: false, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) do
+    accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
+
+    Decimal.sub(Decimal.abs(premium), accumulated)
+  end
+
+  def rolled_cost(rolled_premium, exit_price, true) do
+    Decimal.sub(Decimal.abs(rolled_premium), Decimal.abs(exit_price))
+  end
+
+  def rolled_cost(rolled_premium, exit_price, false) do
+    Decimal.sub(Decimal.abs(exit_price), Decimal.abs(rolled_premium))
   end
 
   def count_type(%Position{type: :stock, count: 1}), do: "share"
