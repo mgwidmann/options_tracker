@@ -511,10 +511,11 @@ defmodule OptionsTracker.Accounts do
     end)
   end
 
-  defp handle_exercise!(%Position{status: :exercised, count: count, type: call_or_put} = position)
+  defp handle_exercise!(%Position{status: :exercised, short: short, count: count, type: call_or_put} = position)
        when call_or_put in ~w[call put]a do
-    # Long stock for call, short stock for put
-    short_long = if(call_or_put == :call, do: false, else: true)
+    # Looking for long stock for call, short stock for put for short options
+    # Looking for short stock for call, long stock for put for long options
+    short_long = if(call_or_put == :call, do: !short, else: short)
 
     position = position |> Repo.preload(:account)
 
@@ -603,7 +604,7 @@ defmodule OptionsTracker.Accounts do
 
       # All positions have been closed out and a new one must be created
       shares_uncovered > 0 && match?(%Ecto.Changeset{}, last_stock) ->
-        new_position_attrs = Position.to_stock_attrs(last_stock.data) |> Map.put(:short, !last_stock.data.short)
+        new_position_attrs = Position.to_stock_attrs(last_stock.data) |> Map.put(:short, if(position.short, do: !last_stock.data.short, else: last_stock.data.short))
 
         {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})
 
@@ -611,13 +612,19 @@ defmodule OptionsTracker.Accounts do
 
       # There are no stocks at all so the entire position must be created
       shares_uncovered > 0 && last_stock == nil ->
-        {short, basis_delta} =
+        {short, basis_delta, accumulated_profit_loss} =
           cond do
-            Position.TransType.call?(position.type) ->
-              {true, Decimal.mult(position.premium, -1)}
+            Position.TransType.call?(position.type) && position.short ->
+              {true, Decimal.abs(position.premium), Decimal.div(position.accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))}
 
-            Position.TransType.put?(position.type) ->
-              {false, position.premium}
+            Position.TransType.call?(position.type) && !position.short ->
+              {false, Decimal.abs(position.premium), Decimal.div(position.accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0)) |> Decimal.mult(-1)}
+
+            Position.TransType.put?(position.type) && position.short ->
+              {false, Decimal.mult(Decimal.abs(position.premium), -1), Decimal.div(position.accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0)) |> Decimal.mult(-1)}
+
+            Position.TransType.put?(position.type) && !position.short ->
+              {true, Decimal.mult(Decimal.abs(position.premium), -1), Decimal.div(position.accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))}
 
             true ->
               raise "Unexpected position type of stock: #{inspect(position)}"
@@ -629,7 +636,7 @@ defmodule OptionsTracker.Accounts do
           |> Map.merge(%{
             short: short,
             opened_at: DateTime.utc_now() |> DateTime.to_date(),
-            basis: Decimal.sub(position.strike, basis_delta)
+            basis: Decimal.add(position.strike, basis_delta) |> Decimal.add(accumulated_profit_loss)
           })
 
         {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})

@@ -279,6 +279,11 @@
           <td>
             <span class="<%= if(position.premium && Decimal.cmp(position.premium, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
               <%= if(position.premium, do: credit_debit_display(position.premium), else: nil) %>
+              <%= if is_option?(position) do %>
+                <span class="has-tooltip-arrow" data-tooltip="<%= break_even_premium(position) |> currency_string() %> breakeven (<%= Decimal.div(position.accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0)) |> currency_string() %> rolled)">
+                  <i class="fa fa-info-circle"></i>
+                </span>
+            <% end %>
             </span>
           </td>
           <td><%= position_status_display(position.type, position.status, true) %></td>
