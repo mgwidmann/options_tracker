@@ -475,37 +475,34 @@ defmodule OptionsTracker.UsersTest do
   describe "shares" do
     alias OptionsTracker.Users.Share
 
-    @valid_attrs %{hash: "some hash"}
-    @update_attrs %{hash: "some updated hash"}
-    @invalid_attrs %{hash: nil}
+    setup do
+      %{user: user_fixture()}
+    end
 
-    def share_fixture(attrs \\ %{}) do
-      {:ok, share} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Users.create_share()
+    def share_fixture(user, position_ids \\ [1, 2, 3]) do
+      {:ok, share} = Users.create_share(user, position_ids)
 
       share
     end
 
-    test "get_share!/1 returns the share with given id" do
-      share = share_fixture()
-      assert Users.get_share!(share.id) == share
+    test "get_share!/1 returns the share with given id", %{user: user} do
+      share = share_fixture(user)
+      assert Users.get_share(share.hash) == share
     end
 
-    test "create_share/1 with valid data creates a share" do
-      assert {:ok, %Share{} = share} = Users.create_share(@valid_attrs)
-      assert share.hash == "some hash"
+    test "create_share/2 with valid data creates a share", %{user: user} do
+      assert {:ok, %Share{} = share} = Users.create_share(user, [1, 2, 3])
+      assert String.length(share.hash) == 60
     end
 
-    test "create_share/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Users.create_share(@invalid_attrs)
+    test "create_share/2 with invalid data returns error changeset", %{user: user} do
+      assert_raise Ecto.InvalidChangesetError, fn -> Users.create_share(user, []) end
     end
 
-    test "delete_share/1 deletes the share" do
-      share = share_fixture()
-      assert {:ok, %Share{}} = Users.delete_share(share)
-      assert_raise Ecto.NoResultsError, fn -> Users.get_share!(share.id) end
+    test "delete_share/1 deletes the share", %{user: user} do
+      share = share_fixture(user)
+      assert %Share{} = Users.delete_share!(share)
+      assert Users.get_share(share.hash) == nil
     end
   end
 end

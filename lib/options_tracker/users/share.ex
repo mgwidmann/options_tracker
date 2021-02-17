@@ -22,6 +22,7 @@ defmodule OptionsTracker.Users.Share do
     |> cast(%{hash: hash, user_id: user.id}, [:hash, :user_id])
     |> put_assoc(:user, user)
     |> validate_required([:hash, :user_id])
+    |> validate_minimum_positions(position_ids)
   end
 
   @random_byte_length 64
@@ -32,4 +33,13 @@ defmodule OptionsTracker.Users.Share do
 
     Bcrypt.Base.hash_password(hash_input, salt)
   end
+
+  @spec validate_minimum_positions(Ecto.Changeset.t(__MODULE__), list(non_neg_integer())) :: Ecto.Changeset.t(__MODULE__)
+  def validate_minimum_positions(changeset, []) do
+    validate_change(changeset, :hash, fn _, _hash ->
+      [{:hash, "must share at least one position"}]
+    end)
+  end
+
+  def validate_minimum_positions(changeset, _), do: changeset
 end
