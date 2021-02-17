@@ -214,7 +214,7 @@ defmodule OptionsTracker.Accounts.Position do
       position
       |> to_stock_attrs()
       |> stringify_keys()
-      |> Map.merge(attrs)
+      |> Map.merge(attrs |> stringify_keys())
 
     duplicate_changeset(position, attrs)
   end

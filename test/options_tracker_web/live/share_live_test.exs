@@ -10,7 +10,8 @@ defmodule OptionsTrackerWeb.ShareLiveTest do
   @invalid_attrs %{hash: nil}
 
   defp fixture(:share) do
-    {:ok, share} = Users.create_share(@create_attrs)
+    user = user_fixture()
+    {:ok, share} = Users.create_share(user, [position_fixture().id])
     share
   end
 
@@ -23,10 +24,10 @@ defmodule OptionsTrackerWeb.ShareLiveTest do
     setup [:create_share]
 
     test "displays share", %{conn: conn, share: share} do
-      {:ok, _show_live, html} = live(conn, Routes.share_show_path(conn, :show, share))
+      path = Routes.share_show_path(conn, :show, %{id: share.hash})
+      {:ok, _show_live, html} = live(conn, path)
 
-      assert html =~ "Show Share"
-      assert html =~ share.hash
+      assert html =~ "$1.50cr"
     end
   end
 end

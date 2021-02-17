@@ -276,6 +276,7 @@ defmodule OptionsTracker.Accounts do
       where: p.account_id in ^account_ids
     )
     |> Repo.all()
+    |> Repo.preload(:account)
   end
 
   @spec search_positions(%{
@@ -342,7 +343,7 @@ defmodule OptionsTracker.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_position!(id), do: Repo.get!(Position, id)
+  def get_position!(id), do: Repo.get!(Position, id) |> Repo.preload(:account)
 
   @spec create_position(
           %{optional(:__struct__) => none, optional(atom | binary) => any},
@@ -370,6 +371,7 @@ defmodule OptionsTracker.Accounts do
           {:ok, _audit} = Audits.position_audit_changeset(:insert, user_id, position) |> Repo.insert()
 
           position
+          |> Repo.preload(:account)
 
         {:error, changeset} ->
           Repo.rollback(changeset)
@@ -407,6 +409,8 @@ defmodule OptionsTracker.Accounts do
       Repo.transaction(fn ->
         case Repo.update(changeset) do
           {:ok, position} ->
+            position = position |> Repo.preload(:account)
+
             update_basis!(position)
             handle_exercise!(position)
 
@@ -581,6 +585,7 @@ defmodule OptionsTracker.Accounts do
     cond do
       # Last position hasn't been closed out since it is larger than shares_needed
       shares_uncovered > 0 && match?(%Position{}, last_stock) ->
+        last_stock = last_stock |> Repo.preload(:account)
         new_position =
           Position.exercise_changeset(last_stock, %{
             count: shares_uncovered,

@@ -93,10 +93,11 @@ defmodule OptionsTrackerWeb.PositionLiveTest do
              |> form("#position-form", position: @invalid_attrs)
              |> render_change() =~ "can&apos;t be blank"
 
-      html =
+      {:ok, view, html} =
         index_live
         |> form("#position-form", position: @create_attrs)
         |> render_submit()
+        |> follow_redirect(conn)
 
       assert html =~ "SOME STOCK"
     end

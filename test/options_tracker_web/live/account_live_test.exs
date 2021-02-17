@@ -13,7 +13,7 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
     opt_open_fee: 120.5,
     stock_close_fee: 120.5,
     stock_open_fee: 120.5,
-    type: 0
+    type: "tasty_works"
   }
   @update_attrs %{
     cash: "456.7",
@@ -23,7 +23,7 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
     opt_open_fee: 456.7,
     stock_close_fee: 456.7,
     stock_open_fee: 456.7,
-    type: 1000
+    type: "tasty_works"
   }
   @invalid_attrs %{
     cash: nil,
@@ -33,7 +33,7 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
     opt_open_fee: nil,
     stock_close_fee: nil,
     stock_open_fee: nil,
-    type: nil
+    type: "" # Cannot be invalid or will crash
   }
 
   defp fixture(:account, user) do
@@ -88,12 +88,13 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
 
       assert index_live
              |> form("#account-form", account: @invalid_attrs)
-             |> render_change() =~ "can&apos;t be blank"
+             |> render_submit() =~ "can&apos;t be blank"
 
-      html =
+      {:ok, view, html} =
         index_live
         |> form("#account-form", account: @update_attrs)
         |> render_submit()
+        |> follow_redirect(conn)
 
       assert html =~ "some updated name"
     end

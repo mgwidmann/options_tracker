@@ -28,6 +28,9 @@ defmodule OptionsTrackerWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint OptionsTrackerWeb.Endpoint
+
+      import OptionsTracker.UsersFixtures
+      import OptionsTracker.AccountsFixtures
     end
   end
 
