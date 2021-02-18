@@ -123,7 +123,11 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     total = Enum.count(profit_loss_list)
     profitable = Enum.count(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
 
-    profitable / total
+    if total == 0 do
+      0.0
+    else
+      profitable / total
+    end
   end
 
   def weighted_wins([]), do: 0.0
