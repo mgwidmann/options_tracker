@@ -134,7 +134,11 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     profitable = Enum.filter(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
       |> Enum.reduce(Decimal.from_float(0.0), fn p, sum -> Decimal.add(p, sum) end)
 
-    Decimal.div(profitable, total)
+    if Decimal.cmp(total, Decimal.from_float(0.0)) == :eq do
+      Decimal.from_float(0.0)
+    else
+      Decimal.div(profitable, total)
+    end
   end
 
   def profit_loss_class(nil), do: nil
