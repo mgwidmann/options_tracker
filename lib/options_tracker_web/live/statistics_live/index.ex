@@ -116,12 +116,25 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     |> Enum.reduce(Decimal.from_float(0.0), &Decimal.add(&1, &2))
   end
 
-  def roi(profit_loss, max_risk) do
-    if Decimal.cmp(max_risk, Decimal.from_float(0.0)) == :eq do
-      max_risk
-    else
-      Decimal.div(profit_loss, max_risk)
-    end
+  def wins([]), do: 0.0
+  def wins(nil), do: 0.0
+
+  def wins(profit_loss_list) do
+    total = Enum.count(profit_loss_list)
+    profitable = Enum.count(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
+
+    profitable / total
+  end
+
+  def weighted_wins([]), do: 0.0
+  def weighted_wins(nil), do: 0.0
+
+  def weighted_wins(profit_loss_list) when is_list(profit_loss_list) do
+    total = Enum.reduce(profit_loss_list, Decimal.from_float(0.0), fn p, sum -> Decimal.add(Decimal.abs(p), sum) end)
+    profitable = Enum.filter(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
+      |> Enum.reduce(Decimal.from_float(0.0), fn p, sum -> Decimal.add(p, sum) end)
+
+    Decimal.div(profitable, total)
   end
 
   def profit_loss_class(nil), do: nil
@@ -154,22 +167,30 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     |> Enum.filter(& &1)
   end
 
-  def roi_json(profit_loss_data, range) do
-    data_points = roi_json_data(profit_loss_data, range)
+  def wins_json(profit_loss_data, range) do
+    data_points = wins_json_data(profit_loss_data, range, false)
 
     Jason.encode!(data_points)
   end
 
-  def roi_json_data(profit_loss_data, range) do
+  def weighted_wins_json(profit_loss_data, range) do
+    data_points = wins_json_data(profit_loss_data, range, false)
+
+    Jason.encode!(data_points)
+  end
+
+  def wins_json_data(profit_loss_data, range, weighted) do
     for date <- range do
       if profit_loss_data[date] do
-        pl = profit_loss_data[date] |> Enum.map(& &1.profit_loss) |> profit_loss()
-        max_loss = profit_loss_data[date] |> max_loss()
+        profit_loss_list = profit_loss_data[date] |> Enum.map(& &1.profit_loss)
 
-        if pl && max_loss do
-          # Make the date always 4pm EST so it does not show the day before
-          %{x: "#{date}T20:00:00.000Z", y: roi(pl, max_loss) |> Decimal.mult(100) |> Decimal.round(2)}
+        y_data = if weighted do
+          weighted_wins(profit_loss_list)
+        else
+          wins(profit_loss_list)
         end
+        # Make the date always 4pm EST so it does not show the day before
+        %{x: "#{date}T20:00:00.000Z", y: y_data |> Decimal.from_float() |> Decimal.mult(100) |> Decimal.round(2)}
       end
     end
     |> Enum.filter(& &1)

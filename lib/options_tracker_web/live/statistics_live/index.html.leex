@@ -22,10 +22,13 @@
   <div class="is-size-7">
     This page displays the daily/weekly/monthly and total breakdowns of your trading activity. It shows your trend breakdown at different time intervals
     in order to better understand your risk profile with respect to the trades you've placed.
+    <br/>
+    <br/>
+    The 'Weighted Win %' shows your win percentage weighted by the amount that was profited or lost. This is calculated by summing all trade's profit loss as absolute value then dividing by the total profitable trades to see what percentage of the total were wins. This helps to identify how much a bad trade can hurt you by looking at how it affects the weighted win percentage.
   </div>
 </div>
 
-<canvas id="chart" phx-hook="StatisticsChart" data-profit-loss='<%= profit_loss_json(@profit_loss, @profit_loss_range) %>' data-roi='<%= roi_json(@profit_loss, @profit_loss_range) %>'></canvas>
+<canvas id="chart" phx-hook="StatisticsChart" data-profit-loss='<%= profit_loss_json(@profit_loss, @profit_loss_range) %>' data-wins='<%= wins_json(@profit_loss, @profit_loss_range) %>' data-weighted-wins='<%= weighted_wins_json(@profit_loss, @profit_loss_range) %>'></canvas>
 
 <section class="section">
   <div class="tabs is-centered is-toggle is-toggle-rounded">
@@ -55,8 +58,8 @@
         <th>Trades</th>
         <th>Largest Loss</th>
         <th>Largest Win</th>
-        <th class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Return On Investment. Actual Profit/Loss divided by max loss. Undefined/infinite risk scenarios have been removed and may cause 0.0% ROI to be displayed.">
-          ROI
+        <th class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Win Percentage. The percentage of trades you closed for any amount of profit.">
+          Win %
           <i class="fa fa-question-circle"></i>
         </th>
       </tr>
@@ -81,9 +84,8 @@
           <td class="has-text-success">
             <%= largest_win(profit_loss_list) %>
           </td>
-          <% r = if(@profit_loss[date], do: max_loss(@profit_loss[date]), else: nil) %>
-          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= currency_string(r || Decimal.from_float(0.0)) %> Risked">
-            <%= pl && r && (roi(pl, r) |> percentage_string()) %>
+          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= percentage_string(weighted_wins(profit_loss_list)) %> weighted by size of profit/loss">
+            <%= pl && (wins(profit_loss_list) |> percentage_string()) %>
           </td>
         </tr>
       <% end %>

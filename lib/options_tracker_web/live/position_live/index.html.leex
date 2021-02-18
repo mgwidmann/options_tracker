@@ -19,9 +19,10 @@
                 <i class="fa fa-question-circle"></i>
               </h6>
             </div>
-            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Return On Investment. The amount of gain you could receive for the risk you are taking. High percentages suggest high risk profiles while low percentages suggest an inefficient use of capital.">
+            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
               <h6 class="is-6">
-                <span class="is-family-code has-text-info"><%= percentage_string(calculate_roi(@profit_loss.max_profit, @profit_loss.max_loss)) %></span><br/><small>ROI</small>
+                <% IO.inspect @profit_loss %>
+                <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span><br/><small>Win Rate</small>
                 <i class="fa fa-question-circle"></i>
               </h6>
             </div>
@@ -63,9 +64,9 @@
           <i class="fa fa-question-circle"></i>
         </h6>
       </div>
-      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Return On Investment. The amount of gain you could receive for the risk you are taking. High percentages suggest high risk profiles while low percentages suggest an inefficient use of capital.">
+      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
         <h6 class="is-6">
-          <span class="is-family-code has-text-info"><%= percentage_string(calculate_roi(@profit_loss.max_profit, @profit_loss.max_loss)) %></span>&nbsp;<small>ROI</small>
+          <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span>&nbsp;<small>Win Rate</small>
           <i class="fa fa-question-circle"></i>
         </h6>
       </div>

@@ -52,15 +52,16 @@ Hooks.StatisticsChart = {
         }
         var ctx = $('#chart');
         var pl = JSON.parse(ctx.attr('data-profit-loss'));
-        var roi = JSON.parse(ctx.attr('data-roi'));
+        var wins = JSON.parse(ctx.attr('data-wins'));
+        var weightedWins = JSON.parse(ctx.attr('data-weighted-wins'));
         this.chart = new TimeSeriesChart(ctx, {
             leftAxis: 'Profit / Loss',
             leftAxisColor: "rgb(72, 199, 0)", // #48C700 text-success
-            rightAxis: 'Return On Investment %',
+            rightAxis: 'Weighted Win %',
             rightAxisColor: "rgb(50, 152, 220)", // #3298dc text-info
-            title: 'Profit / Loss vs Return On Investment',
+            title: 'Profit / Loss vs Weighted Win %',
             leftAxisData: pl,
-            rightAxisData: roi,
+            rightAxisData: weightedWins,
         });
     }
 }

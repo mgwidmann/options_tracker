@@ -158,7 +158,7 @@ defmodule OptionsTracker.Accounts do
   end
 
   defmodule ProfitLoss do
-    defstruct daily: 0, weekly: 0, monthly: 0, total: 0, max_profit: 0, max_loss: 0
+    defstruct daily: 0, weekly: 0, monthly: 0, total: 0, max_profit: 0, max_loss: 0, wins: 0, total_count: 0
   end
 
   @doc """
@@ -189,6 +189,8 @@ defmodule OptionsTracker.Accounts do
       weekly: week_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       monthly: month_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
+      wins: positions_stream |> Enum.count(&(Decimal.cmp(&1.profit_loss, zero) in [:eq, :gt])),
+      total_count: positions_stream |> Enum.count(),
       max_profit:
         open_positions
         |> Enum.reduce(zero, fn position, sum ->
