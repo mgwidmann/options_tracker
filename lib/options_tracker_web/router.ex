@@ -57,10 +57,13 @@ defmodule OptionsTrackerWeb.Router do
     live "/positions/:id/delete", PositionLive.Index, :delete
     live "/positions/:id/notes", PositionLive.Index, :notes
 
-    # Statistics
-    live "/statistics", StatisticsLive.Index, :index
-    live "/statistics/accounts/:account_id", StatisticsLive.Index, :index, as: :statistics_account_index
+    # Metrics
+    live "/metrics", StatisticsLive.Index, :index
+    live "/metrics/accounts/:account_id", StatisticsLive.Index, :index, as: :statistics_account_index
   end
+
+  redirect "/statistics", "/metrics", :permanent
+  redirect "/statistics/accounts/:account_id", "/metrics", :permanent
 
   # Public routes
   scope "/", OptionsTrackerWeb do

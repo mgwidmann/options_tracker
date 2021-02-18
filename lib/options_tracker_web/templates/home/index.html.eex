@@ -61,7 +61,7 @@
             </div>
           </div>
           <div class="content">
-            <img class="is-hidden-mobile" src="/images/add-new-position-desktop.png" />
+            <img class="is-hidden-touch" src="/images/add-new-position-desktop.png" />
             <img class="is-hidden-desktop" src="/images/add-new-position-mobile.png" />
           </div>
       </div>
@@ -94,7 +94,7 @@
             </div>
           </div>
           <div class="content">
-            <img class="is-hidden-mobile" src="/images/easy-exercise-position-desktop.png" />
+            <img class="is-hidden-touch" src="/images/easy-exercise-position-desktop.png" />
             <img class="is-hidden-desktop" src="/images/easy-exercise-position-mobile.png" />
           </div>
         </div>
@@ -128,8 +128,42 @@
             </div>
           </div>
           <div class="content">
-            <img class="is-hidden-mobile" src="/images/track-basis-profit-desktop.png" />
+            <img class="is-hidden-touch" src="/images/track-basis-profit-desktop.png" />
             <img class="is-hidden-desktop" src="/images/track-basis-profit-mobile.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero is-large">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-centered has-text-centered mb-5">
+        <h1 class="title">Track metrics about the trades you place</h1>
+      </div>
+      <div class="columns browser-window">
+        <div class="container">
+          <div class="row">
+            <div class="column left">
+              <span class="dot" style="background:#ED594A;"></span>
+              <span class="dot" style="background:#FDD800;"></span>
+              <span class="dot" style="background:#5AC05A;"></span>
+            </div>
+            <div class="column middle">
+              <input type="text" value="https://options-tracker.gigalixirapp.com/metrics" disabled='disabled'>
+            </div>
+            <div class="column right">
+              <div style="float:right">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+            </div>
+          </div>
+          <div class="content">
+            <img class="is-hidden-touch" src="/images/metrics-desktop.png" />
+            <img class="is-hidden-desktop" src="/images/metrics-mobile.png" />
           </div>
         </div>
       </div>

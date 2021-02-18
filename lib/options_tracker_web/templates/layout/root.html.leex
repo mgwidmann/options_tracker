@@ -34,7 +34,7 @@
           <div class="navbar-start">
             <%= link "Positions", to: Routes.position_index_path(@conn, :index), class: "navbar-item" %>
 
-            <%= link "Statistics", to: Routes.statistics_index_path(@conn, :index), class: "navbar-item" %>
+            <%= link "Metrics", to: Routes.statistics_index_path(@conn, :index), class: "navbar-item" %>
 
             <%= if @current_user.admin? do %>
               <%= link "Dashboard", to: Routes.live_dashboard_path(@conn, :home), class: "navbar-item" %>

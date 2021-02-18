@@ -61,6 +61,7 @@ defmodule OptionsTracker.MixProject do
       {:earmark, "~> 1.4"},
       {:phoenix_html_sanitizer, "~> 1.1"},
       {:recaptcha, "~> 3.0"},
+      {:redirect, "~> 0.3.0"},
     ]
   end
 
