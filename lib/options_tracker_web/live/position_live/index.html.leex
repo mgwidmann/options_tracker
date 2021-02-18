@@ -21,7 +21,6 @@
             </div>
             <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
               <h6 class="is-6">
-                <% IO.inspect @profit_loss %>
                 <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span><br/><small>Win Rate</small>
                 <i class="fa fa-question-circle"></i>
               </h6>
