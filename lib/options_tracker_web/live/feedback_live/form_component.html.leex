@@ -46,6 +46,7 @@
   </section>
   <footer class="modal-card-foot">
     <div class="control is-grouped is-pulled-right ml-auto">
+      <%= raw Recaptcha.Template.display(size: "invisible") %>
       <%= submit "Send Feedback", phx_disable_with: "Saving...", class: "button is-success" %>
     </div>
   </footer>

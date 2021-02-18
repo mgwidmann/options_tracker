@@ -23,5 +23,6 @@ defmodule OptionsTracker.Users.Feedback do
     feedback
     |> cast(attrs, @fields)
     |> validate_required(@required)
+    |> validate_length(:text, min: 1, max: 10_000)
   end
 end

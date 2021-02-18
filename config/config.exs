@@ -26,6 +26,11 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :recaptcha,
+    public_key: {:system, "OPTIONS_TRACKER_RECAPTCHA_SITE_KEY"},
+    secret: {:system, "OPTIONS_TRACKER_RECAPTCHA_SECRET_KEY"},
+    json_library: Jason
+
 config :flames,
   repo: OptionsTracker.Repo,
   endpoint: OptionsTrackerWeb.Endpoint,
@@ -37,7 +42,7 @@ config :logger,
 config :live_dashboard_history, LiveDashboardHistory,
   router: OptionsTrackerWeb.Router,
   metrics: OptionsTrackerWeb.Telemetry,
-  buffer_size: 1_500
+  buffer_size: 1_000
 
 config :money,
   # this allows you to do Money.new(100)

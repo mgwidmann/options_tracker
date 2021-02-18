@@ -12,6 +12,7 @@ $green: #48C700;
 
 @import "./position.scss";
 @import "./feedback.scss";
+@import "./homepage.scss";
 
 .modal-card.wide {
   width: 80vw;
@@ -173,4 +174,8 @@ html {
   background: white;
   box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
   border-radius: 0.5rem;
+}
+
+.g-recaptcha {
+  display: inline-block !important;
 }

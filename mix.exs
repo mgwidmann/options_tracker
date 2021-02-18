@@ -20,7 +20,7 @@ defmodule OptionsTracker.MixProject do
   def application do
     [
       mod: {OptionsTracker.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :recaptcha]
     ]
   end
 
@@ -59,7 +59,8 @@ defmodule OptionsTracker.MixProject do
       {:flames, "~> 0.4.1"},
       {:live_dashboard_history, "~> 0.1.0"},
       {:earmark, "~> 1.4"},
-      {:phoenix_html_sanitizer, "~> 1.1"}
+      {:phoenix_html_sanitizer, "~> 1.1"},
+      {:recaptcha, "~> 3.0"},
     ]
   end
 

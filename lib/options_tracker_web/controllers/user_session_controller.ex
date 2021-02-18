@@ -18,6 +18,24 @@ defmodule OptionsTrackerWeb.UserSessionController do
     end
   end
 
+
+  def demo_create(conn, params) do
+    case Recaptcha.verify(params["g-recaptcha-response"]) do
+      {:ok, _response} ->
+        login_demo_user(conn)
+      {:error, _errors} ->
+        render(conn, "new.html", error_message: "Invalid e-mail or password")
+    end
+  end
+
+  defp login_demo_user(conn) do
+    if user = Users.get_demo_user() do
+      UserAuth.log_in_user(conn, user)
+    else
+      render(conn, "new.html", error_message: "Invalid e-mail or password")
+    end
+  end
+
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "Logged out successfully.")
