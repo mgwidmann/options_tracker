@@ -11,10 +11,7 @@ defmodule OptionsTrackerWeb.ErrorView do
   # the template name. For example, "404.html" becomes
   # "Not Found".
   def template_not_found(template, _assigns) do
-    render("404.html", %{
-      template: String.replace(template, ".html", ""),
-      message: Phoenix.Controller.status_message_from_template(template)
-    })
+    render("404.html", %{status: 404})
   end
 
   def emoji_for_status(404), do: "🔍"

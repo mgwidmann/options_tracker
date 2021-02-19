@@ -18,7 +18,7 @@ config :options_tracker, OptionsTracker.Repo,
 # with webpack to recompile .js and .css sources.
 config :options_tracker, OptionsTrackerWeb.Endpoint,
   http: [port: 4000, ip: {0, 0, 0, 0}],
-  # debug_errors: true,
+  debug_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [
