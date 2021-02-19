@@ -46,6 +46,11 @@ defmodule OptionsTracker.Accounts do
   def get_account!(%OptionsTracker.Accounts.Position{account_id: id}), do: Repo.get!(Account, id)
   def get_account!(id), do: Repo.get!(Account, id)
 
+  def get_public_account(id) do
+    from(a in Account, where: a.public == true and a.id == ^id)
+    |> Repo.one()
+  end
+
   @spec create_account(%{optional(binary) => binary | number}) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   @doc """

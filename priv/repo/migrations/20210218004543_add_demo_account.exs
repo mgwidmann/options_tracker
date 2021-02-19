@@ -3,9 +3,7 @@ defmodule OptionsTracker.Repo.Migrations.AddDemoAccount do
   alias OptionsTracker.Accounts
   alias OptionsTracker.Users
 
-
   def up do
-
     {:ok, user} = Users.register_user(%{
       email: "demo@options-tracker.gigalixirapp.com",
       password: System.get_env("DEMO_PASSWORD")

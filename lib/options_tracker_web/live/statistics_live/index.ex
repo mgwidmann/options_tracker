@@ -5,27 +5,58 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
 
   @impl true
   def mount(params, %{"user_token" => user_token} = _session, socket) do
-    account_id = params["account_id"] || "all"
-    account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
-
     current_user = Users.get_user_by_session_token(user_token)
     track(current_user)
 
-    current_account =
-      if(account_id == :all,
-        do: current_user.accounts,
-        else:
-          current_user.accounts
-          |> Enum.find(fn account ->
-            account.id == account_id
-          end)
-      )
+    {account_id, current_account, current_account_changeset} = get_params(params, current_user)
 
     {:ok,
      socket
      |> assign(:current_user, current_user)
      |> assign(:current_account, current_account)
+     |> assign(:current_account_changeset, current_account_changeset)
      |> assign(:current_account_id, account_id)}
+  end
+
+  # Handle public route
+  def mount(params, _empty_session, socket) do
+    {account_id, current_account, nil} = get_params(params, nil)
+
+    if current_account do
+      {:ok,
+        socket
+        |> assign(:current_user, nil)
+        |> assign(:current_account, current_account)
+        |> assign(:current_account_id, account_id)}
+    else
+      {:ok,
+        socket
+        |> push_redirect(to: "/404.html")}
+    end
+  end
+
+  def get_params(params, current_user) do
+    account_id = params["account_id"] || "all"
+    account_id = if(account_id == "all", do: :all, else: Integer.parse(account_id) |> elem(0))
+
+    current_account =
+      cond do
+        account_id == :all ->
+          current_user && current_user.accounts
+        current_user && current_user.accounts ->
+          current_user.accounts
+          |> Enum.find(fn account ->
+            account.id == account_id
+          end)
+        !current_user ->
+          Accounts.get_public_account(account_id)
+      end
+
+    current_account_changeset = if account_id != :all && current_user do
+      Accounts.change_account(current_account)
+    end
+
+    {account_id, current_account, current_account_changeset}
   end
 
   @impl true
@@ -58,6 +89,22 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
      |> assign(:profit_loss_range, range)
      |> assign(:current_tab, tab)
      |> assign(:url, URI.parse(url))}
+  end
+
+  @impl true
+  def handle_event("save", %{"account" => account_params}, socket) do
+    case Accounts.update_account(socket.assigns.current_account, account_params) do
+      {:ok, account} ->
+        changeset = Accounts.change_account(account)
+        {:noreply,
+          socket
+          |> assign(:current_account, account)
+          |> assign(:current_account_changeset, changeset)}
+      {:error, changeset} ->
+        {:noreply,
+          socket
+          |> assign(:current_account_changeset, changeset)}
+    end
   end
 
   defp tab_to_atom("daily"), do: :daily

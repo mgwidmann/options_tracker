@@ -70,6 +70,7 @@ defmodule OptionsTrackerWeb.Router do
     pipe_through [:browser, :csrf]
 
     live "/shares", ShareLive.Show, :show
+    live "/metrics/public/accounts/:account_id", StatisticsLive.Index, :index, as: :public_statistics_account_index
   end
 
   # Other scopes may use custom stacks.

@@ -17,17 +17,6 @@ defmodule OptionsTrackerWeb.ErrorView do
     })
   end
 
-  def render("404.html", assigns) do
-    template = Map.get(assigns, :template, "404")
-
-    message = Map.get(assigns, :message, Phoenix.Controller.status_message_from_template("404.html"))
-
-    ~E"""
-    <div class="section has-text-centered">
-      <div class="title">
-        <%= template %>&nbsp;<%= message %>
-      </div>
-    </div>
-    """
-  end
+  def emoji_for_status(404), do: "🔍"
+  def emoji_for_status(_), do: "😢"
 end

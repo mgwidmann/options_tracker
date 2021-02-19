@@ -122,4 +122,14 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
     current_user
   end
+
+  def custom_radio_button(socket, form, name, negative_label, positive_label, opts \\ []) do
+    live_component socket, OptionsTrackerWeb.Components.RadioButtonComponent,
+      id: opts[:id] || name,
+      f: form,
+      name: name,
+      negative_label: negative_label,
+      positive_label: positive_label,
+      flip: if(opts[:flip] == nil, do: false, else: opts[:flip])
+  end
 end

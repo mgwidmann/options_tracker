@@ -20,6 +20,7 @@ defmodule OptionsTracker.Accounts.Account do
     field :stock_close_fee, :decimal
     field :stock_open_fee, :decimal
     field :type, TypeEnum
+    field :public, :boolean, default: false
 
     belongs_to :user, OptionsTracker.Users.User
 
@@ -27,7 +28,7 @@ defmodule OptionsTracker.Accounts.Account do
   end
 
   @required_fields ~w[name type opt_open_fee opt_close_fee stock_open_fee stock_close_fee exercise_fee cash user_id]a
-  @optional_fields ~w[broker_name]a
+  @optional_fields ~w[broker_name public]a
   @fields @required_fields ++ @optional_fields
   @spec create_changeset(Account.t(), %{optional(String.t()) => String.t() | number}) ::
           Ecto.Changeset.t()

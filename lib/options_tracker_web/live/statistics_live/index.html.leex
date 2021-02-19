@@ -1,30 +1,66 @@
 <header class="header mt-6">
   <section>
-    <div class="columns">
+    <div class="columns mb-0">
       <div class="column is-12 mh-5">
         <h1 class="title mb-0 is-pulled-left">Metrics</h1>
-        <div class="is-pulled-right">
-          <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
-            id: :accounts_dropdown,
-            current_user: @current_user,
-            current_account_id: @current_account_id,
-            all_path_fun: &Routes.statistics_index_path/3,
-            account_path_fun: &Routes.statistics_account_index_path/4,
-            path_params: []
-          } %>
-        </div>
+        <%= if @current_user do %>
+          <div class="is-pulled-right">
+            <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+              id: :accounts_dropdown,
+              current_user: @current_user,
+              current_account_id: @current_account_id,
+              all_path_fun: &Routes.statistics_index_path/3,
+              account_path_fun: &Routes.statistics_account_index_path/4,
+              path_params: []
+            } %>
+          </div>
+        <% end %>
       </div>
     </div>
+    <%= if @current_user && @current_account_id != :all do %>
+      <div class="columns">
+        <div class="column">
+          <div class="is-pulled-right">
+            <span class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Turning this on allows you to share the link to it publicly. Others will not need to be logged into your account in order to view the information on this page.">
+              Public
+              <i class="fa fa-question-circle"></i>
+            </span>
+            <%= f = form_for @current_account_changeset, "#", phx_change: "save" %>
+              <%= custom_radio_button @socket, f, :public, "No", "Yes" %>
+              <%= error_tag f, :public %>
+            </form>
+          </div>
+          <%= if @current_account.public do %>
+            <div class="is-pulled-right mr-5">
+              <div class="field has-addons">
+                <p class="control is-expanded">
+                  <input id="copy-clipboard-input" class="input is-small" type="text" value="<%= Routes.public_statistics_account_index_url(@socket, :index, @current_account_id) %>" readonly phx-hook="CopyClipboard">
+                </p>
+                <p class="control">
+                  <a id="copy-clipboard-button" class="button is-small has-tooltip-arrow" data-tooltip="Copy to Clipboard" phx-hook="CopyClipboard">
+                    <i class="fa fa-copy"></i>
+                    &nbsp;
+                    Copy Link
+                  </a>
+                </p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </section>
 </header>
 
 <div class="rows">
   <div class="is-size-7">
-    This page displays the daily/weekly/monthly and total breakdowns of your trading activity. It shows your trend breakdown at different time intervals
-    in order to better understand your risk profile with respect to the trades you've placed.
+    <%= if @current_user do %>
+      This page displays the daily/weekly/monthly and total breakdowns of your trading activity. It shows your trend breakdown at different time intervals
+      in order to better understand your risk profile with respect to the trades you've placed.
+    <% end %>
     <br/>
     <br/>
-    The 'Weighted Win %' shows your win percentage weighted by the amount that was profited or lost. This is calculated by summing all trade's profit/loss as absolute value then dividing by the total profitable trades to see what percentage of the total were wins. This helps to identify how much a bad trade can hurt you by looking at how it affects the weighted win percentage.
+    The <strong>Weighted Win %</strong> shows the win percentage weighted by the amount that was profited or lost. This is calculated by summing all trade's profit/loss as absolute value then dividing by the total profitable trades to see what percentage of the total were wins. This helps to identify how much a bad trade can hurt by looking at how it affects the weighted win percentage. When the weighted win is less than the win rate, losses are heavier by size than by count.
   </div>
 </div>
 
@@ -58,7 +94,7 @@
         <th>Trades</th>
         <th>Largest Loss</th>
         <th>Largest Win</th>
-        <th class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Win Percentage. The percentage of trades you closed for any amount of profit.">
+        <th class="has-tooltip-arrow has-tooltip-left has-tooltip-multiline" data-tooltip="Win Percentage. The percentage of trades closed for any amount of profit.">
           Win %
           <i class="fa fa-question-circle"></i>
         </th>
@@ -93,8 +129,10 @@
   </table>
 </section>
 
-<%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
-  id: :feedback,
-  path: @url.path,
-  current_user: @current_user
-} %>
+<%= if @current_user do %>
+  <%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+    id: :feedback,
+    path: @url.path,
+    current_user: @current_user
+  } %>
+<% end %>

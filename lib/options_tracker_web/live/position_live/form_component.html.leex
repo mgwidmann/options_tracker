@@ -36,21 +36,7 @@
             </div>
           </div>
           <div class="column">
-            <div class="control tags has-addons">
-              <span class="tag short is-danger ml-auto <%= if(is_short?(@f), do: "", else: "is-light") %>">
-                <%= label @f, :short_true, class: "radio" do %>
-                  <%= radio_button @f, :short, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Sell
-                <% end %>
-              </span>
-              <span class="tag long is-success mr-auto <%= if(is_short?(@f), do: "is-light", else: "") %>">
-                <%= label @f, :short_false, class: "radio" do %>
-                  <%= radio_button @f, :short, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Buy
-                <% end %>
-              </span>
-              <%= if(@f, do: error_tag(@f, :short), else: nil) %>
-            </div>
+            <%= custom_radio_button @socket, @f, :short, "Sell", "Buy", id: :short_mobile, flip: true %>
           </div>
           <div class="column">
             <%= select @f, :type, position_type_map(), prompt: "Type", class: "select" %>
@@ -167,21 +153,7 @@
       </div>
     </td>
     <td>
-      <div class="control tags has-addons">
-        <span class="tag short is-danger <%= if(is_short?(@f), do: "", else: "is-light") %>">
-          <%= label @f, :short_true, class: "radio" do %>
-            <%= radio_button @f, :short, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
-            Sell
-          <% end %>
-        </span>
-        <span class="tag long is-success <%= if(is_short?(@f), do: "is-light", else: "") %>">
-          <%= label @f, :short_false, class: "radio" do %>
-            <%= radio_button @f, :short, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
-            Buy
-          <% end %>
-        </span>
-        <%= if(@f, do: error_tag(@f, :short), else: nil) %>
-      </div>
+      <%= custom_radio_button @socket, @f, :short, "Sell", "Buy", id: :short_desktop, flip: true %>
     </td>
     <td>
       <div class="control has-icons-left">
