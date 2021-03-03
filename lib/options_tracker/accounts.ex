@@ -163,7 +163,7 @@ defmodule OptionsTracker.Accounts do
   end
 
   defmodule ProfitLoss do
-    defstruct daily: 0, weekly: 0, monthly: 0, total: 0, max_profit: 0, max_loss: 0, wins: 0, total_count: 0
+    defstruct daily: 0, weekly: 0, monthly: 0, total: 0, max_profit: 0, max_loss: 0, wins: 0, total_count: 0, positions: []
   end
 
   @doc """
@@ -219,7 +219,8 @@ defmodule OptionsTracker.Accounts do
           else
             Decimal.add(loss, sum)
           end
-        end)
+        end),
+      positions: positions
     }
   end
 
@@ -253,7 +254,57 @@ defmodule OptionsTracker.Accounts do
     |> Enum.group_by(&Timex.beginning_of_year(&1.closed_at))
   end
 
+  defmodule Metrics do
+    defstruct profit_loss: Decimal.from_float(0.0),
+              largest_loss: Decimal.from_float(0.0),
+              largest_win: Decimal.from_float(0.0),
+              wins: 0,
+              weighted_win_percentage: 0.0,
+              trades: 0,
+              open_trades: 0,
+              fees: 0.0
+  end
+
   alias OptionsTracker.Accounts.Position
+
+  def calculate_metrics(positions) when is_list(positions) do
+    zero = Decimal.from_float(0.0)
+
+    %Metrics{
+      profit_loss: positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss || zero, &2)),
+      largest_loss: positions |> Enum.filter(&Decimal.lt?(&1.profit_loss || zero, zero)) |> Enum.min_by(& &1.profit_loss, &Decimal.lt?/2, fn -> %Position{profit_loss: zero} end) |> Map.get(:profit_loss),
+      largest_win: positions |> Enum.filter(&Decimal.gt?(&1.profit_loss || zero, zero)) |> Enum.max_by(& &1.profit_loss, &Decimal.gt?/2, fn -> %Position{profit_loss: zero} end) |> Map.get(:profit_loss),
+      wins: positions |> Enum.count(& Decimal.gt?(&1.profit_loss || zero, zero)),
+      weighted_win_percentage: weighted_win_percentage(positions),
+      trades: positions |> Enum.count(),
+      open_trades: positions |> Enum.count(& !&1.closed_at),
+      fees: positions |> Enum.reduce(zero, &Decimal.add(&1.fees, &2))
+    }
+  end
+
+
+  def weighted_win_percentage([]), do: Decimal.from_float(0.0)
+  def weighted_win_percentage(nil), do: Decimal.from_float(0.0)
+
+  def weighted_win_percentage([%Position{} | _] = positions) when is_list(positions) do
+    positions
+    |> Enum.map(& &1.profit_loss)
+    |> Enum.filter(& &1)
+    |> weighted_win_percentage()
+  end
+
+  def weighted_win_percentage(profit_loss_list) when is_list(profit_loss_list) do
+    total = Enum.reduce(profit_loss_list, Decimal.from_float(0.0), fn p, sum -> Decimal.add(Decimal.abs(p), sum) end)
+    profitable = Enum.filter(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
+      |> Enum.reduce(Decimal.from_float(0.0), fn p, sum -> Decimal.add(p, sum) end)
+
+    if Decimal.cmp(total, Decimal.from_float(0.0)) == :eq do
+      Decimal.from_float(0.0)
+    else
+      Decimal.div(profitable, total)
+    end
+  end
+
   alias OptionsTracker.Users.User
   alias OptionsTracker.Audits
 
@@ -281,6 +332,14 @@ defmodule OptionsTracker.Accounts do
   def list_positions(account_ids) when is_list(account_ids) do
     from(p in Position,
       where: p.account_id in ^account_ids
+    )
+    |> Repo.all()
+    |> Repo.preload(:account)
+  end
+
+  def get_positions(position_ids, account_ids) do
+    from(p in Position,
+      where: p.account_id in ^account_ids and p.id in ^position_ids
     )
     |> Repo.all()
     |> Repo.preload(:account)

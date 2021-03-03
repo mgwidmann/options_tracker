@@ -64,6 +64,11 @@
   </div>
 </div>
 
+<%= live_component @socket, OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
+  id: :metrics_header,
+  metrics: @metrics,
+} %>
+
 <canvas id="chart" phx-hook="StatisticsChart" data-profit-loss='<%= profit_loss_json(@profit_loss, @profit_loss_range) %>' data-wins='<%= wins_json(@profit_loss, @profit_loss_range) %>' data-weighted-wins='<%= weighted_wins_json(@profit_loss, @profit_loss_range) %>'></canvas>
 
 <section class="section">
@@ -103,9 +108,14 @@
     <tbody id="statistics">
       <%= for date <- @profit_loss_range do %>
         <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) %>
+        <% position_ids = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.id), else: nil) %>
         <tr>
-          <td data-tooltip="<%= Timex.format!(date, "{0M}/{D}/{YYYY}") %>">
-            <%= Timex.format!(date, "{0M}/{D}") %>
+          <td data-tooltip="<%= date_display(date, true) %>">
+            <%= if position_ids do %>
+              <a href="<%= Routes.share_show_path(@socket, :show, position_ids: position_ids |> Enum.join(",")) %>"><%= date_display(date, false) %></a>
+            <% else %>
+              <%= date_display(date, false) %>
+            <% end %>
           </td>
           <% pl = profit_loss(profit_loss_list) %>
           <td class="<%= profit_loss_class(pl) %>">
@@ -120,7 +130,7 @@
           <td class="has-text-success">
             <%= largest_win(profit_loss_list) %>
           </td>
-          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= percentage_string(weighted_wins(profit_loss_list)) %> weighted by size of profit/loss">
+          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= percentage_string(Accounts.weighted_win_percentage(profit_loss_list)) %> weighted by size of profit/loss">
             <%= pl && (wins(profit_loss_list) |> percentage_string()) %>
           </td>
         </tr>

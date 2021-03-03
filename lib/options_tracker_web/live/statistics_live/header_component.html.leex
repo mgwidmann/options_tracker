@@ -1,0 +1,114 @@
+<div class="column">
+  <div class="panel">
+    <div class="panel-heading">
+      Profit / Loss
+    </div>
+    <div class="panel-block py-0 px-0">
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Total profit and loss summed up.">
+          Total
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Largest loss of any single trade in the list.">
+          Largest Loss
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Largest win of any single trade in the list.">
+          Largest Win
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Sum of all fees paid.">
+          Fees
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+    </div>
+    <div class="panel-block py-0">
+      <div class="column has-text-centered">
+        <span class="<%= if(Decimal.cmp(@metrics.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+          <%= currency_string(@metrics.profit_loss) %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered">
+        <span class="has-text-danger">
+          <%= currency_string(@metrics.largest_loss) %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered">
+        <span class="has-text-success">
+          <%= currency_string(@metrics.largest_win) %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered has-text-danger">
+        <span>
+          <%= currency_string(@metrics.fees) %>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-heading">
+      Metrics
+    </div>
+    <div class="panel-block py-0 px-0">
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Win percentage of all closed trades.">
+          Win %
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Win percentage of closed trades weighted by size of profit/loss. Sum of all profits divided by sum of absolute value of all profit and loss.">
+          Weighted Win %
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Total count of all trades executed.">
+          Total Trades
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+      <div class="column has-text-centered is-size-7 py-1">
+        <span data-tooltip="Trades which still remain open at this time.">
+          Open Trades
+          <i class="fa fa-question-circle"></i>
+        </span>
+      </div>
+    </div>
+    <div class="panel-block py-0">
+      <div class="column has-text-centered">
+        <span class="has-text-info">
+          <%= if(@metrics.trades - @metrics.open_trades > 0, do: percentage_string(@metrics.wins / (@metrics.trades - @metrics.open_trades)), else: percentage_string(0.0)) %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered">
+        <span class="has-text-info">
+          <%= percentage_string(@metrics.weighted_win_percentage) %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered">
+        <span>
+          <%= @metrics.trades %>
+        </span>
+      </div>
+      <div class="is-divider-vertical"></div>
+      <div class="column has-text-centered">
+        <span>
+          <%= @metrics.open_trades %>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

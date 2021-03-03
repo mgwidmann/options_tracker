@@ -2,6 +2,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
   use OptionsTrackerWeb, :live_view
   alias OptionsTracker.Accounts
   alias OptionsTracker.Users
+  import OptionsTrackerWeb.PositionLive.Helpers
 
   @impl true
   def mount(params, %{"user_token" => user_token} = _session, socket) do
@@ -64,6 +65,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     tab = tab_to_atom(params["tab"] || "daily")
 
     profit_loss = Accounts.profit_loss(socket.assigns.current_account, tab)
+    metrics = Accounts.calculate_metrics(Map.values(profit_loss) |> List.flatten())
 
     range =
       profit_loss_range(profit_loss)
@@ -87,6 +89,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
      socket
      |> assign(:profit_loss, profit_loss)
      |> assign(:profit_loss_range, range)
+     |> assign(:metrics, metrics)
      |> assign(:current_tab, tab)
      |> assign(:url, URI.parse(url))}
   end
@@ -177,21 +180,6 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
     end
   end
 
-  def weighted_wins([]), do: 0.0
-  def weighted_wins(nil), do: 0.0
-
-  def weighted_wins(profit_loss_list) when is_list(profit_loss_list) do
-    total = Enum.reduce(profit_loss_list, Decimal.from_float(0.0), fn p, sum -> Decimal.add(Decimal.abs(p), sum) end)
-    profitable = Enum.filter(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
-      |> Enum.reduce(Decimal.from_float(0.0), fn p, sum -> Decimal.add(p, sum) end)
-
-    if Decimal.cmp(total, Decimal.from_float(0.0)) == :eq do
-      Decimal.from_float(0.0)
-    else
-      Decimal.div(profitable, total)
-    end
-  end
-
   def profit_loss_class(nil), do: nil
 
   def profit_loss_class(profit_loss) do
@@ -240,7 +228,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
         profit_loss_list = profit_loss_data[date] |> Enum.map(& &1.profit_loss)
 
         y_data = if weighted do
-          weighted_wins(profit_loss_list)
+          Accounts.weighted_win_percentage(profit_loss_list)
         else
           wins(profit_loss_list)
         end

@@ -1,5 +1,5 @@
 <%= if @share do %>
-  <%= if @current_user && @current_user.id == @user.id do %>
+  <%= if @current_user && @current_user.id == @user.id && !@share_preview do %>
     <div class="card mb-5">
       <div class="card-content">
         <div class="media">
@@ -33,6 +33,21 @@
       </div>
     </div>
   <% end %>
+
+  <%= if @share_preview && @current_user do %>
+    <div class="has-text-right">
+      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" phx-click="share" data-tooltip="Share these positions!">
+        <i class="fa fa-share"></i>
+        &nbsp;
+        Share
+      </button>
+    </div>
+  <% end %>
+
+  <%= live_component @socket, OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
+    id: :metrics_header,
+    metrics: @metrics,
+  } %>
 
   <%= live_component @socket, OptionsTrackerWeb.PositionLive.PositionsComponent, %{
     id: :positions_component,

@@ -248,7 +248,7 @@
       <% else %>
         <tr id="position-<%= position.id %>" class="<%= if(@shares[position.id], do: "has-background-warning", else: row_class_for_status(position.status)) %>" phx-hook="ShowNotes">
           <td>
-            <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.opened_at, true) %>"><%= date_display(position.opened_at, false) %></span>
+            <span class="has-tooltip-arrow has-tooltip-right" data-tooltip="Opened on <%= date_display(position.opened_at, true) %><%= if(position.closed_at, do: "\nClosed on #{date_display(position.closed_at, true)}") %>"><%= date_display(position.opened_at, false) %><%= if(position.closed_at, do: " - #{date_display(position.closed_at, false)}") %></span>
           </td>
           <td><%= position.count %>&nbsp;<%= count_type(position) %></td>
           <td><span class="tag is-rounded"><%= position.stock %></span></td>

@@ -6,7 +6,7 @@ defmodule OptionsTracker.Repo.Migrations.AddDemoAccount do
   def up do
     {:ok, user} = Users.register_user(%{
       email: "demo@options-tracker.gigalixirapp.com",
-      password: System.get_env("DEMO_PASSWORD")
+      password: if(Mix.env == :test, do: "testdemopassword", else: System.get_env("DEMO_PASSWORD"))
     })
     Accounts.create_account(%{
       cash: "25000",
