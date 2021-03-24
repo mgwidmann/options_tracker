@@ -575,22 +575,13 @@ defmodule OptionsTracker.Accounts do
     end)
   end
 
-  defp handle_exercise!(%Position{status: :exercised, short: short, count: count, type: call_or_put} = position)
+  defp handle_exercise!(%Position{status: :exercised, count: count, type: call_or_put} = position)
        when call_or_put in ~w[call put]a do
-    # Looking for long stock for call, short stock for put for short options
-    # Looking for short stock for call, long stock for put for long options
-    short_long = if(call_or_put == :call, do: !short, else: short)
-
     position = position |> Repo.preload(:account)
 
     position
     |> Position.open_related_positions()
     |> Repo.all()
-    # Do after retrieval to be able to use index
-    |> Enum.reject(fn s ->
-      # Can't be used for this option
-      s.short != short_long
-    end)
     |> Enum.sort_by(fn %Position{count: c} -> c end, &Kernel.>=/2)
     |> handle_exercise_close(position, count * 100)
     |> Enum.map(fn
@@ -618,7 +609,17 @@ defmodule OptionsTracker.Accounts do
     []
   end
 
-  defp handle_exercise_close(stocks, position, shares_needed) do
+  defp handle_exercise_close(open_stocks, position, shares_needed) do
+    # Looking for long stock for call, short stock for put for short options
+    # Looking for short stock for call, long stock for put for long options
+    short_long = if(position.type == :call, do: !position.short, else: position.short)
+
+    # Split into two categories, stocks that can be used in exercising, and unassignable shares which cannot
+    {unassignable, stocks} = Enum.split_with(open_stocks, fn s ->
+        # Only one that can be used for exercising
+        s.short != short_long
+      end)
+
     {shares_uncovered, stocks} =
       stocks
       |> Enum.reduce({shares_needed, []}, fn stock, {shares_needed, stocks} ->
@@ -662,6 +663,7 @@ defmodule OptionsTracker.Accounts do
           })
 
         [
+          # No need to look through unassignable here as there will be no open positions
           new_position,
           change_position(last_stock, %{count: last_stock.count - shares_uncovered}) | stocks
         ]
@@ -694,18 +696,40 @@ defmodule OptionsTracker.Accounts do
               raise "Unexpected position type of stock: #{inspect(position)}"
           end
 
-        new_position_attrs =
-          position
-          |> Position.to_stock_attrs()
-          |> Map.merge(%{
-            short: short,
-            opened_at: DateTime.utc_now() |> DateTime.to_date(),
-            basis: Decimal.add(position.strike, basis_delta) |> Decimal.add(accumulated_profit_loss)
-          })
+        new_position_basis = Decimal.add(position.strike, basis_delta) |> Decimal.add(accumulated_profit_loss)
+        new_position =
+          if length(unassignable) != 0 do
+            [unassigned | _] = unassignable
 
-        {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})
+            new_shares = position.count * 100
+            new_count = unassigned.count + new_shares
+            change_position(unassigned, %{
+              count: new_count,
+              # (unassigned.count * unassigned.strike + new_shares * position.strike) / new_count
+              strike: Decimal.add(Decimal.mult(unassigned.count, unassigned.strike), Decimal.mult(new_shares, position.strike)) |> Decimal.div(new_count),
+              # (unassigned.count * unassigned.basis + new_shares * new_position_basis) / new_count
+              basis: Decimal.add(Decimal.mult(unassigned.count, unassigned.basis), Decimal.mult(new_shares, new_position_basis)) |> Decimal.div(new_count)
+            })
+          else
+            new_position_attrs =
+              position
+              |> Position.to_stock_attrs()
+              |> Map.merge(%{
+                short: short,
+                opened_at: DateTime.utc_now() |> DateTime.to_date(),
+                basis: new_position_basis
+              })
 
-        [new_position | stocks]
+            {:ok, new_position} = create_position(new_position_attrs, %User{id: @system_action_user_id})
+
+            new_position
+          end
+
+        if last_stock do
+          [new_position, last_stock | stocks]
+        else
+          [new_position | stocks]
+        end
 
       # Everything fit perfectly
       shares_uncovered == 0 ->

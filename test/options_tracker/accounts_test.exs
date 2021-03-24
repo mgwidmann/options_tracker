@@ -718,9 +718,11 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with call on same long stock exercised" do
       account = account_fixture()
+      # 100 long XYZ
       stock = stock_position_fixture(%{account_id: account.id})
 
       position =
+        # 1 short XYZ call
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(101.00),
@@ -750,9 +752,11 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with put on same short stock exercised" do
       account = account_fixture()
+      # 100 short XYZ
       stock = stock_position_fixture(%{short: true, account_id: account.id})
 
       position =
+        # 1 short XYZ put
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(99.00),
@@ -783,7 +787,7 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with calls on more long stock than available exercises" do
       account = account_fixture()
-      # 600 shares selling 3 contracts
+      # 600 long XYZ selling 3 contracts
       stock = stock_position_fixture(%{account_id: account.id, count: 600})
       # untouched
       other_stock =
@@ -794,6 +798,7 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       position =
+        # 3 short XYZ calls
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(101.00),
@@ -834,7 +839,7 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with puts on more short stock than available exercises" do
       account = account_fixture()
-      # 600 shares selling 3 contracts
+      # 600 short XYZ selling 3 contracts
       stock = stock_position_fixture(%{short: true, account_id: account.id, count: 600})
       # untouched
       other_stock =
@@ -846,6 +851,7 @@ defmodule OptionsTracker.AccountsTest do
         })
 
       position =
+        # 3 short XYZ puts
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(99.00),
@@ -886,11 +892,12 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with calls on multiple long stock exercised" do
       account = account_fixture()
-      # 2 purchases totaling 500 shares
+      # 2 trades of 500 long XYZ shares
       stock = stock_position_fixture(%{account_id: account.id, count: 100})
       other_stock = stock_position_fixture(%{account_id: account.id, count: 400})
 
       position =
+        # 5 short XYZ calls
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(101.00),
@@ -922,11 +929,12 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with puts on multiple short stock exercised" do
       account = account_fixture()
-      # 2 purchases totaling 500 shares
+      # 2 trades of 500 short XYZ share
       stock = stock_position_fixture(%{short: true, account_id: account.id, count: 100})
       other_stock = stock_position_fixture(%{short: true, account_id: account.id, count: 400})
 
       position =
+        # 5 short XYZ puts
         position_fixture(%{
           stock: stock.stock,
           strike: Decimal.from_float(99.00),
@@ -962,6 +970,7 @@ defmodule OptionsTracker.AccountsTest do
       stock = stock_position_fixture(%{account_id: account.id, count: 110})
 
       position =
+        # 1 short XYZ call
         position_fixture(%{
           stock: stock.stock,
           count: 1,
@@ -999,6 +1008,7 @@ defmodule OptionsTracker.AccountsTest do
       stock = stock_position_fixture(%{short: true, account_id: account.id, count: 110})
 
       position =
+        # 1 short XYZ put
         position_fixture(%{
           stock: stock.stock,
           count: 1,
@@ -1032,10 +1042,11 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with call on less than available long stock exercises" do
       account = account_fixture()
-      # 5 contracts need 500 shares but only 250
+      # 250 long XYZ shares selling 5 contracts, need 500 shares but only 250
       stock = stock_position_fixture(%{account_id: account.id, count: 250})
 
       position =
+        # 5 short XYZ calls
         position_fixture(%{
           stock: stock.stock,
           count: 5,
@@ -1070,10 +1081,11 @@ defmodule OptionsTracker.AccountsTest do
 
     test "update_position/3 with put on less than available short stock exercises" do
       account = account_fixture()
-      # 5 contracts need 500 shares but only 250
+      # 250 short XYZ shares selling 5 contracts, need 500 shares but only 250
       stock = stock_position_fixture(%{short: true, account_id: account.id, count: 250})
 
       position =
+        # 5 short XYZ puts
         position_fixture(%{
           stock: stock.stock,
           count: 5,
@@ -1104,6 +1116,74 @@ defmodule OptionsTracker.AccountsTest do
       assert open_shares.status == :open
       assert open_shares.count == 250
       assert open_shares.short == false
+    end
+
+    test "update_position/3 with long shares exercising short put adds shares" do
+      account = account_fixture()
+      # 100 long XYZ shares
+      stock = stock_position_fixture(%{account_id: account.id, count: 100})
+
+      position =
+        # 1 short XYZ put
+        position_fixture(%{
+          stock: stock.stock,
+          count: 1,
+          strike: Decimal.from_float(99.00),
+          type: :put,
+          premium: Decimal.from_float(1.50),
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
+
+      stock = Accounts.get_position!(stock.id)
+      assert stock.count == 200
+      assert stock.status == :open
+      assert stock.strike == Decimal.from_float(99.50) # average of 100 and 99
+      assert stock.basis == Decimal.from_float(98.75) # average of 100 and 97.50
+    end
+
+    test "update_position/3 with short shares exercising short call adds shares" do
+      account = account_fixture()
+      # 100 short XYZ shares
+      stock = stock_position_fixture(%{short: true, account_id: account.id, count: 100})
+
+      position =
+        # 1 short XYZ call
+        position_fixture(%{
+          stock: stock.stock,
+          count: 1,
+          strike: Decimal.from_float(101.00),
+          type: :call,
+          premium: Decimal.from_float(1.50),
+          account_id: account.id
+        })
+
+      assert {:ok, %Position{} = position} =
+               Accounts.update_position(
+                 position,
+                 %{
+                   exit_price: Decimal.from_float(0.00),
+                   closed_at: ~D[2011-05-18],
+                   status: :exercised
+                 },
+                 %User{id: account.user_id}
+               )
+
+      stock = Accounts.get_position!(stock.id)
+      assert stock.count == 200
+      assert stock.status == :open
+      assert stock.strike == Decimal.from_float(100.50) # average of 100 and 101
+      assert stock.basis == Decimal.from_float(101.25) # average of 100 and 102.50
     end
   end
 end
