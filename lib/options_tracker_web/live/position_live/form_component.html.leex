@@ -28,7 +28,7 @@
         <div class="media-content columns">
           <div class="column">
             <div class="control has-icons-left">
-              <%= number_input @f, :strike, step: "any", class: "input is-small", placeholder: "Strike" %>
+              <%= number_input @f, :strike, step: "any", class: "input is-small", placeholder: if(is_option?(@f), do: "Strike", else: "Price") %>
               <span class="icon is-small is-left">
                 <i class="fa fa-usd"></i>
               </span>
@@ -53,33 +53,48 @@
               </div>
             </div>
           <% end %>
+          <%= if is_option?(@f) do %>
+            <div class="column">
+              <div class="control has-icons-left">
+                <%= number_input @f, :basis, step: "any", class: "input is-small", placeholder: "Basis" %>
+                <span class="icon is-small is-left">
+                  <i class="fa fa-usd"></i>
+                </span>
+                <%= if(@f, do: error_tag(@f, :basis), else: nil) %>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
       <div class="content">
         <div class="rows">
           <div class="row">
             <div class="columns">
-              <div class="column">
-                <div class="control">
-                  <div class="field">
-                    <%= label @f, :premium, class: "label" %>
-                    <p class="control has-icons-left">
-                      <%= number_input @f, :premium, step: "0.01", placeholder: "0.00", class: "input is-small", disabled: !is_option?(@f) %>
-                      <span class="icon is-small is-left">
-                        <i class="fa fa-usd"></i>
-                      </span>
-                      <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
-                    </p>
+              <%= if is_option?(@f) do %>
+                <div class="column">
+                  <div class="control">
+                    <div class="field">
+                      <%= label @f, :premium, class: "label" %>
+                      <p class="control has-icons-left">
+                        <%= number_input @f, :premium, step: "0.01", placeholder: "0.00", class: "input is-small", disabled: !is_option?(@f) %>
+                        <span class="icon is-small is-left">
+                          <i class="fa fa-usd"></i>
+                        </span>
+                        <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="column">
-                <div class="control">
-                  <%= label @f, :expires_at, class: "label" %>
-                  <%= text_input @f, :expires_at, type: :date, class: "input is-small date", disabled: !is_option?(@f) %>
-                  <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
+              <% end %>
+              <%= if is_option?(@f) do %>
+                <div class="column">
+                  <div class="control">
+                    <%= label @f, :expires_at, class: "label" %>
+                    <%= text_input @f, :expires_at, type: :date, class: "input is-small date", disabled: !is_option?(@f) %>
+                    <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
+                  </div>
                 </div>
-              </div>
+              <% end %>
               <div class="column">
                 <%= label @f, :status, class: "label" %>
                 <%= position_status_display(Map.get(@f.data, :type), Map.get(@f.data, :status), true) %>
@@ -100,7 +115,7 @@
                   <div class="field">
                     <%= label @f, :fees, class: "label" %>
                     <p class="control has-icons-left">
-                      <%= number_input @f, :fees, step: "0.01", class: "input is-small", value: format_currency(@f.source, :fees) %>
+                      <%= number_input @f, :fees, step: "any", class: "input is-small", value: format_currency(@f.source, :fees) %>
                       <span class="icon is-small is-left">
                         <i class="fa fa-usd"></i>
                       </span>
@@ -159,7 +174,7 @@
       <div class="control has-icons-left">
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input @f, :strike, step: "0.50", class: "input is-small", placeholder: "Strike" %>
+            <%= number_input @f, :strike, step: "any", class: "input is-small", placeholder: if(is_option?(@f), do: "Strike", else: "Price") %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>
@@ -184,25 +199,38 @@
           <%= if(@f, do: error_tag(@f, :spread_width), else: nil) %>
         </p>
       <% end %>
+      <%= if !is_option?(@f) do %>
+        <p class="control has-icons-left mt-1">
+          <%= number_input @f, :basis, step: "any", class: "input is-small", placeholder: "Basis" %>
+          <span class="icon is-small is-left">
+            <i class="fa fa-usd"></i>
+          </span>
+          <%= if(@f, do: error_tag(@f, :basis), else: nil) %>
+        </p>
+      <% end %>
     </td>
     <td>
-      <div class="control">
-        <%= text_input @f, :expires_at, type: :date, class: "input is-small date", disabled: !is_option?(@f)  %>
-        <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
-      </div>
-    </td>
-    <td>
-      <div class="control">
-        <div class="field">
-          <p class="control has-icons-left">
-            <%= number_input @f, :premium, step: "0.01", placeholder: "0.00", class: "input is-small", disabled: !is_option?(@f)  %>
-            <span class="icon is-small is-left">
-              <i class="fa fa-usd"></i>
-            </span>
-            <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
-          </p>
+      <%= if is_option?(@f) do %>
+        <div class="control">
+          <%= text_input @f, :expires_at, type: :date, class: "input is-small date"  %>
+          <%= if(@f, do: error_tag(@f, :expires_at), else: nil) %>
         </div>
-      </div>
+      <% end %>
+    </td>
+    <td>
+      <%= if is_option?(@f) do %>
+        <div class="control">
+          <div class="field">
+            <p class="control has-icons-left">
+              <%= number_input @f, :premium, step: "0.01", placeholder: "0.00", class: "input is-small", disabled: !is_option?(@f)  %>
+              <span class="icon is-small is-left">
+                <i class="fa fa-usd"></i>
+              </span>
+              <%= if(@f, do: error_tag(@f, :premium), else: nil) %>
+            </p>
+          </div>
+        </div>
+      <% end %>
     </td>
     <td>
       <div class="control">
@@ -219,7 +247,7 @@
       <div class="control">
         <div class="field">
           <p class="control has-icons-left">
-            <%= number_input @f, :fees, step: "0.01", class: "input is-small", value: format_currency(@f.source, :fees) %>
+            <%= number_input @f, :fees, step: "any", class: "input is-small", value: format_currency(@f.source, :fees) %>
             <span class="icon is-small is-left">
               <i class="fa fa-usd"></i>
             </span>

@@ -139,10 +139,10 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def is_option?(%Phoenix.HTML.Form{params: params, data: %Position{} = position}) do
     type = params["type"] || position.type
 
-    if is_atom(type) do
-      type != OptionsTracker.Accounts.Position.TransType.stock_key()
-    else
-      type != OptionsTracker.Accounts.Position.TransType.stock()
+    cond do
+      is_atom(type)   -> type != OptionsTracker.Accounts.Position.TransType.stock_key()
+      is_binary(type) -> type != to_string(OptionsTracker.Accounts.Position.TransType.stock_key())
+      is_number(type) -> type != OptionsTracker.Accounts.Position.TransType.stock()
     end
   end
 
