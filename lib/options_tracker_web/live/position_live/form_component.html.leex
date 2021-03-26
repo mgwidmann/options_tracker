@@ -53,7 +53,7 @@
               </div>
             </div>
           <% end %>
-          <%= if is_option?(@f) do %>
+          <%= if !is_option?(@f) do %>
             <div class="column">
               <div class="control has-icons-left">
                 <%= number_input @f, :basis, step: "any", class: "input is-small", placeholder: "Basis" %>
