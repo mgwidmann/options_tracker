@@ -74,7 +74,7 @@ defmodule OptionsTrackerWeb.LiveHelpers do
   def ensure_decimal(""), do: Decimal.from_float(0.0)
   def ensure_decimal(string) when is_bitstring(string) do
     case Float.parse(string) do
-      {float, ""} ->
+      {float, remaining} when remaining in ["", "."] ->
         Decimal.from_float(float)
       :error ->
         raise "Failure to ensure_decimal, decimal (#{inspect string}) could not be parsed."

@@ -340,7 +340,7 @@ defmodule OptionsTracker.AccountsTest do
 
       position = position_fixture(%{stock: stock.stock, type: :call, premium: 1.50, account_id: account.id})
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -367,7 +367,7 @@ defmodule OptionsTracker.AccountsTest do
 
       position = position_fixture(%{stock: stock.stock, type: :put, premium: 1.50, account_id: account.id})
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -403,7 +403,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -444,7 +444,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -497,7 +497,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -545,7 +545,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -586,7 +586,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -621,7 +621,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -657,7 +657,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -692,7 +692,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -808,7 +808,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -861,7 +861,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -907,7 +907,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -944,7 +944,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -980,7 +980,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -1018,7 +1018,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -1056,7 +1056,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -1095,7 +1095,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -1134,7 +1134,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{
@@ -1168,7 +1168,7 @@ defmodule OptionsTracker.AccountsTest do
           account_id: account.id
         })
 
-      assert {:ok, %Position{} = position} =
+      assert {:ok, %Position{} = _position} =
                Accounts.update_position(
                  position,
                  %{

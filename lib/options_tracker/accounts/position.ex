@@ -73,6 +73,7 @@ defmodule OptionsTracker.Accounts.Position do
   @optional_open_fields ~w[basis accumulated_profit_loss rolled_position_id notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
   @required_spread_fields ~w[spread_width]a
+  @all_open_fields @required_open_fields ++ @required_spread_fields ++ @optional_open_fields
   @spec open_changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
@@ -233,12 +234,16 @@ defmodule OptionsTracker.Accounts.Position do
       "type" => position.type,
       "opened_at" => DateTime.utc_now(),
       "status" => :open,
-      "account_id" => position.account.id
+      "account_id" => position.account.id,
+      "spread_width" => position.spread_width
     }
     attrs = Map.merge(dup, attrs)
 
+    IO.inspect(attrs, label: "attrs")
+    IO.inspect(@all_open_fields, label: "@all_open_fields")
+
     %__MODULE__{}
-    |> cast(attrs, @fields)
+    |> cast(attrs, @all_open_fields)
     |> put_assoc(:account, position.account)
     |> standard_validations()
     |> calculate_profit_loss()

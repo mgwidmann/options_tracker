@@ -91,9 +91,9 @@ defmodule OptionsTrackerWeb.PositionLiveTest do
 
       assert index_live
              |> form("#position-form", position: @invalid_attrs)
-             |> render_change() =~ "can&apos;t be blank"
+             |> render_change() =~ "can&#39;t be blank"
 
-      {:ok, view, html} =
+      {:ok, _view, html} =
         index_live
         |> form("#position-form", position: @create_attrs)
         |> render_submit()
@@ -113,7 +113,7 @@ defmodule OptionsTrackerWeb.PositionLiveTest do
 
       assert index_live
              |> form("#position-form", position: @invalid_attrs)
-             |> render_change() =~ "can&apos;t be blank"
+             |> render_change() =~ "can&#39;t be blank"
 
       {:ok, _, html} =
         index_live

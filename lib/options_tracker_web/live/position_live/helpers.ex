@@ -4,8 +4,8 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   alias OptionsTrackerWeb.Router.Helpers, as: Routes
 
   @spec type_display(Position.t()) :: String.t()
-  def type_display(%Position{type: :stock, basis: basis}),
-    do: "#{OptionsTrackerWeb.LiveHelpers.currency_string(basis)} basis"
+  def type_display(%Position{type: :stock, basis: basis}) when not is_nil(basis), do: "#{OptionsTrackerWeb.LiveHelpers.currency_string(basis)} basis"
+  def type_display(%Position{type: :stock, basis: nil}), do: "$0.00 basis"
 
   def type_display(%Position{type: :call}), do: "Call"
   def type_display(%Position{type: :put}), do: "Put"
@@ -17,7 +17,6 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   def type_display_class(%Position{type: :call_spread}), do: "is-success is-light"
   def type_display_class(%Position{type: :put}), do: "is-danger"
   def type_display_class(%Position{type: :put_spread}), do: "is-danger is-light"
-
   def break_even(%Position{type: call, strike: price, short: short, accumulated_profit_loss: accumulated_profit_loss, premium: premium}) when call in [:call, :call_spread] do
     accumulated = Decimal.div(accumulated_profit_loss || Decimal.from_float(0.0), Decimal.from_float(100.0))
 

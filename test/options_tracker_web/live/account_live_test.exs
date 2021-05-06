@@ -66,7 +66,7 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
 
       assert index_live
              |> form("#account-form", account: @invalid_attrs)
-             |> render_change() =~ "can&apos;t be blank"
+             |> render_change() =~ "can&#39;t be blank"
 
       {:ok, _, html} =
         index_live
@@ -88,9 +88,9 @@ defmodule OptionsTrackerWeb.AccountLiveTest do
 
       assert index_live
              |> form("#account-form", account: @invalid_attrs)
-             |> render_submit() =~ "can&apos;t be blank"
+             |> render_submit() =~ "can&#39;t be blank"
 
-      {:ok, view, html} =
+      {:ok, _view, html} =
         index_live
         |> form("#account-form", account: @update_attrs)
         |> render_submit()

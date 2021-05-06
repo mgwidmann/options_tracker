@@ -5,9 +5,9 @@ defmodule OptionsTrackerWeb.ShareLiveTest do
 
   alias OptionsTracker.Users
 
-  @create_attrs %{hash: "some hash"}
-  @update_attrs %{hash: "some updated hash"}
-  @invalid_attrs %{hash: nil}
+  # @create_attrs %{hash: "some hash"}
+  # @update_attrs %{hash: "some updated hash"}
+  # @invalid_attrs %{hash: nil}
 
   defp fixture(:share) do
     user = user_fixture()

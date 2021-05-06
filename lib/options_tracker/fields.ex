@@ -17,6 +17,12 @@ defmodule OptionsTracker.Fields.Date do
   def cast(%Date{} = date), do: {:ok, date}
   def cast(_), do: :error
 
+  def equal?(nil, _), do: false
+  def equal?(_, nil), do: false
+  def equal?(date1, date2) do
+    Timex.equal?(date1, date2, :seconds)
+  end
+
   def load(date) do
     {:ok, date}
   end
