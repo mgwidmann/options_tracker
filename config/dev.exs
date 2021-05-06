@@ -34,6 +34,9 @@ config :options_tracker, OptionsTrackerWeb.Endpoint,
 config :options_tracker,
   share_salt: "$2b$12$6N.RCzp.npCGXTDdin0Wg."
 
+config :options_tracker, OptionsTrackerWeb.Mailer,
+  adapter: Bamboo.LocalAdapter
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

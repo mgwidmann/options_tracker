@@ -7,7 +7,6 @@ defmodule OptionsTrackerWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root}
     plug :put_secure_browser_headers
     plug :fetch_current_user
   end
@@ -16,8 +15,8 @@ defmodule OptionsTrackerWeb.Router do
     plug :protect_from_forgery
   end
 
-  pipeline :full_width do
-    plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root_full}
+  pipeline :standard_width do
+    plug :put_root_layout, {OptionsTrackerWeb.LayoutView, :root}
   end
 
   pipeline :admin do
@@ -28,9 +27,13 @@ defmodule OptionsTrackerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  if Mix.env == :dev do
+    forward "/sent_emails", Bamboo.SentEmailViewerPlug
+  end
+
   # Authenticated routes
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser, :csrf, :require_authenticated_user]
+    pipe_through [:browser, :standard_width, :csrf, :require_authenticated_user]
 
     # Users
     get "/users/settings", UserSettingsController, :edit
@@ -88,7 +91,7 @@ defmodule OptionsTrackerWeb.Router do
   import Phoenix.LiveDashboard.Router
 
   scope "/admin" do
-    pipe_through [:browser, :admin]
+    pipe_through [:browser, :standard_width, :admin]
 
     scope "/" do
       pipe_through [:csrf]
@@ -104,7 +107,7 @@ defmodule OptionsTrackerWeb.Router do
   ## Authentication routes
 
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser, :csrf, :redirect_if_user_is_authenticated]
+    pipe_through [:browser, :standard_width, :csrf, :redirect_if_user_is_authenticated]
 
     get "/users/register", UserRegistrationController, :new
     post "/users/register", UserRegistrationController, :create
@@ -121,14 +124,16 @@ defmodule OptionsTrackerWeb.Router do
     pipe_through [:browser, :csrf]
 
     scope "/" do
-      pipe_through :full_width
       get "/", HomeController, :index
     end
 
-    delete "/users/log_out", UserSessionController, :delete
-    get "/users/confirm", UserConfirmationController, :new
-    post "/users/confirm", UserConfirmationController, :create
-    get "/users/confirm/:token", UserConfirmationController, :confirm
+    scope "/" do
+      pipe_through [:standard_width]
+      delete "/users/log_out", UserSessionController, :delete
+      get "/users/confirm", UserConfirmationController, :new
+      post "/users/confirm", UserConfirmationController, :create
+      get "/users/confirm/:token", UserConfirmationController, :confirm
+    end
   end
 
   def restrict_admin(conn, []) do

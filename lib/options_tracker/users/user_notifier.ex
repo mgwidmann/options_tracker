@@ -35,20 +35,8 @@ defmodule OptionsTracker.Users.UserNotifier do
   Deliver instructions to reset password account.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can reset your password by visiting the url below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    OptionsTrackerWeb.UserEmail.password_reset(user, url)
+    |> OptionsTrackerWeb.Mailer.deliver_later()
   end
 
   @doc """

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>OptionsTracker</title>
+    <link rel="stylesheet" href="<%= Routes.static_url(OptionsTrackerWeb.Endpoint, "/css/app.css") %>"/>
+  </head>
+  <body>
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container">
+          <div class="columns is-vcentered">
+            <div class="column">
+              <img src="<%= Routes.static_url(OptionsTrackerWeb.Endpoint, "/images/options-large.png") %>">
+            </div>
+            <div class="column">
+              <h1 class="title is-pulled-right">
+                Keeping track of your options
+              </h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="my-5 is-large">
+      <div class="container">
+        <div class="columns">
+          <div class="column is-10 is-offset-1">
+            <div class="card">
+              <div class="card-content">
+                <div class="content">
+                  <%= render @view_module, @view_template, assigns %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <%= render "footer.html" %>
+  </body>
+</html>

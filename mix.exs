@@ -62,6 +62,8 @@ defmodule OptionsTracker.MixProject do
       {:phoenix_html_sanitizer, "~> 1.1"},
       {:recaptcha, "~> 3.0"},
       {:redirect, "~> 0.3.0"},
+      {:bamboo, "~> 2.1.0"},
+      {:bamboo_phoenix, "~> 1.0.0"},
     ]
   end
 

@@ -29,7 +29,7 @@
         </div>
         <div class="is-pulled-right">
           <div class="mh-3">
-            <% no_account = @current_account == nil || match?([_|_], @current_account) %>
+            <% no_account = @current_account == nil || match?([_|_], @current_account) || @current_account == [] %>
             <%= if no_account do %>
               <a href="javascript:void(0);" class="button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left" data-tooltip="You must select an account first!" disabled="true">
                 <i class="fa fa-plus" aria-hidden="true"></i>

@@ -27,3 +27,6 @@ config :options_tracker,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :options_tracker, OptionsTrackerWeb.Mailer,
+  adapter: Bamboo.LocalAdapter
