@@ -42,7 +42,7 @@ config :logger,
 config :live_dashboard_history, LiveDashboardHistory,
   router: OptionsTrackerWeb.Router,
   metrics: OptionsTrackerWeb.Telemetry,
-  buffer_size: 500
+  buffer_size: 250
 
 config :money,
   # this allows you to do Money.new(100)
