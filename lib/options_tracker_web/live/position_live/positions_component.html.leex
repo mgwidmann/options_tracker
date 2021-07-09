@@ -200,7 +200,7 @@
 </div>
 </form>
 
-<%= f = unless(@share_mode || @read_only, do: form_for(@changeset, "#",
+<%= f = unless(@share_mode || @read_only || @live_action not in [:edit, :new], do: form_for(@changeset, "#",
   id: "position-form",
   phx_change: "validate",
   phx_submit: "save")) %>
