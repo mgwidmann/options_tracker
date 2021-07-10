@@ -389,7 +389,8 @@ defmodule OptionsTracker.UsersTest do
     test "sends token through notification", %{user: user} do
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, email} = Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, %{body: email.text_body}}
         end)
 
       {:ok, token} = Base.url_decode64(token, padding: false)
@@ -406,7 +407,8 @@ defmodule OptionsTracker.UsersTest do
 
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, email} = Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, %{body: email.text_body}}
         end)
 
       %{user: user, token: token}

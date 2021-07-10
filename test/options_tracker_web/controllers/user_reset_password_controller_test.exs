@@ -46,7 +46,8 @@ defmodule OptionsTrackerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, email} = Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, %{body: email.text_body}}
         end)
 
       %{token: token}
@@ -68,7 +69,8 @@ defmodule OptionsTrackerWeb.UserResetPasswordControllerTest do
     setup %{user: user} do
       token =
         extract_user_token(fn url ->
-          Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, email} = Users.deliver_user_reset_password_instructions(user, url)
+          {:ok, %{body: email.text_body}}
         end)
 
       %{token: token}
