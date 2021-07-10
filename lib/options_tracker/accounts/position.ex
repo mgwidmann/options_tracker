@@ -239,13 +239,11 @@ defmodule OptionsTracker.Accounts.Position do
     }
     attrs = Map.merge(dup, attrs)
 
-    IO.inspect(attrs, label: "attrs")
-    IO.inspect(@all_open_fields, label: "@all_open_fields")
-
     %__MODULE__{}
-    |> cast(attrs, @all_open_fields)
+    |> cast(attrs, @fields)
     |> put_assoc(:account, position.account)
     |> standard_validations()
+    |> closing_validations()
     |> calculate_profit_loss()
   end
 
