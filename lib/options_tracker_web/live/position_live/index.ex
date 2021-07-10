@@ -7,6 +7,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   alias OptionsTracker.Users
   alias OptionsTracker.Users.User
   alias OptionsTracker.Search
+  alias OptionsTracker.Campaign
 
   @impl true
   def mount(params, %{"user_token" => user_token} = _session, socket) do
@@ -22,6 +23,8 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
         else: get_account(current_user, account_id)
       )
 
+    campaigns = Campaign.campaigns(current_user)
+
     changeset = Accounts.change_position(%Position{})
 
     search_changeset = Search.new(current_account)
@@ -36,7 +39,8 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:share_mode, false)
      |> assign(:shares, %{})
      |> assign(:profit_loss, Accounts.profit_loss(current_account))
-     |> assign(:search_changeset, search_changeset)}
+     |> assign(:search_changeset, search_changeset)
+     |> assign(:campaigns, campaigns)}
   end
 
   @impl true
@@ -271,6 +275,15 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:share_mode, false)
      |> assign(:shares, %{})
      |> push_redirect(to: Routes.share_show_path(socket, :show, id: share.hash))}
+  end
+
+  def handle_event("sentiment", %{"campaign" => campaign, "answer" => answer}, socket) do
+    Campaign.record_campaign(socket.assigns.current_user, campaign, answer)
+
+    {:noreply,
+      socket
+      |> put_flash(:info, "Thank you for your feedback!")
+      |> push_redirect(to: Routes.position_index_path(socket, :index))}
   end
 
   defp save_position(socket, :edit, position_params, return_to) do

@@ -1,3 +1,18 @@
+<%= unless @campaigns |> Enum.find(& &1.campaign == "subscription") do %>
+  <p class="alert alert-warning has-text-centered" role="alert">
+    <b>NOTICE:</b> This site was not functional for a few days. Options Tracker runs using all free tier capabilities provided by tools like
+    <a href="https://www.gigalixir.com">gigalixir.com</a>. However, these free tiers have limits and the site breeched them resulting in
+    a read only database. <b>Don't worry, none of your positions were lost!</b> You just couldn't log in or add any new positions when it happened.
+    It will happen again though, and likely soon.<br/>
+    I had to destroy and recreate the database to resolve the issue. The end result long term is the site needs to become a
+    subscription site to pay for costs.<br/><br/>
+    If you would be willing to pay $5 a month to keep this site running, we would only need about 10 subscribers to cover costs. And if we get more
+    than that I would be able to lower the price further. As a user of the site myself, I'm just looking to keep it running. I'm not trying to profit from it (my trades however 🤑).<br/><br/>
+    <a class="button is-primary" phx-click="sentiment" phx-value-campaign="subscription" phx-value-answer="yes">Yes, I'd pay $5/month</a>&nbsp;
+    <a class="button" phx-click="sentiment" phx-value-campaign="subscription" phx-value-answer="no">No, it must remain free</a><br/>
+    <small>Clicking this button does not commit you to anything at this time, its just to gauge interest.</small>
+  </p>
+<% end %>
 <header class="header">
   <section class="section">
     <div class="columns">
