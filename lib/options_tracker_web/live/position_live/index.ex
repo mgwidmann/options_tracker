@@ -8,6 +8,7 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
   alias OptionsTracker.Users.User
   alias OptionsTracker.Search
   alias OptionsTracker.Campaign
+  alias OptionsTracker.TableCleaner
 
   @impl true
   def mount(params, %{"user_token" => user_token} = _session, socket) do
@@ -29,6 +30,10 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
 
     search_changeset = Search.new(current_account)
 
+    clean_result = if current_user.admin? do
+      TableCleaner.check()
+    end
+
     {:ok,
      socket
      |> assign(:current_user, current_user)
@@ -40,7 +45,8 @@ defmodule OptionsTrackerWeb.PositionLive.Index do
      |> assign(:shares, %{})
      |> assign(:profit_loss, Accounts.profit_loss(current_account))
      |> assign(:search_changeset, search_changeset)
-     |> assign(:campaigns, campaigns)}
+     |> assign(:campaigns, campaigns)
+     |> assign(:clean_result, clean_result)}
   end
 
   @impl true

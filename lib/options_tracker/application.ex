@@ -15,9 +15,9 @@ defmodule OptionsTracker.Application do
       {Phoenix.PubSub, name: OptionsTracker.PubSub},
       OptionsTrackerWeb.Presence,
       # Start the Endpoint (http/https)
-      OptionsTrackerWeb.Endpoint
+      OptionsTrackerWeb.Endpoint,
       # Start a worker by calling: OptionsTracker.Worker.start_link(arg)
-      # {OptionsTracker.Worker, arg}
+      {OptionsTracker.TableCleaner, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

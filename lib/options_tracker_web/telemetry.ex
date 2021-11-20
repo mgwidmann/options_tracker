@@ -51,6 +51,7 @@ defmodule OptionsTrackerWeb.Telemetry do
       summary("vm.total_run_queue_lengths.io"),
 
       # OptionsTracker Metrics
+      last_value("options_tracker.total.count"),
       last_value("options_tracker.users.count"),
       last_value("options_tracker.users.online.count"),
       last_value("options_tracker.positions.count"),
@@ -66,7 +67,8 @@ defmodule OptionsTrackerWeb.Telemetry do
         {OptionsTrackerWeb.Metrics, :count_users, []},
         {OptionsTrackerWeb.Metrics, :count_online_users, []},
         {OptionsTrackerWeb.Metrics, :count_positions, []},
-        {OptionsTrackerWeb.Metrics, :count_errors, []}
+        {OptionsTrackerWeb.Metrics, :count_errors, []},
+        {OptionsTrackerWeb.Metrics, :count_total, []}
       ]
     end
   else

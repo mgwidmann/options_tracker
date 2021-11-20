@@ -8,4 +8,12 @@
       This site is kept free to use thanks to free services like <a href="https://gigalixir.com/">gigalixir.com</a> and <a href="https://sendgrid.com/">sendgrid.com</a>.
     </p>
   </div>
+  <div class="content has-text-centered mt-1">
+    System Status:
+    <%= if OptionsTracker.TableCleaner.system_failure? do %>
+      <strong style="color: red;">FAILURE</strong>
+    <% else %>
+      <strong style="color: green;">HEALTHY</strong>
+    <% end %>
+  </div>
 </footer>
