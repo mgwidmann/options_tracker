@@ -12,7 +12,6 @@
 
 alias OptionsTracker.Users
 alias OptionsTracker.Users.User
-alias OptionsTracker.Accounts
 alias OptionsTracker.Accounts.Account
 alias OptionsTracker.Accounts.Position
 alias OptionsTracker.Repo
@@ -38,7 +37,6 @@ user =
   if user.accounts == [] do
     rh =
       %Account{
-        id: 1,
         broker_name: nil,
         cash: Decimal.from_float(2_000.00),
         exercise_fee: Decimal.from_float(0.00),
@@ -54,7 +52,6 @@ user =
 
     tw =
       %Account{
-        id: 2,
         broker_name: nil,
         cash: Decimal.from_float(4_000.00),
         exercise_fee: Decimal.from_float(5.00),

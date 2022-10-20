@@ -13,6 +13,7 @@ defmodule OptionsTracker.TableCleaner do
   @impl true
   def init(:ok) do
     :timer.send_interval(@check, self(), :count)
+    IO.inspect(["Sending self:", self(), :count])
     send(self(), :count)
     {:ok, %{total: -1, clean_failure: false}}
   end

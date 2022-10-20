@@ -3,7 +3,6 @@ defmodule OptionsTrackerWeb.PositionLive.EditModalComponent do
   import OptionsTrackerWeb.PositionLive.Helpers
 
   alias OptionsTracker.Accounts
-  alias OptionsTracker.Accounts.Position
   import OptionsTracker.Accounts.Position.TransType, only: [stock?: 1]
 
   @seconds_in_a_day 86_400

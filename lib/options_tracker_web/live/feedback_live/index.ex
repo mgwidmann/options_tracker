@@ -3,7 +3,7 @@ defmodule OptionsTrackerWeb.FeedbackLive.Index do
   alias OptionsTracker.Users
 
   @impl true
-  def mount(params, %{"user_token" => user_token} = _session, socket) do
+  def mount(_params, %{"user_token" => user_token} = _session, socket) do
     current_user = Users.get_user_by_session_token(user_token)
     track(current_user)
 
@@ -16,7 +16,7 @@ defmodule OptionsTrackerWeb.FeedbackLive.Index do
   end
 
   @impl true
-  def handle_params(params, url, socket) do
+  def handle_params(_params, _url, socket) do
     {:noreply, socket}
   end
 

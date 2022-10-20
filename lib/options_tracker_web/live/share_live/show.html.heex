@@ -19,7 +19,7 @@
         <div class="content">
           <div class="field has-addons">
             <p class="control is-expanded">
-              <input id="copy-clipboard-input" class="input" type="text" value="<%= @url %>" readonly phx-hook="CopyClipboard">
+              <input id="copy-clipboard-input" class="input" type="text" value={@url} readonly phx-hook="CopyClipboard">
             </p>
             <p class="control">
               <a id="copy-clipboard-button" class="button has-tooltip-arrow" data-tooltip="Copy to Clipboard" phx-hook="CopyClipboard">
@@ -44,12 +44,12 @@
     </div>
   <% end %>
 
-  <%= live_component @socket, OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
+  <%= live_component OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
     id: :metrics_header,
     metrics: @metrics,
   } %>
 
-  <%= live_component @socket, OptionsTrackerWeb.PositionLive.PositionsComponent, %{
+  <%= live_component OptionsTrackerWeb.PositionLive.PositionsComponent, %{
     id: :positions_component,
     share_mode: false,
     changeset: nil,

@@ -55,7 +55,7 @@
   </thead>
   <tbody id="feedback">
     <%= for feedback <- @feedbacks do %>
-      <tr id="feedback-<%= feedback.id %>">
+      <tr id={"feedback-#{feedback.id}"}>
         <td><%= feedback.user.email %> (<%= feedback.user.id %>)</td>
         <td><%= feedback.path %></td>
         <td><%= feedback.rating %> stars</td>

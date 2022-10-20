@@ -1,25 +1,25 @@
 <span class="control tags has-addons">
   <%= if @flip do %>
-    <span class="tag radio-button negative is-danger ml-auto <%= if(is_button_on?(@f, @name), do: "", else: "is-light") %>">
+    <span class={"tag radio-button negative is-danger ml-auto #{if(is_button_on?(@f, @name), do: "", else: "is-light")}"}>
       <%= label @f, :"#{@name}_true", class: "radio" do %>
         <%= radio_button @f, @name, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
         <%= @negative_label %>
       <% end %>
     </span>
-    <span class="tag radio-button negative is-success mr-auto <%= if(is_button_on?(@f, @name), do: "is-light", else: "") %>">
+    <span class={"tag radio-button negative is-success mr-auto #{if(is_button_on?(@f, @name), do: "is-light", else: "")}"}>
       <%= label @f, :"#{@name}_false", class: "radio" do %>
         <%= radio_button @f, @name, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
         <%= @positive_label %>
       <% end %>
     </span>
   <% else %>
-    <span class="tag radio-button negative is-danger ml-auto <%= if(is_button_on?(@f, @name), do: "is-light", else: "") %>">
+    <span class={"tag radio-button negative is-danger ml-auto #{if(is_button_on?(@f, @name), do: "is-light", else: "")}"}>
       <%= label @f, :"#{@name}_false", class: "radio" do %>
         <%= radio_button @f, @name, false, class: "radio", style: "opacity:0;width:0;height:0;" %>
         <%= @negative_label %>
       <% end %>
     </span>
-    <span class="tag radio-button negative is-success mr-auto <%= if(is_button_on?(@f, @name), do: "", else: "is-light") %>">
+    <span class={"tag radio-button negative is-success mr-auto #{if(is_button_on?(@f, @name), do: "", else: "is-light")}"}>
       <%= label @f, :"#{@name}_true", class: "radio" do %>
         <%= radio_button @f, @name, true, class: "radio", style: "opacity:0;width:0;height:0;" %>
         <%= @positive_label %>

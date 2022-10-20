@@ -123,7 +123,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
       |> Decimal.abs()
       |> OptionsTrackerWeb.LiveHelpers.currency_string()
 
-    credit_debit_str = if(Decimal.cmp(value, Decimal.new(0)) in [:eq, :gt], do: "cr", else: "db")
+    credit_debit_str = if(Decimal.compare(value, Decimal.new(0)) in [:eq, :gt], do: "cr", else: "db")
 
     "#{value_string}#{credit_debit_str}"
   end
@@ -176,7 +176,7 @@ defmodule OptionsTrackerWeb.PositionLive.Helpers do
   end
 
   def calculate_roi(%Decimal{} = max_profit, %Decimal{} = max_loss) do
-    if Decimal.cmp(max_loss, 0) == :eq do
+    if Decimal.compare(max_loss, 0) == :eq do
       Decimal.from_float(0.0)
     else
       Decimal.div(max_profit, max_loss)

@@ -70,7 +70,7 @@ defmodule OptionsTrackerWeb.Router do
 
   # Public routes
   scope "/", OptionsTrackerWeb do
-    pipe_through [:browser, :csrf]
+    pipe_through [:browser, :standard_width, :csrf]
 
     live "/shares", ShareLive.Show, :show
     live "/metrics/public/accounts/:account_id", StatisticsLive.Index, :index, as: :public_statistics_account_index

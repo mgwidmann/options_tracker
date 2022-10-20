@@ -5,7 +5,7 @@
 # is restricted to this project.
 
 # General application configuration
-use Mix.Config
+import Config
 
 config :options_tracker,
   ecto_repos: [OptionsTracker.Repo]

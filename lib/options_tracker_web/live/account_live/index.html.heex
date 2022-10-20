@@ -1,7 +1,7 @@
 <header class="header mb-6">
   <section class="section columns">
     <h1 class="title column is-pulled-left">Accounts</h1>
-    <div class="column rows">
+    <div class="column rows"></div>
     <div class="is-pulled-right">
       <div class="row mh-3">
         <%= live_patch to: Routes.account_index_path(@socket, :new), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": "Add an Account" do %>
@@ -13,7 +13,7 @@
 </header>
 
 <%= if @live_action in [:new, :edit] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.AccountLive.FormComponent,
+  <%= live_modal OptionsTrackerWeb.AccountLive.FormComponent,
     id: @account.id || :new,
     title: @page_title,
     action: @live_action,
@@ -96,7 +96,7 @@
   </thead>
   <tbody id="accounts">
     <%= for account <- @accounts do %>
-      <tr id="account-<%= account.id %>">
+      <tr id={"account-#{account.id}"}>
         <td><%= account.name %></td>
         <td><%= account_type_display(account.type, account.broker_name) %></td>
         <td><%= currency_string(account.opt_open_fee) %></td>
@@ -123,7 +123,7 @@
   </tbody>
 </table>
 
-<%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+<%= live_component OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
   id: :feedback,
   path: @url.path,
   current_user: @current_user

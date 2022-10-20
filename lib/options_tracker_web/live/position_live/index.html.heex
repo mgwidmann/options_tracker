@@ -62,7 +62,7 @@
               <% end %>
             <% end %>
           </div>
-          <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+          <%= live_component OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
             id: :accounts_dropdown,
             current_user: @current_user,
             current_account_id: @current_account_id,
@@ -95,114 +95,114 @@
   </section>
 </header>
 
-<%= search_form = form_for @search_changeset, "#", id: "search-form", as: :search_form, phx_change: "search" %>
-<div class="columns is-multiline pb-3">
-  <div class="column is-half-desktop is-full-tablet">
-    <div class="panel">
-      <p class="panel-heading">
-        Search for a position
-      </p>
-      <div class="panel-block">
-        <div class="column">
-          <div class="control mb-0 tags has-addons">
-            <span class="tag long is-success <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.open_key(), do: "", else: "is-light") %>">
-              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.open_key()}", class: "radio" do %>
-                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.open_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                Open
-              <% end %>
+<.form let={search_form} for={@search_changeset} id="search-form" phx-change="search" as={:search_form} onkeydown="return event.key != 'Enter';">
+  <div class="columns is-multiline pb-3">
+    <div class="column is-half-desktop is-full-tablet">
+      <div class="panel">
+        <p class="panel-heading">
+          Search for a position
+        </p>
+        <div class="panel-block">
+          <div class="column">
+            <div class="control mb-0 tags has-addons">
+              <span class={"tag long is-success #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.open_key(), do: "", else: "is-light")}"}>
+                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.open_key()}", class: "radio" do %>
+                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.open_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                  Open
+                <% end %>
+              </span>
+              <span class={"tag short is-info #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.all_key(), do: "", else: "is-light")}"}>
+                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.all_key()}", class: "radio" do %>
+                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.all_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                  All
+                <% end %>
+              </span>
+              <span class={"tag short is-danger #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.closed_key(), do: "", else: "is-light")}"}>
+                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.closed_key()}", class: "radio" do %>
+                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.closed_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                  Closed
+                <% end %>
+              </span>
+            </div>
+          </div>
+          <div class="column">
+            <p class="control has-icons-left">
+              <%= text_input search_form, :search, class: "input is-rounded", placeholder: "Ticker" %>
+              <span class="icon is-left">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="column is-half-desktop is-full-tablet">
+      <div class="panel">
+        <div class="panel-heading">
+          Realized Profit / Loss
+        </div>
+        <div class="panel-block py-0 px-0">
+          <div class="column has-text-centered is-size-7 py-1">
+            <%= if @current_account_id == :all do %>
+              <%= live_redirect "Daily", to: Routes.statistics_index_path(@socket, :index, tab: :daily) %>
+            <% else %>
+              <%= live_redirect "Daily", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :daily) %>
+            <% end %>
+          </div>
+          <div class="column has-text-centered is-size-7 py-1">
+            <%= if @current_account_id == :all do %>
+              <%= live_redirect "Weekly", to: Routes.statistics_index_path(@socket, :index, tab: :weekly) %>
+            <% else %>
+              <%= live_redirect "Weekly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :weekly) %>
+            <% end %>
+          </div>
+          <div class="column has-text-centered is-size-7 py-1">
+            <%= if @current_account_id == :all do %>
+              <%= live_redirect "Monthly", to: Routes.statistics_index_path(@socket, :index, tab: :monthly) %>
+            <% else %>
+              <%= live_redirect "Monthly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :monthly) %>
+            <% end %>
+          </div>
+          <div class="column has-text-centered is-size-7 py-1">
+            <%= if @current_account_id == :all do %>
+              <%= live_redirect "Total", to: Routes.statistics_index_path(@socket, :index, tab: :yearly) %>
+            <% else %>
+              <%= live_redirect "Total", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :yearly) %>
+            <% end %>
+          </div>
+        </div>
+        <div class="panel-block py-0">
+          <div class="column has-text-centered">
+            <span class={"#{if(Decimal.compare(@profit_loss.daily, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+              <%= currency_string(@profit_loss.daily) %>
             </span>
-            <span class="tag short is-info <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.all_key(), do: "", else: "is-light") %>">
-              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.all_key()}", class: "radio" do %>
-                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.all_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                All
-              <% end %>
+          </div>
+          <div class="is-divider-vertical"></div>
+          <div class="column has-text-centered">
+            <span class={"#{if(Decimal.compare(@profit_loss.weekly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+              <%= currency_string(@profit_loss.weekly) %>
             </span>
-            <span class="tag short is-danger <%= if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.closed_key(), do: "", else: "is-light") %>">
-              <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.closed_key()}", class: "radio" do %>
-                <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.closed_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                Closed
-              <% end %>
+          </div>
+          <div class="is-divider-vertical"></div>
+          <div class="column has-text-centered">
+            <span class={"#{if(Decimal.compare(@profit_loss.monthly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+              <%= currency_string(@profit_loss.monthly) %>
+            </span>
+          </div>
+          <div class="is-divider-vertical"></div>
+          <div class="column has-text-centered">
+            <span class={"#{if(Decimal.compare(@profit_loss.total, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+              <%= currency_string(@profit_loss.total) %>
             </span>
           </div>
         </div>
-        <div class="column">
-          <p class="control has-icons-left">
-            <%= text_input search_form, :search, class: "input is-rounded", placeholder: "Ticker" %>
-            <span class="icon is-left">
-              <i class="fa fa-search" aria-hidden="true"></i>
-            </span>
-          </p>
-        </div>
       </div>
     </div>
   </div>
-  <div class="column is-half-desktop is-full-tablet">
-    <div class="panel">
-      <div class="panel-heading">
-        Realized Profit / Loss
-      </div>
-      <div class="panel-block py-0 px-0">
-        <div class="column has-text-centered is-size-7 py-1">
-          <%= if @current_account_id == :all do %>
-            <%= live_redirect "Daily", to: Routes.statistics_index_path(@socket, :index, tab: :daily) %>
-          <% else %>
-            <%= live_redirect "Daily", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :daily) %>
-          <% end %>
-        </div>
-        <div class="column has-text-centered is-size-7 py-1">
-          <%= if @current_account_id == :all do %>
-            <%= live_redirect "Weekly", to: Routes.statistics_index_path(@socket, :index, tab: :weekly) %>
-          <% else %>
-            <%= live_redirect "Weekly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :weekly) %>
-          <% end %>
-        </div>
-        <div class="column has-text-centered is-size-7 py-1">
-          <%= if @current_account_id == :all do %>
-            <%= live_redirect "Monthly", to: Routes.statistics_index_path(@socket, :index, tab: :monthly) %>
-          <% else %>
-            <%= live_redirect "Monthly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :monthly) %>
-          <% end %>
-        </div>
-        <div class="column has-text-centered is-size-7 py-1">
-          <%= if @current_account_id == :all do %>
-            <%= live_redirect "Total", to: Routes.statistics_index_path(@socket, :index, tab: :yearly) %>
-          <% else %>
-            <%= live_redirect "Total", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :yearly) %>
-          <% end %>
-        </div>
-      </div>
-      <div class="panel-block py-0">
-        <div class="column has-text-centered">
-          <span class="<%= if(Decimal.cmp(@profit_loss.daily, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-            <%= currency_string(@profit_loss.daily) %>
-          </span>
-        </div>
-        <div class="is-divider-vertical"></div>
-        <div class="column has-text-centered">
-          <span class="<%= if(Decimal.cmp(@profit_loss.weekly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-            <%= currency_string(@profit_loss.weekly) %>
-          </span>
-        </div>
-        <div class="is-divider-vertical"></div>
-        <div class="column has-text-centered">
-          <span class="<%= if(Decimal.cmp(@profit_loss.monthly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-            <%= currency_string(@profit_loss.monthly) %>
-          </span>
-        </div>
-        <div class="is-divider-vertical"></div>
-        <div class="column has-text-centered">
-          <span class="<%= if(Decimal.cmp(@profit_loss.total, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
-            <%= currency_string(@profit_loss.total) %>
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</form>
+</.form>
 
 <%= if @live_action in [:close] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.EditModalComponent,
+  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
     id: @position.id,
     title: @page_title,
     action: @live_action,
@@ -216,7 +216,7 @@
 <% end %>
 
 <%= if @live_action in [:notes] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.EditModalComponent,
+  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
     id: @position.id,
     title: @page_title,
     action: @live_action,
@@ -230,7 +230,7 @@
 <% end %>
 
 <%= if @live_action in [:roll] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.EditModalComponent,
+  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
     id: @position.id,
     title: @page_title,
     action: @live_action,
@@ -244,7 +244,7 @@
 <% end %>
 
 <%= if @live_action in [:delete] do %>
-  <%= live_modal @socket, OptionsTrackerWeb.PositionLive.DeleteModalComponent,
+  <%= live_modal OptionsTrackerWeb.PositionLive.DeleteModalComponent,
     id: :delete,
     modal_title: "Delete Position",
     title: @page_title,
@@ -265,13 +265,13 @@
     <% share_mode_tooltip = "Once you've selected some trades, click this button again to create the share link." %>
     <% tooltip = "Click this to toggle into share mode so you can select which trades you want to share." %>
     <%= if @share_mode && @shares == %{} do %>
-      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" data-tooltip="<%= if(@share_mode, do: share_mode_tooltip, else: tooltip) %>">
+      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
         <i class="fa fa-share"></i>
         &nbsp;
         Share
       </button>
     <% else %>
-      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" phx-click="<%= if(@share_mode, do: "save_share", else: "share") %>" data-tooltip="<%= if(@share_mode, do: share_mode_tooltip, else: tooltip) %>">
+      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" phx-click={"#{if(@share_mode, do: "save_share", else: "share")}"} data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
         <i class="fa fa-share"></i>
         &nbsp;
         Share
@@ -287,7 +287,7 @@
   </div>
 </div>
 
-<%= live_component @socket, OptionsTrackerWeb.PositionLive.PositionsComponent, %{
+<%= live_component OptionsTrackerWeb.PositionLive.PositionsComponent, %{
   id: :positions_component,
   share_mode: @share_mode,
   changeset: @changeset,
@@ -300,7 +300,7 @@
   read_only: false
 } %>
 
-<%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+<%= live_component OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
   id: :feedback,
   path: @url.path,
   current_user: @current_user

@@ -44,7 +44,7 @@ module.exports = (env, options) => {
         },
         {
           test: /\.(png|woff|woff2|eot|ttf|svg)/,
-          loader: 'url-loader?limit=100000'
+          use: ['url-loader?limit=100000']
         }
       ]
     },

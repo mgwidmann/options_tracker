@@ -1,5 +1,6 @@
 defmodule OptionsTrackerWeb.LiveHelpers do
-  import Phoenix.LiveView.Helpers
+  use Phoenix.Component
+  import Phoenix.LiveComponent
 
   @doc """
   Renders a component inside the `OptionsTrackerWeb.ModalComponent` component.
@@ -9,13 +10,13 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
   ## Examples
 
-      <%= live_modal @socket, OptionsTrackerWeb.UserLive.FormComponent,
+      <%= live_modal OptionsTrackerWeb.UserLive.FormComponent,
         id: @user.id || :new,
         action: @live_action,
         user: @user,
         return_to: Routes.user_index_path(@socket, :index) %>
   """
-  def live_modal(socket, component, opts) do
+  def live_modal(component, opts) do
     path = Keyword.fetch!(opts, :return_to)
     on_close = Keyword.get(opts, :on_close, fn -> nil end)
 
@@ -28,7 +29,39 @@ defmodule OptionsTrackerWeb.LiveHelpers do
       opts: opts
     ]
 
-    live_component(socket, OptionsTrackerWeb.ModalComponent, modal_opts)
+    live_component(OptionsTrackerWeb.ModalComponent, modal_opts)
+  end
+
+  attr :condition, :boolean, required: true
+  attr :for, :any
+  attr :rest, :global
+  slot :inner_block, required: true
+  def if_form(assigns) do
+    ~H"""
+    <%= if !!@condition && @for do %>
+      <.form let={f} for={@for} {@rest}>
+        <%= render_slot(@inner_block, f) %>
+      </.form>
+    <% else %>
+      <%= render_slot(@inner_block) %>
+    <% end %>
+    """
+  end
+
+  attr :condition, :boolean, required: true
+  attr :for, :any
+  attr :rest, :global
+  slot :inner_block, required: true
+  def unless_form(assigns) do
+    ~H"""
+    <%= if !@condition && @for do %>
+      <.form let={f} for={@for} {@rest}>
+        <%= render_slot(@inner_block, f) %>
+      </.form>
+    <% else %>
+      <%= render_slot(@inner_block) %>
+    <% end %>
+    """
   end
 
   @spec currency_string(float | Decimal.t(), boolean) :: String.t()
@@ -123,8 +156,8 @@ defmodule OptionsTrackerWeb.LiveHelpers do
     current_user
   end
 
-  def custom_radio_button(socket, form, name, negative_label, positive_label, opts \\ []) do
-    live_component socket, OptionsTrackerWeb.Components.RadioButtonComponent,
+  def custom_radio_button(form, name, negative_label, positive_label, opts \\ []) do
+    live_component OptionsTrackerWeb.Components.RadioButtonComponent,
       id: opts[:id] || name,
       f: form,
       name: name,

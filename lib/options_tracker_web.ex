@@ -84,6 +84,7 @@ defmodule OptionsTrackerWeb do
       use PhoenixHtmlSanitizer, :basic_html
 
       # Import LiveView helpers (live_render, live_component, live_patch, etc)
+      import Phoenix.Component
       import Phoenix.LiveView.Helpers
       import OptionsTrackerWeb.LiveHelpers
 

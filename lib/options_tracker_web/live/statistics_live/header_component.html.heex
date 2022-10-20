@@ -31,7 +31,7 @@
     </div>
     <div class="panel-block py-0">
       <div class="column has-text-centered">
-        <span class="<%= if(Decimal.cmp(@metrics.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger") %>">
+        <span class={"#{if(Decimal.compare(@metrics.profit_loss, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
           <%= currency_string(@metrics.profit_loss) %>
         </span>
       </div>

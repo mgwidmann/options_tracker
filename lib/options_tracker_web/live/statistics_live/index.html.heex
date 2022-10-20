@@ -5,7 +5,7 @@
         <h1 class="title mb-0 is-pulled-left">Metrics</h1>
         <%= if @current_user do %>
           <div class="is-pulled-right">
-            <%= live_component @socket, OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+            <%= live_component OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
               id: :accounts_dropdown,
               current_user: @current_user,
               current_account_id: @current_account_id,
@@ -25,16 +25,16 @@
               Public
               <i class="fa fa-question-circle"></i>
             </span>
-            <%= f = form_for @current_account_changeset, "#", phx_change: "save" %>
-              <%= custom_radio_button @socket, f, :public, "No", "Yes" %>
+            <.form let={f} for={@current_account_changeset} phx-change="save">
+              <%= custom_radio_button f, :public, "No", "Yes" %>
               <%= error_tag f, :public %>
-            </form>
+            </.form>
           </div>
           <%= if @current_account.public do %>
             <div class="is-pulled-right mr-5">
               <div class="field has-addons">
                 <p class="control is-expanded">
-                  <input id="copy-clipboard-input" class="input is-small" type="text" value="<%= Routes.public_statistics_account_index_url(@socket, :index, @current_account_id) %>" readonly phx-hook="CopyClipboard">
+                  <input id="copy-clipboard-input" class="input is-small" type="text" value={Routes.public_statistics_account_index_url(@socket, :index, @current_account_id)} readonly phx-hook="CopyClipboard">
                 </p>
                 <p class="control">
                   <a id="copy-clipboard-button" class="button is-small has-tooltip-arrow" data-tooltip="Copy to Clipboard" phx-hook="CopyClipboard">
@@ -64,26 +64,26 @@
   </div>
 </div>
 
-<%= live_component @socket, OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
+<%= live_component OptionsTrackerWeb.StatisticsLive.HeaderComponent, %{
   id: :metrics_header,
   metrics: @metrics,
 } %>
 
-<canvas id="chart" phx-hook="StatisticsChart" data-profit-loss='<%= profit_loss_json(@profit_loss, @profit_loss_range) %>' data-wins='<%= wins_json(@profit_loss, @profit_loss_range) %>' data-weighted-wins='<%= weighted_wins_json(@profit_loss, @profit_loss_range) %>'></canvas>
+<canvas id="chart" phx-hook="StatisticsChart" data-profit-loss={"#{profit_loss_json(@profit_loss, @profit_loss_range)}"} data-wins={"#{wins_json(@profit_loss, @profit_loss_range)}"} data-weighted-wins={"#{weighted_wins_json(@profit_loss, @profit_loss_range)}"}></canvas>
 
 <section class="section">
   <div class="tabs is-centered is-toggle is-toggle-rounded">
     <ul>
-      <li class="<%= if(@current_tab == :daily, do: "is-active", else: nil) %>">
+      <li class={"#{if(@current_tab == :daily, do: "is-active", else: nil)}"}>
         <%= live_patch "Daily", to: "#{@url.path}?tab=daily" %>
       </li>
-      <li class="<%= if(@current_tab == :weekly, do: "is-active", else: nil) %>">
+      <li class={"#{if(@current_tab == :weekly, do: "is-active", else: nil)}"}>
         <%= live_patch "Weekly", to: "#{@url.path}?tab=weekly" %>
       </li>
-      <li class="<%= if(@current_tab == :monthly, do: "is-active", else: nil) %>">
+      <li class={"#{if(@current_tab == :monthly, do: "is-active", else: nil)}"}>
         <%= live_patch "Monthly", to: "#{@url.path}?tab=monthly" %>
       </li>
-      <li class="<%= if(@current_tab == :yearly, do: "is-active", else: nil) %>">
+      <li class={"#{if(@current_tab == :yearly, do: "is-active", else: nil)}"}>
         <%= live_patch "Yearly", to: "#{@url.path}?tab=yearly" %>
       </li>
     </ul>
@@ -110,15 +110,15 @@
         <% profit_loss_list = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.profit_loss), else: nil) %>
         <% position_ids = if(@profit_loss[date], do: @profit_loss[date] |> Enum.map(& &1.id), else: nil) %>
         <tr>
-          <td data-tooltip="<%= date_display(date, true) %>">
+          <td data-tooltip={"#{date_display(date, true)}"}>
             <%= if position_ids do %>
-              <a href="<%= Routes.share_show_path(@socket, :show, position_ids: position_ids |> Enum.join(",")) %>"><%= date_display(date, false) %></a>
+              <a href={Routes.share_show_path(@socket, :show, position_ids: position_ids |> Enum.join(","))}><%= date_display(date, false) %></a>
             <% else %>
               <%= date_display(date, false) %>
             <% end %>
           </td>
           <% pl = profit_loss(profit_loss_list) %>
-          <td class="<%= profit_loss_class(pl) %>">
+          <td class={profit_loss_class(pl)}>
             <%= pl && currency_string(pl) %>
           </td>
           <td>
@@ -130,7 +130,7 @@
           <td class="has-text-success">
             <%= largest_win(profit_loss_list) %>
           </td>
-          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip="<%= percentage_string(Accounts.weighted_win_percentage(profit_loss_list)) %> weighted by size of profit/loss">
+          <td class="has-text-info has-tooltip-arrow has-tooltip-left" data-tooltip={"#{percentage_string(Accounts.weighted_win_percentage(profit_loss_list))} weighted by size of profit/loss"}>
             <%= pl && (wins(profit_loss_list) |> percentage_string()) %>
           </td>
         </tr>
@@ -140,7 +140,7 @@
 </section>
 
 <%= if @current_user do %>
-  <%= live_component @socket, OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+  <%= live_component OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
     id: :feedback,
     path: @url.path,
     current_user: @current_user

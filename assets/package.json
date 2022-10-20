@@ -14,7 +14,6 @@
     "chart.js": "^2.9.3",
     "font-awesome": "^4.7.0",
     "js-datepicker": "^5.14.2",
-    "node-sass": "^6.0.1",
     "nprogress": "^0.2.0",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
@@ -29,11 +28,12 @@
     "css-loader": "^5.2.4",
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^1.6.0",
-    "optimize-css-assets-webpack-plugin": "^5.0.4",
+    "optimize-css-assets-webpack-plugin": "^6.0.1",
+    "sass": "^1.55.0",
     "sass-loader": "^10.2.0",
     "terser-webpack-plugin": "^4.2.3",
     "url-loader": "^4.1.1",
-    "webpack": "4.46.0",
+    "webpack": "^5.74.0",
     "webpack-cli": "^3.3.12"
   }
 }

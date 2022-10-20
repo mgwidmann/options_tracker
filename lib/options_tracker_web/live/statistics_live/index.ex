@@ -129,7 +129,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
   def largest_win(profit_loss_list) when is_list(profit_loss_list) do
     win =
       profit_loss_list
-      |> Enum.filter(&(Decimal.cmp(&1, Decimal.new(0)) in [:gt, :eq]))
+      |> Enum.filter(&(Decimal.compare(&1, Decimal.new(0)) in [:gt, :eq]))
       |> Enum.max_by(&Decimal.to_float(&1), fn -> nil end)
 
     if win do
@@ -142,7 +142,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
   def largest_loss(profit_loss_list) when is_list(profit_loss_list) do
     loss =
       profit_loss_list
-      |> Enum.filter(&(Decimal.cmp(&1, Decimal.new(0)) in [:lt]))
+      |> Enum.filter(&(Decimal.compare(&1, Decimal.new(0)) in [:lt]))
       |> Enum.min_by(&Decimal.to_float(&1), fn -> nil end)
 
     if loss do
@@ -171,7 +171,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
 
   def wins(profit_loss_list) do
     total = Enum.count(profit_loss_list)
-    profitable = Enum.count(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
+    profitable = Enum.count(profit_loss_list, &(Decimal.compare(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
 
     if total == 0 do
       0.0
@@ -183,7 +183,7 @@ defmodule OptionsTrackerWeb.StatisticsLive.Index do
   def profit_loss_class(nil), do: nil
 
   def profit_loss_class(profit_loss) do
-    if Decimal.cmp(profit_loss, Decimal.new(0)) in [:gt, :eq] do
+    if Decimal.compare(profit_loss, Decimal.new(0)) in [:gt, :eq] do
       "has-text-success"
     else
       "has-text-danger"
