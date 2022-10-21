@@ -2,8 +2,8 @@ const path = require('path');
 const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = (env, options) => {
   const devMode = options.mode !== 'production';
@@ -13,7 +13,7 @@ module.exports = (env, options) => {
       minimize: true,
       minimizer: [
         new TerserPlugin({ parallel: true }),
-        new OptimizeCSSAssetsPlugin({})
+        new CssMinimizerPlugin(),
       ]
     },
     entry: {

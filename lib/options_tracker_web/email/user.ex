@@ -5,7 +5,7 @@ defmodule OptionsTrackerWeb.UserEmail do
     new_email(
       to: user.email,
       from: "noreply@options-tracker.gigalixirapp.com",
-      subject: "Welcome to the app.",
+      subject: "Welcome to the app."
     )
     |> put_layout({OptionsTrackerWeb.LayoutView, :email})
     |> assign(:user, user)

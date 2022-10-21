@@ -43,6 +43,8 @@ defmodule OptionsTracker.MixProject do
       {:phoenix_html, "~> 3.2"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:phoenix_live_dashboard, "~> 0.7.1"},
+      {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
+      {:dart_sass, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
@@ -77,7 +79,8 @@ defmodule OptionsTracker.MixProject do
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      "assets.deploy": ["cmd npm install --prefix assets", "cmd npm run deploy --prefix assets", "phx.digest"]
     ]
   end
 end

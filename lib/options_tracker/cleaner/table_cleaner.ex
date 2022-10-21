@@ -28,6 +28,8 @@ defmodule OptionsTracker.TableCleaner do
     {:noreply, Map.put(state, :total, count)}
   end
 
+  @fail_if_nothing_removed Mix.env() == :prod
+
   @impl true
   def handle_info(:clean, state) do
     total = -1
@@ -41,7 +43,7 @@ defmodule OptionsTracker.TableCleaner do
     total = total + cleaned
     Logger.info("Cleaned #{cleaned} records from the errors table")
 
-    if total <= 0 && Mix.env() == :prod do
+    if total <= 0 && @fail_if_nothing_removed do
       Logger.warn("CLEANING FAILURE!!!!! Database is getting too large with #{inspect state.total} records!")
       {:noreply, Map.put(state, :clean_failure, true)}
     else
