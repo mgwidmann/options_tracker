@@ -7,13 +7,12 @@ if [[ -z "$file" ]]; then
     exit 1
 fi
 
-pg_url=`gigalixir pg -a options-tracker | jq '.[0].url' -M -c -r`
-pg_user=`gigalixir pg -a options-tracker | jq '.[0].username' -M -c -r`
-pg_database=`gigalixir pg -a options-tracker | jq '.[0].database' -M -c -r`
-pg_host=`gigalixir pg -a options-tracker | jq '.[0].host' -M -c -r`
-pg_password=`gigalixir pg -a options-tracker | jq '.[0].password' -M -c -r`
+pg_url=postgres://options_tracker:yGs1NksUCb8vY5E@top2.nearest.of.options-tracker-db.internal:5432/options_tracker
+pg_user=postgres
+pg_database=options_tracker
+pg_host=localhost
+pg_port=5433
 
 echo Restoring PROD $file to $pg_database as user $pg_user...
-echo Password is $pg_password
 
-pg_restore -U $pg_user -W -h $pg_host -p 5432 --format=custom --no-owner --no-privileges --no-acl -d $pg_database $file
+psql -U $pg_user -d $pg_database -h $pg_host -p $pg_port -f $file
