@@ -21,7 +21,6 @@ user = Users.get_user_by_email("admin@gmail.com")
 user =
   if user == nil do
     %User{
-      id: 1,
       email: "admin@gmail.com",
       admin?: true,
       confirmed_at: DateTime.utc_now() |> DateTime.truncate(:second),
@@ -158,7 +157,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-05-21],
     count: 1,
@@ -179,7 +178,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-06-03],
     count: 1,
@@ -200,7 +199,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-06-12],
     count: 1,
@@ -221,7 +220,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-06-19],
     count: 1,
@@ -242,7 +241,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-06-26],
     count: 1,
@@ -263,7 +262,7 @@ user =
     type: :call
   },
   %Position{
-    account_id: rh.id,
+    account_id: tw.id,
     basis: nil,
     closed_at: ~D[2020-07-02],
     count: 1,

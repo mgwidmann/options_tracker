@@ -9,6 +9,8 @@ defmodule OptionsTracker.Application do
     children = [
       # Start the Ecto repository
       OptionsTracker.Repo,
+      # Start up the flames supervisor after the repo is available
+      Flames.Supervisor,
       # Start the Telemetry supervisor
       OptionsTrackerWeb.Telemetry,
       # Start the PubSub system

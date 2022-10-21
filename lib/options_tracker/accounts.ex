@@ -194,7 +194,7 @@ defmodule OptionsTracker.Accounts do
       weekly: week_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       monthly: month_positions |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
       total: positions_stream |> Enum.reduce(zero, &Decimal.add(&1.profit_loss, &2)),
-      wins: positions_stream |> Enum.count(&(Decimal.cmp(&1.profit_loss, zero) in [:eq, :gt])),
+      wins: positions_stream |> Enum.count(&(Decimal.compare(&1.profit_loss, zero) in [:eq, :gt])),
       total_count: positions_stream |> Enum.count(),
       max_profit:
         open_positions
@@ -295,10 +295,10 @@ defmodule OptionsTracker.Accounts do
 
   def weighted_win_percentage(profit_loss_list) when is_list(profit_loss_list) do
     total = Enum.reduce(profit_loss_list, Decimal.from_float(0.0), fn p, sum -> Decimal.add(Decimal.abs(p), sum) end)
-    profitable = Enum.filter(profit_loss_list, &(Decimal.cmp(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
+    profitable = Enum.filter(profit_loss_list, &(Decimal.compare(&1, Decimal.from_float(0.0)) in [:eq, :gt]))
       |> Enum.reduce(Decimal.from_float(0.0), fn p, sum -> Decimal.add(p, sum) end)
 
-    if Decimal.cmp(total, Decimal.from_float(0.0)) == :eq do
+    if Decimal.compare(total, Decimal.from_float(0.0)) == :eq do
       Decimal.from_float(0.0)
     else
       Decimal.div(profitable, total)

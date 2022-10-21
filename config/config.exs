@@ -21,6 +21,7 @@ config :options_tracker, OptionsTrackerWeb.Endpoint,
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
+  level: System.get_env("LOG_LEVEL") || "info",
   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix

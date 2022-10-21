@@ -55,7 +55,7 @@ defmodule OptionsTracker.MixProject do
       {:date_time_parser, "~> 1.1"},
       {:money, "~> 1.11.0"},
       {:timex, "~> 3.7"},
-      {:flames, "~> 0.5.0"},
+      {:flames, path: "../flames"},
       {:live_dashboard_history, "~> 0.1.4"},
       {:earmark, "~> 1.4"},
       {:phoenix_html_sanitizer, "~> 1.1"},

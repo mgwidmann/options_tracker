@@ -73,7 +73,7 @@ defmodule OptionsTracker.Accounts.Position do
   @optional_open_fields ~w[basis accumulated_profit_loss rolled_position_id notes exit_strategy]a
   @open_fields @required_open_fields ++ @optional_open_fields
   @required_spread_fields ~w[spread_width]a
-  @all_open_fields @required_open_fields ++ @required_spread_fields ++ @optional_open_fields
+  # @all_open_fields @required_open_fields ++ @required_spread_fields ++ @optional_open_fields
   @spec open_changeset(
           {map, map} | %{:__struct__ => atom | %{__changeset__: map}, optional(atom) => any},
           :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}

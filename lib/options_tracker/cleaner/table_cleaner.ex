@@ -13,7 +13,6 @@ defmodule OptionsTracker.TableCleaner do
   @impl true
   def init(:ok) do
     :timer.send_interval(@check, self(), :count)
-    IO.inspect(["Sending self:", self(), :count])
     send(self(), :count)
     {:ok, %{total: -1, clean_failure: false}}
   end
@@ -31,7 +30,7 @@ defmodule OptionsTracker.TableCleaner do
 
   @impl true
   def handle_info(:clean, state) do
-    total = 0
+    total = -1
     {cleaned, _} = Cleaner.clean(OptionsTracker.Audits.Position, 90)
     total = total + cleaned
     Logger.info("Cleaned #{inspect cleaned} records from the positions_audits table")
@@ -42,7 +41,7 @@ defmodule OptionsTracker.TableCleaner do
     total = total + cleaned
     Logger.info("Cleaned #{cleaned} records from the errors table")
 
-    if total <= 0 do
+    if total <= 0 && Mix.env() == :prod do
       Logger.warn("CLEANING FAILURE!!!!! Database is getting too large with #{inspect state.total} records!")
       {:noreply, Map.put(state, :clean_failure, true)}
     else
