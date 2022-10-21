@@ -4,6 +4,7 @@ defmodule OptionsTrackerWeb.Router do
   import OptionsTrackerWeb.UserAuth
 
   pipeline :browser do
+    plug :redirect_fly_io
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -145,5 +146,10 @@ defmodule OptionsTrackerWeb.Router do
       |> Phoenix.Controller.render(OptionsTrackerWeb.ErrorView, "404.html")
       |> halt
     end
+  end
+
+  def redirect_fly_io(conn, []) do
+    conn
+    |> Phoenix.Controller.redirect(external: "https://options-tracker.fly.dev/#{conn.request_path}")
   end
 end
