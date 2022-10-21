@@ -33,6 +33,7 @@ if config_env() == :prod do
   config :options_tracker, OptionsTracker.Repo,
     # ssl: true,
     url: database_url,
+    telemetry_prefix: [:db, :repo],
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -48,7 +49,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("PHX_HOST") || "options-tracker.fly.dev"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :options_tracker, OptionsTrackerWeb.Endpoint,
@@ -63,21 +64,16 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  # ## Configuring the mailer
-  #
-  # In production you need to configure the mailer to use a different adapter.
-  # Also, you may need to configure the Swoosh API client of your choice if you
-  # are not using SMTP. Here is an example of the configuration:
-  #
-  #     config :options_tracker, OptionsTrackerMailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # For this example you need include a HTTP client required by Swoosh API client.
-  # Swoosh supports Hackney and Finch out of the box:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
-  #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :options_tracker,
+    # Note: This cannot be changed once set in an environment without wiping all share records from the database
+    share_salt: System.get_env("SHARE_SALT") || raise("Need to set SHARE_SALT env variable by executing `Bcrypt.gen_salt` to generate a random salt to use")
+
+  config :options_tracker, OptionsTrackerWeb.Mailer,
+    adapter: Bamboo.SendGridAdapter,
+    api_key: System.get_env("SENDGRID_API_KEY"),
+    hackney_opts: [
+      recv_timeout: :timer.minutes(1),
+      connect_timeout: :timer.minutes(1)
+    ]
 end

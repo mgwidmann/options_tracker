@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "deploy": "node_modules/.bin/webpack --mode production",
-    "watch": "node_modules/.bin/webpack --mode development --watch"
+    "watch": "webpack-cli --mode development --watch"
   },
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
