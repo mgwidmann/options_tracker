@@ -187,10 +187,10 @@ defmodule OptionsTrackerWeb.PositionLive.FormComponent do
                     </div>
                   </div>
                   <div class="column">
-                    <%#= raw Recaptcha.Template.display(size: "invisible") %>
                     <label class="label">&nbsp;</label>
                     <div class="control is-grouped has-text-centered ml-auto">
-                      <%= live_patch "Cancel", to: Routes.position_index_path(@socket, :index), class: "button mx-2" %>
+                      <a href="#" class="button mx-2" phx-click="cancel">Cancel</a>
+                      <%= raw Recaptcha.Template.display(size: "invisible") %>
                       <%= submit "Save", phx_disable_with: "Saving...", class: "button is-success" %>
                     </div>
                   </div>

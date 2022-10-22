@@ -50,12 +50,13 @@ defmodule OptionsTrackerWeb.LiveHelpers do
 
   attr :condition, :boolean, required: true
   attr :for, :any
+  attr :action, :string
   attr :rest, :global
   slot :inner_block, required: true
   def unless_form(assigns) do
     ~H"""
     <%= if !@condition && @for do %>
-      <.form let={f} for={@for} {@rest}>
+      <.form let={f} for={@for} action={@action} {@rest}>
         <%= render_slot(@inner_block, f) %>
       </.form>
     <% else %>

@@ -1,10 +1,10 @@
 <div>
   <div id="positions-mobile" class="rows is-hidden-desktop">
-    <.unless_form let={f} for={@changeset} id="position-form-mobile" phx-change="validate" phx-save="save" condition={@share_mode || @read_only || @live_action not in [:edit, :new]}>
+    <.unless_form let={mobile_f} for={@changeset} action="#" id="position-form-mobile" phx-change="validate" phx-submit="save" condition={@share_mode || @read_only || @live_action not in [:edit, :new]}>
       <%= if !@read_only && @live_action in [:new] do %>
         <%= live_component OptionsTrackerWeb.PositionLive.FormComponent,
           id: :new_mobile,
-          f: f,
+          f: mobile_f,
           title: @page_title,
           action: @live_action,
           position: @position,
@@ -16,7 +16,7 @@
         <%= if !@read_only && @live_action in [:edit] && @position.id == position.id do %>
           <%= live_component OptionsTrackerWeb.PositionLive.FormComponent,
             id: :edit_mobile,
-            f: f,
+            f: mobile_f,
             title: @page_title,
             action: @live_action,
             position: @position,
@@ -197,7 +197,7 @@
     </.unless_form>
   </div>
 
-  <.unless_form let={f} for={@changeset} id="position-form" phx-change="validate" phx-submit="save" condition={@share_mode || @read_only || @live_action not in [:edit, :new]}>
+  <.unless_form let={f} for={@changeset} id="position-form" action={"#"} phx-change="validate" phx-submit="save" condition={@share_mode || @read_only || @live_action not in [:edit, :new]}>
     <table id="positions-table" class="table is-striped is-narrow is-hoverable is-fullwidth is-hidden-touch">
       <thead>
         <tr>
