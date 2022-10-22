@@ -26,7 +26,7 @@ defmodule OptionsTracker.Users do
     Repo.get_by(User, email: email) |> Repo.preload(:accounts)
   end
 
-  @demo_user "demo@options-tracker.io"
+  @demo_user "demo@options-tracker.com"
   def get_demo_user_email() do
     @demo_user
   end
