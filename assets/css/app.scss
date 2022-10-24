@@ -176,6 +176,24 @@ html {
   border-radius: 0.5rem;
 }
 
+.addthis_tipjar_inline-manual {
+  #attj.addthis-animated.slideInRight {
+    animation-name: none;
+  }
+}
+
+.addthis_tipjar_inline, .addthis_tipjar_inline-manual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .addthis_toolbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .g-recaptcha {
   display: inline-block !important;
 }

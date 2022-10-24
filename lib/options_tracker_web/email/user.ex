@@ -4,7 +4,7 @@ defmodule OptionsTrackerWeb.UserEmail do
   def password_reset(user, url) do
     new_email(
       to: user.email,
-      from: "noreply@options-tracker.gigalixirapp.com",
+      from: "noreply@options-tracker.com",
       subject: "Welcome to the app."
     )
     |> put_layout({OptionsTrackerWeb.LayoutView, :email})

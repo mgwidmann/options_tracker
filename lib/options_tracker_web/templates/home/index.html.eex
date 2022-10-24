@@ -50,7 +50,7 @@
               <span class="dot" style="background:#5AC05A;"></span>
             </div>
             <div class="column middle">
-              <input type="text" value="https://options-tracker.gigalixirapp.com/positions/accounts/5/new" disabled='disabled'>
+              <input type="text" value="https://www.options-tracker.com/positions/accounts/5/new" disabled='disabled'>
             </div>
             <div class="column right">
               <div style="float:right">
@@ -83,7 +83,7 @@
               <span class="dot" style="background:#5AC05A;"></span>
             </div>
             <div class="column middle">
-              <input type="text" value="https://options-tracker.gigalixirapp.com/positions" disabled='disabled'>
+              <input type="text" value="https://www.options-tracker.com/positions" disabled='disabled'>
             </div>
             <div class="column right">
               <div style="float:right">
@@ -117,7 +117,7 @@
               <span class="dot" style="background:#5AC05A;"></span>
             </div>
             <div class="column middle">
-              <input type="text" value="https://options-tracker.gigalixirapp.com/positions" disabled='disabled'>
+              <input type="text" value="https://www.options-tracker.com/positions" disabled='disabled'>
             </div>
             <div class="column right">
               <div style="float:right">
@@ -151,7 +151,7 @@
               <span class="dot" style="background:#5AC05A;"></span>
             </div>
             <div class="column middle">
-              <input type="text" value="https://options-tracker.gigalixirapp.com/metrics" disabled='disabled'>
+              <input type="text" value="https://www.options-tracker.com/metrics" disabled='disabled'>
             </div>
             <div class="column right">
               <div style="float:right">

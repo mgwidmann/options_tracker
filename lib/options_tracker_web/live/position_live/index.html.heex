@@ -1,307 +1,313 @@
-<%= unless @campaigns |> Enum.find(& &1.campaign == "regular_use") do %>
-  <p class="alert alert-warning has-text-centered" role="alert">
-    <b>NOTICE:</b> It happened again! Options Tracker runs using all free tier capabilities provided by tools like
-    <a href="https://www.gigalixir.com">gigalixir.com</a>. However, these free tiers have limits and the site breeched them resulting in
-    a read only database. <b>Don't worry, none of your positions were lost!</b> You just couldn't log in or add any new positions when it happened.
-    This is the second time it has happened. I had to destroy and recreate the database to resolve the issue again.
-    <br/><br/>
-    The survey got 46 respondents over the 4 months it was live. Of the 46, only 9 replied <b>yes</b> and the others said <b>no</b>. I am trying to aggressively clean up
-    data which is not necessary to store long term (such as session info, audit history of trades, etc.) in hopes that the site can remain free since theres not enough
-    interest to sustain it. If it cannot be done so easily, the site may have to become restricted and closed off from the public if there is not enough usage.<br/><br/>
-    Please answer the survey below:<br/>
-    <a class="button is-primary" phx-click="sentiment" phx-value-campaign="regular_use" phx-value-answer="yes">Yes, I use the site regularly</a>&nbsp;
-    <a class="button" phx-click="sentiment" phx-value-campaign="regular_use" phx-value-answer="no">No, I don't use the site regularly</a><br/>
-  </p>
-<% end %>
-<%= if @clean_result do %>
-  <%= if @clean_result.clean_failure do %>
-    <p class="alert alert-danger has-text-centered" role="alert">
-      <b>FAILURE</b> to clean database! Total record count at <%= @clean_result.total %> and no more records were able to be cleaned!
-    </p>
-  <% end %>
-<% end %>
-<header class="header">
-  <section class="section">
-    <div class="columns">
-      <div class="column is-12 mh-5">
-        <div class="is-pulled-left mw-50p">
-          <div class="row">
-            <h1 class="title mb-0">Positions</h1>
+<div>
+  <div>
+    <% pay_campaign = @campaigns |> Enum.find(& &1.campaign == "pay") %>
+    <%= unless pay_campaign do %>
+      <p class="alert alert-warning has-text-centered" role="alert">
+        <b>NOTICE:</b> Options Tracker has moved to a permanent custom domain, options-tracker.com!
+        <br/>
+        <br/>
+        Running the site with all free tier tools meant the site was down (<b>a lot</b>). I'm sure this was painful for <br/>
+        everyone. The site is now on a permanent server which should mean far less downtime but costs money to run now.
+        <br/>
+        <br/>
+        Would you like to help support?
+        <br/>
+        <br/>
+        <a class="button" phx-click="sentiment" phx-value-campaign="pay" phx-value-answer="no">No, I'm still angry</a>&nbsp;
+        <a class="button is-primary" phx-click="sentiment" phx-value-campaign="pay" phx-value-answer="yes">Yes, I can chip in a few bucks!</a><br/>
+      </p>
+    <% end %>
+  </div>
+  <%!-- phx-update="ignore" only works on push_patch, not push_redirect which gets used too often --%>
+  <div id="top-tipjar" phx-update="ignore">
+    <% dismissed_at = Timex.to_datetime(pay_campaign.inserted_at, "UTC") |> DateTime.to_date() %>
+    <%= if !pay_campaign || (pay_campaign && Timex.before?(Timex.today(), Timex.add(dismissed_at, Timex.Duration.from_days(7)))) do %>
+      <%= Phoenix.View.render(OptionsTrackerWeb.LayoutView, "donate.html", %{}) %>
+    <% end %>
+  </div>
+  <header class="header">
+    <section class="section">
+      <div class="columns">
+        <div class="column is-12 mh-5">
+          <div class="is-pulled-left mw-50p">
+            <div class="row">
+              <h1 class="title mb-0">Positions</h1>
+            </div>
+            <div class="columns is-gapless is-hidden-touch">
+              <div class="column">
+                <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
+                  <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span><br/><small>Notional Risk</small>
+                  <i class="fa fa-question-circle"></i>
+                </h6>
+              </div>
+              <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
+                <h6 class="is-6">
+                  <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span><br/><small>Potential Profit</small>
+                  <i class="fa fa-question-circle"></i>
+                </h6>
+              </div>
+              <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
+                <h6 class="is-6">
+                  <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span><br/><small>Win Rate</small>
+                  <i class="fa fa-question-circle"></i>
+                </h6>
+              </div>
+            </div>
           </div>
-          <div class="columns is-gapless is-hidden-touch">
-            <div class="column">
-              <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
-                <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span><br/><small>Notional Risk</small>
-                <i class="fa fa-question-circle"></i>
-              </h6>
-            </div>
-            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
-              <h6 class="is-6">
-                <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span><br/><small>Potential Profit</small>
-                <i class="fa fa-question-circle"></i>
-              </h6>
-            </div>
-            <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
-              <h6 class="is-6">
-                <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span><br/><small>Win Rate</small>
-                <i class="fa fa-question-circle"></i>
-              </h6>
-            </div>
-          </div>
-        </div>
-        <div class="is-pulled-right">
-          <div class="mh-3">
-            <% no_account = @current_account == nil || match?([_|_], @current_account) || @current_account == [] %>
-            <%= if no_account do %>
-              <a href="javascript:void(0);" class="button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left" data-tooltip="You must select an account first!" disabled="true">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-              </a>
-            <% else %>
-              <%= live_patch to: Routes.position_index_path(@socket, :new, @current_account_id), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
-                <i class="fa fa-plus" aria-hidden="true"></i>
+          <div class="is-pulled-right">
+            <div class="mh-3">
+              <% no_account = @current_account == nil || match?([_|_], @current_account) || @current_account == [] %>
+              <%= if no_account do %>
+                <a href="javascript:void(0);" class="button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left" data-tooltip="You must select an account first!" disabled="true">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </a>
+              <% else %>
+                <%= live_patch to: Routes.position_index_path(@socket, :new, @current_account_id), class: "button is-primary has-tooltip-arrow is-pulled-right has-tooltip-left", "data-tooltip": if(no_account, do: "You must select an account first!", else: "Add a position"), disabled: no_account do %>
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                <% end %>
               <% end %>
-            <% end %>
+            </div>
+            <%= live_component OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
+              id: :accounts_dropdown,
+              current_user: @current_user,
+              current_account_id: @current_account_id,
+              all_path_fun: &Routes.position_index_path/3,
+              account_path_fun: &Routes.position_account_index_path/4
+            } %>
           </div>
-          <%= live_component OptionsTrackerWeb.AccountLive.AccountsDropdown, %{
-            id: :accounts_dropdown,
-            current_user: @current_user,
-            current_account_id: @current_account_id,
-            all_path_fun: &Routes.position_index_path/3,
-            account_path_fun: &Routes.position_account_index_path/4
-          } %>
         </div>
       </div>
-    </div>
-    <div class="columns is-gapless is-hidden-desktop mt-5">
-      <div class="column">
-        <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
-          <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span>&nbsp;<small>Notional Risk</small>
-          <i class="fa fa-question-circle"></i>
-        </h6>
+      <div class="columns is-gapless is-hidden-desktop mt-5">
+        <div class="column">
+          <h6 class="is-6 mb-1 has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total amount currently being risked if all positions move against you to their extremes. Undefined/infinite risk scenarios have been removed.">
+            <span class="is-family-code has-text-danger"><%= currency_string(@profit_loss.max_loss) %></span>&nbsp;<small>Notional Risk</small>
+            <i class="fa fa-question-circle"></i>
+          </h6>
+        </div>
+        <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
+          <h6 class="is-6">
+            <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span>&nbsp;<small>Potential Profit</small>
+            <i class="fa fa-question-circle"></i>
+          </h6>
+        </div>
+        <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
+          <h6 class="is-6">
+            <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span>&nbsp;<small>Win Rate</small>
+            <i class="fa fa-question-circle"></i>
+          </h6>
+        </div>
       </div>
-      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="The total profit you could receive if all positions move in your favor. Undefined/infinite gain scenarios have been removed.">
-        <h6 class="is-6">
-          <span class="is-family-code has-text-success"><%= currency_string(@profit_loss.max_profit) %>+</span>&nbsp;<small>Potential Profit</small>
-          <i class="fa fa-question-circle"></i>
-        </h6>
-      </div>
-      <div class="column has-tooltip-arrow has-tooltip-multiline" data-tooltip="Win rate percentage. This is the number of trades you close for any amount of profit.">
-        <h6 class="is-6">
-          <span class="is-family-code has-text-info"><%= if(@profit_loss.total_count != 0, do: percentage_string(@profit_loss.wins / @profit_loss.total_count), else: percentage_string(0.0)) %></span>&nbsp;<small>Win Rate</small>
-          <i class="fa fa-question-circle"></i>
-        </h6>
-      </div>
-    </div>
-  </section>
-</header>
+    </section>
+  </header>
 
-<.form let={search_form} for={@search_changeset} id="search-form" phx-change="search" as={:search_form} onkeydown="return event.key != 'Enter';">
-  <div class="columns is-multiline pb-3">
-    <div class="column is-half-desktop is-full-tablet">
-      <div class="panel">
-        <p class="panel-heading">
-          Search for a position
-        </p>
-        <div class="panel-block">
-          <div class="column">
-            <div class="control mb-0 tags has-addons">
-              <span class={"tag long is-success #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.open_key(), do: "", else: "is-light")}"}>
-                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.open_key()}", class: "radio" do %>
-                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.open_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Open
-                <% end %>
+  <.form let={search_form} for={@search_changeset} id="search-form" phx-change="search" as={:search_form} onkeydown="return event.key != 'Enter';">
+    <div class="columns is-multiline pb-3">
+      <div class="column is-half-desktop is-full-tablet">
+        <div class="panel">
+          <p class="panel-heading">
+            Search for a position
+          </p>
+          <div class="panel-block">
+            <div class="column">
+              <div class="control mb-0 tags has-addons">
+                <span class={"tag long is-success #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.open_key(), do: "", else: "is-light")}"}>
+                  <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.open_key()}", class: "radio" do %>
+                    <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.open_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                    Open
+                  <% end %>
+                </span>
+                <span class={"tag short is-info #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.all_key(), do: "", else: "is-light")}"}>
+                  <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.all_key()}", class: "radio" do %>
+                    <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.all_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                    All
+                  <% end %>
+                </span>
+                <span class={"tag short is-danger #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.closed_key(), do: "", else: "is-light")}"}>
+                  <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.closed_key()}", class: "radio" do %>
+                    <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.closed_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
+                    Closed
+                  <% end %>
+                </span>
+              </div>
+            </div>
+            <div class="column">
+              <p class="control has-icons-left">
+                <%= text_input search_form, :search, class: "input is-rounded", placeholder: "Ticker" %>
+                <span class="icon is-left">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column is-half-desktop is-full-tablet">
+        <div class="panel">
+          <div class="panel-heading">
+            Realized Profit / Loss
+          </div>
+          <div class="panel-block py-0 px-0">
+            <div class="column has-text-centered is-size-7 py-1">
+              <%= if @current_account_id == :all do %>
+                <%= live_redirect "Daily", to: Routes.statistics_index_path(@socket, :index, tab: :daily) %>
+              <% else %>
+                <%= live_redirect "Daily", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :daily) %>
+              <% end %>
+            </div>
+            <div class="column has-text-centered is-size-7 py-1">
+              <%= if @current_account_id == :all do %>
+                <%= live_redirect "Weekly", to: Routes.statistics_index_path(@socket, :index, tab: :weekly) %>
+              <% else %>
+                <%= live_redirect "Weekly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :weekly) %>
+              <% end %>
+            </div>
+            <div class="column has-text-centered is-size-7 py-1">
+              <%= if @current_account_id == :all do %>
+                <%= live_redirect "Monthly", to: Routes.statistics_index_path(@socket, :index, tab: :monthly) %>
+              <% else %>
+                <%= live_redirect "Monthly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :monthly) %>
+              <% end %>
+            </div>
+            <div class="column has-text-centered is-size-7 py-1">
+              <%= if @current_account_id == :all do %>
+                <%= live_redirect "Total", to: Routes.statistics_index_path(@socket, :index, tab: :yearly) %>
+              <% else %>
+                <%= live_redirect "Total", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :yearly) %>
+              <% end %>
+            </div>
+          </div>
+          <div class="panel-block py-0">
+            <div class="column has-text-centered">
+              <span class={"#{if(Decimal.compare(@profit_loss.daily, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+                <%= currency_string(@profit_loss.daily) %>
               </span>
-              <span class={"tag short is-info #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.all_key(), do: "", else: "is-light")}"}>
-                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.all_key()}", class: "radio" do %>
-                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.all_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  All
-                <% end %>
+            </div>
+            <div class="is-divider-vertical"></div>
+            <div class="column has-text-centered">
+              <span class={"#{if(Decimal.compare(@profit_loss.weekly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+                <%= currency_string(@profit_loss.weekly) %>
               </span>
-              <span class={"tag short is-danger #{if(@search_changeset.changes[:status] == OptionsTracker.Search.StatusType.closed_key(), do: "", else: "is-light")}"}>
-                <%= label search_form, :"status_#{OptionsTracker.Search.StatusType.closed_key()}", class: "radio" do %>
-                  <%= radio_button search_form, :status, OptionsTracker.Search.StatusType.closed_key(), class: "radio", style: "opacity:0;width:0;height:0;" %>
-                  Closed
-                <% end %>
+            </div>
+            <div class="is-divider-vertical"></div>
+            <div class="column has-text-centered">
+              <span class={"#{if(Decimal.compare(@profit_loss.monthly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+                <%= currency_string(@profit_loss.monthly) %>
+              </span>
+            </div>
+            <div class="is-divider-vertical"></div>
+            <div class="column has-text-centered">
+              <span class={"#{if(Decimal.compare(@profit_loss.total, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
+                <%= currency_string(@profit_loss.total) %>
               </span>
             </div>
           </div>
-          <div class="column">
-            <p class="control has-icons-left">
-              <%= text_input search_form, :search, class: "input is-rounded", placeholder: "Ticker" %>
-              <span class="icon is-left">
-                <i class="fa fa-search" aria-hidden="true"></i>
-              </span>
-            </p>
-          </div>
         </div>
       </div>
     </div>
-    <div class="column is-half-desktop is-full-tablet">
-      <div class="panel">
-        <div class="panel-heading">
-          Realized Profit / Loss
-        </div>
-        <div class="panel-block py-0 px-0">
-          <div class="column has-text-centered is-size-7 py-1">
-            <%= if @current_account_id == :all do %>
-              <%= live_redirect "Daily", to: Routes.statistics_index_path(@socket, :index, tab: :daily) %>
-            <% else %>
-              <%= live_redirect "Daily", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :daily) %>
-            <% end %>
-          </div>
-          <div class="column has-text-centered is-size-7 py-1">
-            <%= if @current_account_id == :all do %>
-              <%= live_redirect "Weekly", to: Routes.statistics_index_path(@socket, :index, tab: :weekly) %>
-            <% else %>
-              <%= live_redirect "Weekly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :weekly) %>
-            <% end %>
-          </div>
-          <div class="column has-text-centered is-size-7 py-1">
-            <%= if @current_account_id == :all do %>
-              <%= live_redirect "Monthly", to: Routes.statistics_index_path(@socket, :index, tab: :monthly) %>
-            <% else %>
-              <%= live_redirect "Monthly", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :monthly) %>
-            <% end %>
-          </div>
-          <div class="column has-text-centered is-size-7 py-1">
-            <%= if @current_account_id == :all do %>
-              <%= live_redirect "Total", to: Routes.statistics_index_path(@socket, :index, tab: :yearly) %>
-            <% else %>
-              <%= live_redirect "Total", to: Routes.statistics_account_index_path(@socket, :index, @current_account_id, tab: :yearly) %>
-            <% end %>
-          </div>
-        </div>
-        <div class="panel-block py-0">
-          <div class="column has-text-centered">
-            <span class={"#{if(Decimal.compare(@profit_loss.daily, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
-              <%= currency_string(@profit_loss.daily) %>
-            </span>
-          </div>
-          <div class="is-divider-vertical"></div>
-          <div class="column has-text-centered">
-            <span class={"#{if(Decimal.compare(@profit_loss.weekly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
-              <%= currency_string(@profit_loss.weekly) %>
-            </span>
-          </div>
-          <div class="is-divider-vertical"></div>
-          <div class="column has-text-centered">
-            <span class={"#{if(Decimal.compare(@profit_loss.monthly, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
-              <%= currency_string(@profit_loss.monthly) %>
-            </span>
-          </div>
-          <div class="is-divider-vertical"></div>
-          <div class="column has-text-centered">
-            <span class={"#{if(Decimal.compare(@profit_loss.total, 0) in [:gt, :eq], do: "has-text-success", else: "has-text-danger")}"}>
-              <%= currency_string(@profit_loss.total) %>
-            </span>
-          </div>
-        </div>
-      </div>
+  </.form>
+
+  <%= if @live_action in [:close] do %>
+    <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
+      id: @position.id,
+      title: @page_title,
+      action: @live_action,
+      position: @position,
+      current_user: @current_user,
+      modal_title: "Close Position",
+      only_notes: false,
+      show_notes: false,
+      roll: false,
+      return_to: return_to_path(@socket, @current_account_id) %>
+  <% end %>
+
+  <%= if @live_action in [:notes] do %>
+    <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
+      id: @position.id,
+      title: @page_title,
+      action: @live_action,
+      position: @position,
+      current_user: @current_user,
+      modal_title: "Edit Notes",
+      only_notes: true,
+      show_notes: true,
+      roll: false,
+      return_to: return_to_path(@socket, @current_account_id) %>
+  <% end %>
+
+  <%= if @live_action in [:roll] do %>
+    <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
+      id: @position.id,
+      title: @page_title,
+      action: @live_action,
+      position: @position,
+      current_user: @current_user,
+      modal_title: "Roll Position",
+      only_notes: false,
+      show_notes: false,
+      roll: true,
+      return_to: return_to_path(@socket, @current_account_id) %>
+  <% end %>
+
+  <%= if @live_action in [:delete] do %>
+    <%= live_modal OptionsTrackerWeb.PositionLive.DeleteModalComponent,
+      id: :delete,
+      modal_title: "Delete Position",
+      title: @page_title,
+      action: @live_action,
+      position: @position,
+      return_to: return_to_path(@socket, @current_account_id) %>
+  <% end %>
+
+  <div class="rows mb-3">
+    <div class="has-text-right">
+      <%= if @share_mode do %>
+        <button class="button" phx-click="share" data-tooltip="Cancel share mode.">
+          <i class="fa fa-x"></i>
+          &nbsp;
+            Cancel
+        </button>
+      <% end %>
+      <% share_mode_tooltip = "Once you've selected some trades, click this button again to create the share link." %>
+      <% tooltip = "Click this to toggle into share mode so you can select which trades you want to share." %>
+      <%= if @share_mode && @shares == %{} do %>
+        <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
+          <i class="fa fa-share"></i>
+          &nbsp;
+          Share
+        </button>
+      <% else %>
+        <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" phx-click={"#{if(@share_mode, do: "save_share", else: "share")}"} data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
+          <i class="fa fa-share"></i>
+          &nbsp;
+          Share
+        </button>
+      <% end %>
+    </div>
+    <div class="has-text-right mt-3">
+      <%= if @share_mode do %>
+        <button class="button is-small has-tooltip-arrow has-tooltip-left is-info" phx-click="add_all" data-tooltip="Add all in view.">
+          <i class="fa fa-plus"></i>
+        </button>
+      <% end %>
     </div>
   </div>
-</.form>
 
-<%= if @live_action in [:close] do %>
-  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
-    id: @position.id,
-    title: @page_title,
-    action: @live_action,
+  <%= live_component OptionsTrackerWeb.PositionLive.PositionsComponent, %{
+    id: :positions_component,
+    share_mode: @share_mode,
+    changeset: @changeset,
+    live_action: @live_action,
     position: @position,
-    current_user: @current_user,
-    modal_title: "Close Position",
-    only_notes: false,
-    show_notes: false,
-    roll: false,
-    return_to: return_to_path(@socket, @current_account_id) %>
-<% end %>
+    page_title: @page_title,
+    current_account_id: @current_account_id,
+    shares: @shares,
+    positions: @positions,
+    read_only: false
+  } %>
 
-<%= if @live_action in [:notes] do %>
-  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
-    id: @position.id,
-    title: @page_title,
-    action: @live_action,
-    position: @position,
-    current_user: @current_user,
-    modal_title: "Edit Notes",
-    only_notes: true,
-    show_notes: true,
-    roll: false,
-    return_to: return_to_path(@socket, @current_account_id) %>
-<% end %>
-
-<%= if @live_action in [:roll] do %>
-  <%= live_modal OptionsTrackerWeb.PositionLive.EditModalComponent,
-    id: @position.id,
-    title: @page_title,
-    action: @live_action,
-    position: @position,
-    current_user: @current_user,
-    modal_title: "Roll Position",
-    only_notes: false,
-    show_notes: false,
-    roll: true,
-    return_to: return_to_path(@socket, @current_account_id) %>
-<% end %>
-
-<%= if @live_action in [:delete] do %>
-  <%= live_modal OptionsTrackerWeb.PositionLive.DeleteModalComponent,
-    id: :delete,
-    modal_title: "Delete Position",
-    title: @page_title,
-    action: @live_action,
-    position: @position,
-    return_to: return_to_path(@socket, @current_account_id) %>
-<% end %>
-
-<div class="rows mb-3">
-  <div class="has-text-right">
-    <%= if @share_mode do %>
-      <button class="button" phx-click="share" data-tooltip="Cancel share mode.">
-        <i class="fa fa-x"></i>
-        &nbsp;
-          Cancel
-      </button>
-    <% end %>
-    <% share_mode_tooltip = "Once you've selected some trades, click this button again to create the share link." %>
-    <% tooltip = "Click this to toggle into share mode so you can select which trades you want to share." %>
-    <%= if @share_mode && @shares == %{} do %>
-      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
-        <i class="fa fa-share"></i>
-        &nbsp;
-        Share
-      </button>
-    <% else %>
-      <button class="button is-info has-tooltip-arrow has-tooltip-multiline has-tooltip-left" phx-click={"#{if(@share_mode, do: "save_share", else: "share")}"} data-tooltip={"#{if(@share_mode, do: share_mode_tooltip, else: tooltip)}"}>
-        <i class="fa fa-share"></i>
-        &nbsp;
-        Share
-      </button>
-    <% end %>
-  </div>
-  <div class="has-text-right mt-3">
-    <%= if @share_mode do %>
-      <button class="button is-small has-tooltip-arrow has-tooltip-left is-info" phx-click="add_all" data-tooltip="Add all in view.">
-        <i class="fa fa-plus"></i>
-      </button>
-    <% end %>
-  </div>
+  <%= live_component OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
+    id: :feedback,
+    path: @url.path,
+    current_user: @current_user
+  } %>
 </div>
-
-<%= live_component OptionsTrackerWeb.PositionLive.PositionsComponent, %{
-  id: :positions_component,
-  share_mode: @share_mode,
-  changeset: @changeset,
-  live_action: @live_action,
-  position: @position,
-  page_title: @page_title,
-  current_account_id: @current_account_id,
-  shares: @shares,
-  positions: @positions,
-  read_only: false
-} %>
-
-<%= live_component OptionsTrackerWeb.FeedbackLive.FeedbackEntry, %{
-  id: :feedback,
-  path: @url.path,
-  current_user: @current_user
-} %>
