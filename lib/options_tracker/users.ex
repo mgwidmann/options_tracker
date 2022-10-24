@@ -429,6 +429,20 @@ defmodule OptionsTracker.Users do
   end
 
   @doc """
+  Lists all shares for a user
+
+  ## Examples
+
+      iex> list_shares()
+      [%Share{}]
+  """
+  def list_shares(user) do
+    from(s in Share, where: s.user_id == ^user.id)
+    |> Repo.all()
+    |> Repo.preload(:positions)
+  end
+
+  @doc """
   Creates a share.
 
   ## Examples

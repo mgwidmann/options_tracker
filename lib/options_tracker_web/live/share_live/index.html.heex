@@ -1,0 +1,98 @@
+<%= if @shares != [] do %>
+  <header class="header mb-6">
+    <section class="section columns">
+      <h1 class="title column is-pulled-left">Positions Shared</h1>
+    </section>
+  </header>
+
+  <div class="rows is-hidden-desktop">
+    <%= for share <- @shares do %>
+      <div class="card mt-6">
+        <div class="card-content py-2 px-2">
+          <div class="mb-2">
+            <div class="columns is-mobile py-2">
+              <div class="column">
+                <%= length(share.positions) %> trade<%= if(length(share.positions) > 1, do: "s", else: "") %> of
+              </div>
+              <div class="column has-text-centered">
+                <%= share.positions |> Enum.map(& &1.stock) |> Enum.uniq() |> Enum.join(", ") %>
+              </div>
+              <div class="column has-text-right">
+                <%= share.positions |> Enum.map(& &1.status) |> share_status() %>
+              </div>
+            </div>
+          </div>
+          <div class="">
+            <div class="columns is-mobile">
+              <div class="column is-one-half">
+                Shared on <%= date_display(share.inserted_at |> Timex.to_date(), true) %>
+              </div>
+              <div class="column is-one-half has-text-right">
+                <span class="px-2">
+                  <%= live_redirect to: Routes.share_show_path(@socket, :show, id: share.hash), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "View" do %>
+                    <i class="fa fa-eye" aria-hidden="true"></i>
+                  <% end %>
+                  <%= link to: "#", phx_click: "unshare", phx_value_hash: share.hash, class: "button is-danger is-size-7", data: [confirm: "Are sure you want to unshare? People visiting the link will no longer be able to see your trades."] do %>
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  <% end %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <table class="table is-striped is-narrow is-hoverable is-fullwidth is-hidden-touch">
+    <thead>
+      <tr>
+        <th># Positions</th>
+        <th>Tickers</th>
+        <th>Status</th>
+        <th>Shared</th>
+
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="shares">
+      <%= for share <- @shares do %>
+        <tr id={"share-#{share.id}"}>
+          <td><%= length(share.positions) %> trade<%= if(length(share.positions) > 1, do: "s", else: "") %></td>
+          <td><%= share.positions |> Enum.map(& &1.stock) |> Enum.uniq() |> Enum.join(", ") %></td>
+          <td><%= share.positions |> Enum.map(& &1.status) |> share_status() %></td>
+          <td><%= date_display(share.inserted_at |> Timex.to_date(), true) %></td>
+
+          <td>
+            <span class="px-2">
+              <%= live_redirect to: Routes.share_show_path(@socket, :show, id: share.hash), class: "button is-small mr-1 has-tooltip-arrow has-tooltip-top", "data-tooltip": "View" do %>
+                <i class="fa fa-eye" aria-hidden="true"></i>
+              <% end %>
+              <%= link to: "#", phx_click: "unshare", phx_value_hash: share.hash, class: "button is-danger is-size-7", data: [tooltip: "Unshare", confirm: "Are sure you want to unshare? People visiting the link will no longer be able to see your trades."] do %>
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              <% end %>
+            </span>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="container">
+    <div class="columns is-vcentered">
+      <div class="column">
+        <div>
+          <img class="is-hidden-touch" src="/images/employee-blurred.png" />
+          <img class="is-hidden-desktop" src="/images/employee-blurred-mobile.png" />
+        </div>
+        <div class="title has-text-centered">You have no shared positions!</div>
+        <div class="subtitle has-text-centered">
+          Visit the positions page and share them!
+        </div>
+        <div class="has-text-centered">
+          <a class="button is-primary" href="/positions">Positions</a>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

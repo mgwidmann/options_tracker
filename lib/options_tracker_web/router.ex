@@ -47,8 +47,9 @@ defmodule OptionsTrackerWeb.Router do
     live "/accounts/:id/edit", AccountLive.Index, :edit
     live "/accounts/:id", AccountLive.Show, :show
 
-    # Positions
+    # Positions & Shares
     live "/positions", PositionLive.Index, :index
+    live "/positions/shares", ShareLive.Index, :index
     live "/positions/accounts/:account_id", PositionLive.Index, :index, as: :position_account_index
     live "/positions/accounts/:account_id/new", PositionLive.Index, :new
     live "/positions/:id/edit", PositionLive.Index, :edit
@@ -59,6 +60,7 @@ defmodule OptionsTrackerWeb.Router do
     live "/positions/:id/reopen", PositionLive.Index, :reopen
     live "/positions/:id/delete", PositionLive.Index, :delete
     live "/positions/:id/notes", PositionLive.Index, :notes
+
 
     # Metrics
     live "/metrics", StatisticsLive.Index, :index

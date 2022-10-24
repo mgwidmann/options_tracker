@@ -38,6 +38,8 @@
 
             <%= link "Metrics", to: Routes.statistics_index_path(@conn, :index), class: "navbar-item" %>
 
+            <%= link "Shares", to: Routes.share_index_path(@conn, :index), class: "navbar-item" %>
+
             <%= if @current_user.admin? do %>
               <%= link "Dashboard", to: Routes.live_dashboard_path(@conn, :home), class: "navbar-item" %>
               <%= link "Errors", to: "/admin/errors", class: "navbar-item" %>
