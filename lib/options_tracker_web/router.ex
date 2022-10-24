@@ -150,6 +150,6 @@ defmodule OptionsTrackerWeb.Router do
 
   def redirect_fly_io(conn, []) do
     conn
-    |> Phoenix.Controller.redirect(external: "https://www.options-tracker.com#{conn.request_path}")
+    |> Phoenix.Controller.redirect(external: "https://options-tracker.com#{conn.request_path}")
   end
 end
