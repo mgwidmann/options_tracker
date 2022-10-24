@@ -20,8 +20,8 @@
   </div>
   <%!-- phx-update="ignore" only works on push_patch, not push_redirect which gets used too often --%>
   <div id="top-tipjar" phx-update="ignore">
-    <% dismissed_at = Timex.to_datetime(pay_campaign.inserted_at, "UTC") |> DateTime.to_date() %>
-    <%= if !pay_campaign || (pay_campaign && Timex.before?(Timex.today(), Timex.add(dismissed_at, Timex.Duration.from_days(7)))) do %>
+    <% dismissed_at = if(pay_campaign, do: Timex.to_datetime(pay_campaign.inserted_at, "UTC") |> DateTime.to_date(), else: nil) %>
+    <%= if !pay_campaign || !dismissed_at || (pay_campaign && Timex.before?(Timex.today(), Timex.add(dismissed_at, Timex.Duration.from_days(7)))) do %>
       <%= Phoenix.View.render(OptionsTrackerWeb.LayoutView, "donate.html", %{}) %>
     <% end %>
   </div>
