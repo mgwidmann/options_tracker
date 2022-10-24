@@ -24,21 +24,19 @@ defmodule OptionsTrackerWeb.ShareLive.Index do
      |> assign(:current_user, current_user)}
   end
 
+
+  def share_status([]), do: ""
   def share_status(statuses) when is_list(statuses) do
-    if length(statuses) == 0 do
-      ""
-    else
-      statuses
-      |> Enum.uniq()
-      |> Enum.reduce(fn
-        :open, _ -> :open
-        _, :open -> :open
-        :closed, s when s != :open -> :closed
-        :rolled, s when s != :open -> :closed
-        :exercised, s when s != :open -> :closed
-      end)
-      |> StatusType.name_for(true)
-    end
+    statuses
+    |> Enum.uniq()
+    |> Enum.reduce(fn
+      :open, _ -> :open
+      _, :open -> :open
+      :closed, s when s != :open -> :closed
+      :rolled, s when s != :open -> :closed
+      :exercised, s when s != :open -> :closed
+    end)
+    |> StatusType.name_for(true)
   end
 
   @impl true
