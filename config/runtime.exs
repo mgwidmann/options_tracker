@@ -49,7 +49,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "options-tracker.fly.dev"
+  host = System.get_env("PHX_HOST") || "www.options-tracker.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :options_tracker, OptionsTrackerWeb.Endpoint,
