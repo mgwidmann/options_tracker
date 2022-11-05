@@ -35,6 +35,9 @@ WORKDIR /app
 RUN mix local.hex --force && \
     mix local.rebar --force
 
+# Until this is fixed: https://github.com/hexpm/hex/issues/963
+RUN mix hex.install 1.0.1
+
 # set build ENV
 ENV MIX_ENV="prod"
 
