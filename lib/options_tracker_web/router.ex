@@ -1,9 +1,11 @@
 defmodule OptionsTrackerWeb.Router do
   use OptionsTrackerWeb, :router
+  use Plug.ErrorHandler
 
   import OptionsTrackerWeb.UserAuth
 
   pipeline :browser do
+    plug :redirect_old_host
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -139,13 +141,31 @@ defmodule OptionsTrackerWeb.Router do
   end
 
   def restrict_admin(conn, []) do
-    if conn.assigns.current_user.admin? do
+    if conn.assigns.current_user && conn.assigns.current_user.admin? do
       conn
     else
       conn
       |> put_status(:unauthorized)
       |> Phoenix.Controller.render(OptionsTrackerWeb.ErrorView, "404.html")
       |> halt
+    end
+  end
+
+  def handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
+    conn |> json(%{error: message |> String.replace_trailing(" (#{inspect __MODULE__})", "")}) |> halt()
+  end
+
+  def handle_errors(conn, _) do
+    conn |> json(%{error: "unknown"}) |> halt()
+  end
+
+  def redirect_old_host(conn, []) do
+    if String.contains?(conn.host, "fly.dev") do
+      conn
+      |> put_status(:found)
+      |> put_resp_header("location", "https://options-tracker.com")
+    else
+      conn
     end
   end
 end
