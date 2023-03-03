@@ -7,7 +7,6 @@ if [[ -z "$file" ]]; then
     exit 1
 fi
 
-pg_url=postgres://options_tracker:yGs1NksUCb8vY5E@top2.nearest.of.options-tracker-db.internal:5432/options_tracker
 pg_user=postgres
 pg_database=options_tracker
 pg_host=localhost
